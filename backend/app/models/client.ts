@@ -7,10 +7,10 @@ export default class Client extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
 
-  @column()
+  @column({ columnName: 'first_name' })
   declare first_name: string
 
-  @column()
+  @column({ columnName: 'last_name' })
   declare last_name: string
 
   @column()
@@ -37,7 +37,7 @@ export default class Client extends BaseModel {
   @column()
   declare company: string
 
-  @column()
+  @column({ columnName: 'vat_number' })
   declare vat_number: string
 
   @column()
@@ -46,7 +46,7 @@ export default class Client extends BaseModel {
   @column()
   declare language: string
 
-  @column()
+  @column({ columnName: 'user_id' })
   declare user_id: string
 
   @belongsTo(() => User)

@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/config/api'
 import { useSirene } from '@/app/hooks/useSirene'
+import fetchSirenDetails from "@/app/services/customer";
 
 const Sirene = () => {
   const queryClient = useQueryClient()
@@ -21,25 +22,22 @@ const Sirene = () => {
     setIsOpen(false)
   }
 
-  const scrappSirenemutation = useMutation<
-    { siren_number: FormDataEntryValue },
-    Error,
-    { siren_number: FormDataEntryValue }
-  >({
-    mutationFn: async (siren_number) =>
-      api.post(`business-data/scrappe-sirene`, siren_number),
-    onError: (e: any) => {
-      throw new Error(e)
+  const scrappSirenMutation = useMutation(fetchSirenDetails, {
+    onError: (error) => {
+      toast.error(`Error: ${error.message}`, {
+        position: 'top-right',
+        duration: 5000
+      });
     },
     onSuccess: (data) => {
-      console.log(data)
-      queryClient.invalidateQueries({ queryKey: ['tax_information'] })
-      toast.success('user updated', {
-        duration: 5000,
+      console.log('Fetched SIREN data:', data);
+      queryClient.invalidateQueries(['tax_information']);
+      toast.success('SIREN data updated successfully', {
         position: 'top-right',
-      })
+        duration: 5000
+      });
     },
-  })
+  });
 
   const handleCreateClient = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -47,7 +45,7 @@ const Sirene = () => {
     const form = event.currentTarget
     const { siren_number } = Object.fromEntries(new FormData(form))
     console.log(siren_number)
-    await scrappSirenemutation.mutateAsync({ siren_number: siren_number })
+    await scrappSirenMutation.mutateAsync({ siren_number: siren_number })
     setLoading(false)
 
     setTimeout(() => {
