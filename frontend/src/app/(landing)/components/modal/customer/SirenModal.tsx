@@ -3,31 +3,38 @@ import { Fragment, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {getSirenDetails} from "@/app/services/customer";
+import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
+import { getSirenDetails } from "@/app/services/customer";
 
-function SirenModal({ isOpen, onClose, onSirenSubmit }) {
-    const [siren, setSiren] = useState('');
+interface SirenModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSirenSubmit: (data: any) => void;
+}
+
+function SirenModal({ isOpen, onClose, onSirenSubmit }: SirenModalProps) {
+    const [siren, setSiren] = useState<string>('');
     const queryClient = useQueryClient();
 
-    const sirenMutation = useMutation({
+    const sirenMutation: UseMutationResult<any, Error, string, unknown> = useMutation({
         mutationFn: getSirenDetails,
-        onError: (error) => {
-            console.error('Error fetching SIREN details:', error);
+        onError: (error: Error) => {
         },
-        onSuccess: (data) => {
-            console.log('Fetched SIREN data:', data);
+        onSuccess: (data: any) => {
             queryClient.invalidateQueries(['tax_information']);
             onSirenSubmit(data);
             resetAndClose(); // Reset and close after successful fetch
         },
     });
 
-    const handleInputChange = (e) => {
-        setSiren(e.target.value.match(/^[0-9]*$/g) ? e.target.value : siren);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        if (newValue.match(/^[0-9]*$/)) {
+            setSiren(newValue);
+        }
     };
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (siren) {
             sirenMutation.mutate(siren);
@@ -46,7 +53,7 @@ function SirenModal({ isOpen, onClose, onSirenSubmit }) {
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={resetAndClose}>  {/* Use resetAndClose to handle closing */}
+            <Dialog as="div" className="relative z-10" onClose={resetAndClose}>
                 <div className="fixed inset-0 bg-black bg-opacity-25" />
                 <div className="fixed inset-0 overflow-y-auto">
                     <div className="flex min-h-full items-center justify-center p-4 text-center">

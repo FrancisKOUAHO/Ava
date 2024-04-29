@@ -3,7 +3,11 @@ import axios from 'axios'
 import PublicBusinessData from '#models/public_business_data'
 import env from "#start/env";
 
-const typeVoieDictionary = {
+interface TypeVoieDictionary {
+  [key: string]: string;
+}
+
+const typeVoieDictionary :TypeVoieDictionary  = {
   'ALL': 'Allée',
   'AV': 'Avenue',
   'BD': 'Boulevard',
@@ -39,7 +43,12 @@ const typeVoieDictionary = {
   'PARC': 'Parc',
   'QU': 'Quartier'
 };
-let cachedToken = {
+interface CachedToken {
+  value: string | null;
+  expiry: number | null;
+}
+
+let cachedToken: CachedToken = {
   value: null,
   expiry: null
 };
@@ -47,7 +56,7 @@ let cachedToken = {
 export default class ScrappersController {
 
 
-  getFullTypeVoie(abbreviation) {
+  getFullTypeVoie(abbreviation: string): string { // Définir le type de retour
     const upperAbbreviation = abbreviation.toUpperCase(); // Convertir en majuscules
     return typeVoieDictionary[upperAbbreviation] || abbreviation; // Retourne l'abréviation si non trouvée dans le dictionnaire
   }
@@ -56,8 +65,6 @@ export default class ScrappersController {
   async sirene({ request, response, auth }: HttpContext) {
     const user = auth.user!
     const data = request.only(['siren_number'])
-
-    console.log('requestData', data.siren_number)
 
     const client = await axios.get(
       `https://api.insee.fr/entreprises/sirene/V3.11/siren/${data.siren_number}`,
@@ -73,7 +80,6 @@ export default class ScrappersController {
       return response.notFound()
     }
 
-    console.log('client', client)
 
     const publicBusinessData = await PublicBusinessData.create({
       user_id: user.id,
@@ -87,14 +93,12 @@ export default class ScrappersController {
       return response.badRequest()
     }
 
-    console.log('publicBusinessData', publicBusinessData)
     return response.created('client')
   }
 
 
   async getSireneInfo({ request, response }: HttpContext) {
     const siren_number = request.input('siren_number');
-    console.log('Requested SIREN Number:', siren_number);
 
     try {
       const token = await this.authenticate();
@@ -102,7 +106,6 @@ export default class ScrappersController {
         return response.internalServerError('Failed to authenticate with SIRENE API');
       }
 
-      console.log("apres")
 
       const url = `https://registre-national-entreprises.inpi.fr/api/companies/${siren_number}`;
       const headers = {
@@ -133,26 +136,19 @@ export default class ScrappersController {
           currency: 'EUR', // Supposition basée sur le pays
           language: 'FR' // Supposition basée sur le pays
         };
-        console.log('Processed client data:', clientData);
         return response.ok(clientData);
-      } else {
-        console.log('No data found for SIREN:', siren_number);
-        return response.notFound('No data found for the provided SIREN number.');
       }
+        return response.notFound('No data found for the provided SIREN number.');
     } catch (error) {
       console.error('Error fetching data for SIREN:', siren_number, error);
       return this.handleErrorResponse(error, response);
     }
   }
 
-  async authenticate() {
+  async authenticate(): Promise<string> { // Définir le type de retour comme une promesse de chaîne
     const expiresIn = 3600* 1000; // Durée de validité du token en millisecondes (1 jour)
-    console.log("cachedToken.value")
-    console.log(cachedToken.value)
-    // Vérifie si le token est encore valide
 
     if (cachedToken.value && cachedToken.expiry > Date.now()) {
-      console.log("Déjà connecté, token encore valide");
       return cachedToken.value;
     }
 
@@ -169,12 +165,6 @@ export default class ScrappersController {
       // Calculez l'expiration basée sur lastLogin + 1 jour
       const expiryTime = lastLoginTime + expiresIn;
 
-      if (expiryTime > Date.now()) {
-        console.log("Nouveau token nécessaire, dernière connexion trop ancienne.");
-      } else {
-        console.log("Utilisez le token actuel, moins d'un jour depuis la dernière connexion.");
-      }
-
       cachedToken = {
         value: token,
         expiry: expiryTime
@@ -187,8 +177,7 @@ export default class ScrappersController {
     }
   }
 
-  // Helper to handle errors from axios requests
-  handleErrorResponse(error, response) {
+  handleErrorResponse(error: any, response: HttpContext['response']) { // Définir le type de response
     if (error.response) {
       return response.status(error.response.status).send(error.response.data);
     } else if (error.request) {

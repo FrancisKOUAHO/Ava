@@ -3,10 +3,18 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {createCustomer, updateCustomer} from "@/app/services/customer";
-import {Client} from '@/app/models/Client';
+import { createCustomer, updateCustomer } from "@/app/services/customer";
+import { Client } from '@/app/models/Client';
 
-function CustomerModal({ isOpen, onClose, initialData,onAddClient,isUpdating }) {
+interface CustomerModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    initialData: Client | null;
+    onAddClient: (client: Client, isUpdating: boolean) => void;
+    isUpdating: boolean;
+}
+
+function CustomerModal({ isOpen, onClose, initialData, onAddClient, isUpdating }: CustomerModalProps) {
     const [client, setClient] = useState<Client>({
         first_name: '',
         last_name: '',
@@ -22,11 +30,10 @@ function CustomerModal({ isOpen, onClose, initialData,onAddClient,isUpdating }) 
         currency: '',
         language: ''
     });
-    const [resetKey, setResetKey] = useState(0);
+    const [resetKey, setResetKey] = useState<number>(0);
 
-    // Update the client state whenever initialData changes
     useEffect(() => {
-        if (initialData && Object.keys(initialData).length > 0) {
+        if (initialData) {
             setClient({ ...initialData });
         } else {
             setClient({
@@ -47,32 +54,25 @@ function CustomerModal({ isOpen, onClose, initialData,onAddClient,isUpdating }) 
         }
     }, [initialData, resetKey]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = event.target;
         setClient(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log('Submitting Client:', client);
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
         try {
             const customer = isUpdating ? await updateCustomer(client) : await createCustomer(client);
-            console.log('Customer created:', customer);
             onAddClient(customer, isUpdating);
-            onClose();
-            handleReset();  // Réinitialiser après soumission
+            handleReset();
         } catch (error) {
-            console.error('Failed to create customer:', error);
         }
     };
 
-    // Fonction pour gérer la réinitialisation
     const handleReset = () => {
-        setResetKey(prevKey => prevKey + 1);  // Incrémenter la clé de réinitialisation
+        setResetKey(prevKey => prevKey + 1);
         onClose();
     };
-
-
 
     return (
         <Transition appear show={isOpen} as={Fragment} key={resetKey}>
@@ -135,9 +135,7 @@ function CustomerModal({ isOpen, onClose, initialData,onAddClient,isUpdating }) 
                                         ))}
                                     </div>
                                     <div className="mt-4 flex justify-end">
-                                        <Button type="submit">
-                                            {isUpdating ? 'Mettre à jour le client' : 'Ajouter le client'}
-                                        </Button>
+                                        <Button type="submit">Appliquer modification</Button>
                                     </div>
                                 </form>
                             </Dialog.Panel>
