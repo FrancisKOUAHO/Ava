@@ -2,7 +2,7 @@
 
 const Page = () => {
   return (
-    <div className="flex min-h-full flex-col text-center justify-center sm:px-6 lg:p-8 p-8 h-[100vh]">
+    <div className="flex min-h-full flex-col text-center justify-center sm:px-6 lg:p-8 p-8 h-[100vh] bg-[#110e3c]">
       <div className="m-auto justify-center">
         <div className="m-auto w-full justify-center">
           <div className="m-auto">

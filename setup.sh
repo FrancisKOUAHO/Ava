@@ -2,7 +2,7 @@
 
 docker compose down -v
 
-docker compose up -d --remove-orphans
+docker compose up --build -d --remove-orphans
 
 sleep 5
 

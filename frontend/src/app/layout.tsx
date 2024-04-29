@@ -27,7 +27,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
-        <title>Ava | Dashboard</title>
+        <title>Plumera | Dashboard</title>
         <meta
           name="description"
           content="Invoicer.ia est un outil de facturation en ligne pour les auto-entrepreneurs."
