@@ -74,9 +74,13 @@ function CustomerModal({ isOpen, onClose, initialData, onAddClient, isUpdating }
         onClose();
     };
 
+    const handleCloseModal = () => {
+        resetClientState();
+        onClose();
+    };
     return (
         <Transition appear show={isOpen} as={Fragment} key={resetKey}>
-            <Dialog as="div" className="relative z-10" onClose={onClose}>
+            <Dialog as="div" className="relative z-10" onClose={handleCloseModal}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"

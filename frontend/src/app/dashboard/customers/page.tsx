@@ -20,6 +20,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
+interface OnAddClientParams {
+    client: Client;
+    isUpdating: boolean;
+}
+
+
 const Page = () => {
     const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
     const [isSirenModalOpen, setSirenModalOpen] = useState(false);
@@ -66,17 +72,17 @@ const Page = () => {
     };
 
     const closeCustomerModal = () => {
+        setIsUpdating(false);
         setCustomerModalOpen(false);
     };
 
-    const onAddClient = (client: Client, isUpdating: boolean) => {
-        if (isUpdating) {
-            setClients((prevClients: Client[]): Client[] => prevClients.map(c => c.id === client.id ? client : c));
-        } else {
-            setClients((prevClients: Client[]): Client[] => [...prevClients, client]);
-        }
+    const onAddClient = ({ client, isUpdating }: OnAddClientParams): void => {
+        setClients((prevClients: Client[]): Client[] => {
+            return isUpdating ?
+                prevClients.map((existingClient: Client): Client => existingClient.id === client.id ? client : existingClient) :
+                [...prevClients, client];
+        });
     };
-
     const toggleDropdown = (id: string) => {
         setOpenDropdownId(openDropdownId === id ? null : id);
     };
