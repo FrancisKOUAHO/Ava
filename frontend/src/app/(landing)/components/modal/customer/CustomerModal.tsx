@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,9 +56,8 @@ function CustomerModal({ isOpen, onClose, initialData, onAddClient, isUpdating }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
-        setClient(prev => ({ ...prev, [name]: value }));
+        setClient(prev => ({ ...prev, [name as keyof Client]: value }));
     };
-
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         try {
@@ -75,7 +74,7 @@ function CustomerModal({ isOpen, onClose, initialData, onAddClient, isUpdating }
     };
 
     const handleCloseModal = () => {
-        resetClientState();
+        //resetClientState();
         onClose();
     };
     return (

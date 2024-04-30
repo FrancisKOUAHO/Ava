@@ -3,19 +3,8 @@ import {Client} from "@/app/models/Client";
 
 const camelToSnakeCase = (str: string): string => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
-// const snakeToCamelCase = (str: string): string => str.replace(/(_\w)/g, matches => matches[1].toUpperCase());
 
-// const convertKeysToCamelCase = (data: any): any => {
-//     if (Array.isArray(data)) {
-//         return data.map(item => convertKeysToCamelCase(item));
-//     } else if (data !== null && data.constructor === Object) {
-//         return Object.keys(data).reduce((acc, key) => ({
-//             ...acc,
-//             [snakeToCamelCase(key)]: convertKeysToCamelCase(data[key])
-//         }), {});
-//     }
-//     return data;
-// };
+
 
 const convertKeysToSnakeCase = (data: Client | Client[] ): Client | Client[]  => {
     if (Array.isArray(data)) {

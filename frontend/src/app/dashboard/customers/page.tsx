@@ -27,14 +27,15 @@ interface OnAddClientParams {
 
 
 const Page = () => {
-    const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
-    const [isSirenModalOpen, setSirenModalOpen] = useState(false);
+    const [isCustomerModalOpen, setCustomerModalOpen] = useState<boolean>(false);
+    const [isSirenModalOpen, setSirenModalOpen] = useState<boolean>(false);
     const [customerData, setCustomerData] = useState<Client | null>(null);
     const [clients, setClients] = useState<Client[]>([]);
     const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const [clientIdToDelete, setClientIdToDelete] = useState<string | null>(null);
-    const [isUpdating, setIsUpdating] = useState(false);
+    const [isUpdating, setIsUpdating] = useState<boolean>(false);
+
 
     useEffect(() => {
         const loadClients = async () => {
@@ -76,7 +77,7 @@ const Page = () => {
         setCustomerModalOpen(false);
     };
 
-    const onAddClient = ({ client, isUpdating }: OnAddClientParams): void => {
+    const onAddClient = (client: Client, isUpdating: boolean): void => {
         setClients((prevClients: Client[]): Client[] => {
             return isUpdating ?
                 prevClients.map((existingClient: Client): Client => existingClient.id === client.id ? client : existingClient) :
