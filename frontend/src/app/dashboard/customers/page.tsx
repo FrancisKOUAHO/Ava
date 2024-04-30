@@ -71,9 +71,9 @@ const Page = () => {
 
     const onAddClient = (client: Client, isUpdating: boolean) => {
         if (isUpdating) {
-            setClients(prevClients => prevClients.map(c => c.id === client.id ? client : c));
+            setClients((prevClients: Client[]): Client[] => prevClients.map(c => c.id === client.id ? client : c));
         } else {
-            setClients(prevClients => [...prevClients, client]);
+            setClients((prevClients: Client[]): Client[] => [...prevClients, client]);
         }
     };
 
@@ -90,14 +90,14 @@ const Page = () => {
         try {
             if (clientIdToDelete) {
                 await deleteClient(clientIdToDelete);
-                setClients(clients => clients.filter(client => client.id !== clientIdToDelete));
+                setClients((clients: Client[]): Client[]  => clients.filter(client => client.id !== clientIdToDelete));
                 setDeleteModalOpen(false);
                 setClientIdToDelete(null);
             }
         } catch (error) {
         }
     };
-    const formatDate = (dateString:String) => {
+    const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('fr-FR', {
             day: '2-digit',
@@ -105,6 +105,7 @@ const Page = () => {
             year: 'numeric'
         });
     }
+
 
     return (
         <section className="px-6 py-6">

@@ -148,7 +148,13 @@ export default class ScrappersController {
   async authenticate(): Promise<string> { // Définir le type de retour comme une promesse de chaîne
     const expiresIn = 3600* 1000; // Durée de validité du token en millisecondes (1 jour)
 
-    if (cachedToken.value && cachedToken.expiry > Date.now()) {
+    if(!cachedToken || !cachedToken.expiry){
+      return "Erreur";
+
+    }
+
+
+    if (cachedToken.value  && cachedToken.expiry > Date.now()) {
       return cachedToken.value;
     }
 

@@ -1,10 +1,11 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState, useCallback } from 'react';
+import React, { Fragment, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useMutation, useQueryClient, UseMutationResult } from '@tanstack/react-query';
 import { getSirenDetails } from "@/app/services/customer";
+import {Client} from "@/app/models/Client";
 
 interface SirenModalProps {
     isOpen: boolean;
@@ -20,7 +21,7 @@ function SirenModal({ isOpen, onClose, onSirenSubmit }: SirenModalProps) {
         mutationFn: getSirenDetails,
         onError: (error: Error) => {
         },
-        onSuccess: (data: any) => {
+        onSuccess: (data: Client) => {
             queryClient.invalidateQueries(['tax_information']);
             onSirenSubmit(data);
             resetAndClose(); // Reset and close after successful fetch
