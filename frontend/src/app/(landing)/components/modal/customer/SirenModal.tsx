@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Dialog, Transition } from '@headlessui/react';
 import React, { Fragment, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';

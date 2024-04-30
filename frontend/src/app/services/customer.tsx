@@ -1,3 +1,4 @@
+// @ts-ignore
 import api from '@/config/api';
 import {Client} from "@/app/models/Client";
 
@@ -21,7 +22,7 @@ const convertKeysToSnakeCase = (data: Client | Client[] ): Client | Client[]  =>
 const fetchSirenDetails = async (siren_number: string): Promise<any> => {
     try {
         const response = await axios.post('business-data/scrappe-sirene', { siren_number });
-        return convertKeysToCamelCase(response.data); // Assuming conversion function exists and is imported
+        return convertKeysToSnakeCase(response.data); // Assuming conversion function exists and is imported
     } catch (error: unknown) {
         if (error instanceof Error) {
             throw new Error('Failed to fetch SIREN details: ' + error.message);

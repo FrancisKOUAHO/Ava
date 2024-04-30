@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React, { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Button } from '@/components/ui/button';

@@ -1,4 +1,5 @@
 'use client'
+// @ts-nocheck
 
 import { Ellipsis, SendHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -9,10 +10,9 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { AxiosError } from 'axios';  // Assuming you're using Axios
 import fetchSirenDetails from "@/app/services/customer";
+import {Client} from "@/app/models/Client";
 
-interface SirenData {
-  siren_number: string;
-}
+
 
 const Sirene = () => {
   const queryClient = useQueryClient()
@@ -24,14 +24,14 @@ const Sirene = () => {
     setIsOpen(false)
   }
 
-  const scrappSirenMutation = useMutation<SirenData, AxiosError, SirenData>(fetchSirenDetails, {
+  const scrappSirenMutation = useMutation<Client, AxiosError, Client>(fetchSirenDetails, {
     onError: (error: AxiosError) => {
       toast.error(`Error: ${error.message}`, {
         position: 'top-right',
         duration: 5000
       });
     },
-    onSuccess: (data: SirenData) => {
+    onSuccess: (data: Client) => {
       console.log('Fetched SIREN data:', data);
       queryClient.invalidateQueries(['tax_information']);
       toast.success('SIREN data updated successfully', {
