@@ -30,17 +30,11 @@ const Home = () => {
       })
   }
 
-  const handleGoogleConnect = (): void => {
-    api
-      .get('api/auth/connect-to-google')
-      .then((response: AxiosResponse) => {
-        const redirectUrl = response.request.responseURL
-        window.location.href = redirectUrl
-      })
-      .catch((error: any) => {
-        console.error('Error:', error)
-      })
+  const handleGoogleConnect = () => {
+    // Directly navigate to your backend route that handles the Google OAuth redirection
+    window.location.href = 'http://localhost:3333/api/v1/auth/connect-to-google';
   }
+
 
   const handleSubmit = (event: any): void => {
     event.preventDefault()

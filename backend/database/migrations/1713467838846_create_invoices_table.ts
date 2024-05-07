@@ -14,6 +14,7 @@ export default class InvoicesSchema extends BaseSchema {
       table.dateTime('due_date').nullable()
       table.text('notes').nullable()
       table.text('terms').nullable()
+      table.decimal('discount', 12, 2).notNullable()
       table.decimal('total_amount', 12, 2).nullable()
       table.string('status').nullable()
       table.timestamp('created_at').notNullable()

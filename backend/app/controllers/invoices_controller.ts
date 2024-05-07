@@ -1,6 +1,8 @@
 import { HttpContext } from '@adonisjs/core/http'
 import Invoice from '#models/invoice'
 import { createInvoiceValidator, updateInvoiceValidator } from '#validators/invoice'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import db from '@adonisjs/lucid/services/db'
 
 export default class InvoicesController {
   /**
@@ -31,6 +33,7 @@ export default class InvoicesController {
 
     return response.created(invoice)
   }
+
 
   /**
    * Show individual record
@@ -96,5 +99,22 @@ export default class InvoicesController {
     await invoice.delete()
 
     return response.noContent()
+  }
+
+
+  public async getAllInvoiceData({ response }: HttpContextContract) {
+    try {
+      const invoices = await Invoice.query()
+          .preload('client', (query) => {
+            query.select('id', 'first_name', 'last_name'); // Select specific fields from the client
+          })
+          .select('invoices.*', db.rawQuery(`(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`))
+          .orderBy('invoices.created_at', 'desc');
+
+      return response.ok(invoices);
+    } catch (error) {
+      console.error('Failed to fetch invoices', error);
+      return response.status(500).send('Failed to fetch invoices');
+    }
   }
 }

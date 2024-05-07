@@ -49,6 +49,10 @@
             .group(() => {
               router.resource('customer', ClientsController).apiOnly()
               router.resource('invoice-item', InvoiceItemsController).apiOnly()
+              router.post('invoice-item-many', [InvoiceItemsController, 'storeAll'])
+              router.get('invoice-data', [InvoicesController, 'getAllInvoiceData'])
+                router.get('connect-to-google', [SessionController, 'connectToGoogle'])
+
               router.resource('invoice', InvoicesController).apiOnly()
             })
             .prefix('billing')
