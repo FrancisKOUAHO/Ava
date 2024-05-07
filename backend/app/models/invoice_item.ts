@@ -3,6 +3,8 @@ import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import Invoice from '#models/invoice'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations';
 
+import User from "#models/user";
+
 export default class InvoiceItem extends BaseModel {
   @column({ isPrimary: true })
   declare id: string
