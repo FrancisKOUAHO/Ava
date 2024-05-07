@@ -54,3 +54,13 @@ npm init adonisjs@latest hello-world -- -K=slim
 
 # boilerplate_next_adonis_traefik
 # sveltekit-adonis
+
+
+
+#commande à faire 
+``
+yarn add @radix-ui/react-popover -W
+``
+``
+node ace migration:run
+``

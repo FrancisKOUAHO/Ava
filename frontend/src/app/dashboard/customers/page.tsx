@@ -16,6 +16,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import api from "@/config/api";
+import { AxiosResponse } from 'axios'
 
 const Page = () => {
   const [isCustomerModalOpen, setCustomerModalOpen] = useState<boolean>(false)
@@ -110,12 +112,16 @@ const Page = () => {
     })
   }
 
+
+
   return (
     <section className="px-6 py-6">
+
       <header className="flex justify-between items-center">
         <div className="flex justify-center items-center gap-12">
           <h5 className="text-black text-lg font-semibold">Clients</h5>
           <div>
+
             <button
               onClick={openSirenModal}
               style={{ display: 'flex', gap: '5px' }}

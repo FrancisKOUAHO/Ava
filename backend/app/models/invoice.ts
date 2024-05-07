@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo,hasMany, column } from '@adonisjs/lucid/orm'
 import User from '#models/user'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import type {BelongsTo, HasMany} from '@adonisjs/lucid/types/relations'
 import Client from '#models/client'
+import InvoiceItem from "#models/invoice_item";
 
 export default class Invoice extends BaseModel {
   @column({ isPrimary: true })
@@ -32,10 +33,19 @@ export default class Invoice extends BaseModel {
   @column()
   declare total_amount: number
 
+  @column()
+  declare discount: number
+
   @belongsTo(() => User, {
     foreignKey: 'user_id',
   })
   declare user: BelongsTo<typeof User>
+
+  @hasMany(() => InvoiceItem, {
+    foreignKey: 'invoice_id',  // The name of the FK in the InvoiceItem model
+  })
+  declare items: HasMany<typeof InvoiceItem>
+
 
   @column()
   declare client_id: string

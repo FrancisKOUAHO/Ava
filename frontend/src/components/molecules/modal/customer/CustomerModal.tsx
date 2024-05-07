@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createCustomer, updateCustomer } from '@/lib/customer'
-import { ClientProps } from '@/types/ClientProps'
+import { Client } from '@/types/Client'
 
 interface CustomerModalProps {
   isOpen: boolean
   onClose: () => void
-  initialData: ClientProps | null
-  onAddClient: (client: ClientProps, isUpdating: boolean) => void
+  initialData: Client | null
+  onAddClient: (client: Client, isUpdating: boolean) => void
   isUpdating: boolean
 }
 
@@ -23,7 +23,8 @@ function CustomerModal({
   onAddClient,
   isUpdating,
 }: CustomerModalProps) {
-  const [client, setClient] = useState<ClientProps>({
+  const [client, setClient] = useState<Client>({
+    siren_number: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -45,6 +46,7 @@ function CustomerModal({
       setClient({ ...initialData })
     } else {
       setClient({
+        siren_number: '',
         first_name: '',
         last_name: '',
         email: '',
@@ -64,7 +66,7 @@ function CustomerModal({
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
-    setClient((prev) => ({ ...prev, [name as keyof ClientProps]: value }))
+    setClient((prev) => ({ ...prev, [name as keyof Client]: value }))
   }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -122,6 +124,7 @@ function CustomerModal({
                 <form onSubmit={handleSubmit} className="mt-2">
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     {[
+                      { label: 'Siren', name: 'siren_number' },
                       { label: 'Prénom', name: 'first_name' },
                       { label: 'Nom', name: 'last_name' },
                       { label: 'Email', name: 'email', type: 'email' },
@@ -132,7 +135,7 @@ function CustomerModal({
                       { label: 'Code Postal', name: 'zip' },
                       { label: 'Pays', name: 'country' },
                       { label: 'Société', name: 'company' },
-                      { label: 'Numéro de TVA', name: 'vat_number' },
+                      // { label: 'Numéro de TVA', name: 'vat_number' },
                       { label: 'Devise', name: 'currency' },
                       { label: 'Langue', name: 'language' },
                     ].map(({ label, name, type = 'text' }, index) => (

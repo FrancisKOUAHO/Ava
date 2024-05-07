@@ -32,7 +32,45 @@ export default class InvoiceItemsController {
     return response.created(invoiceItem)
   }
 
-  /**
+
+    async storeAll({ request, response }: HttpContext) {
+        // Convert the object with numeric keys into an array
+        const itemsObject = request.all();
+        const itemsArray = Object.values(itemsObject);  // This converts the object into an array of values
+
+        let results = [];
+        let errors = [];
+
+        for (const data of itemsArray) {
+            const validation = await createInvoiceItemValidator.validate(data);
+            if (!validation) {
+                // errors.push(validation));
+                continue;  // Skip this iteration if validation fails
+            }
+
+            try {
+                // If validation passes, create the invoice item
+                const invoiceItem = await InvoiceItem.create(data);
+                results.push(invoiceItem);
+            } catch (error) {
+                errors.push({ message: "Failed to create invoice item", details: error.message });
+            }
+        }
+
+        // Check if there were any errors
+        if (errors.length > 0) {
+            return response.status(400).json({ errors });
+        }
+
+        // If all items were created without errors
+        return response.status(201).json(results);
+    }
+
+
+
+
+
+    /**
    * Show individual record
    */
   async show({ params, response }: HttpContext) {

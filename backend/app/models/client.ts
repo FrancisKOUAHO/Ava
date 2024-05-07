@@ -35,6 +35,9 @@ export default class Client extends BaseModel {
   declare country: string
 
   @column()
+  declare siren_number: string
+
+  @column()
   declare company: string
 
   @column({ columnName: 'vat_number' })

@@ -46,7 +46,7 @@ const Sidebar: FunctionComponent = () => {
         }
       >
         <Files />
-        Invoices
+        Factures
       </button>
       <div
         className={
@@ -90,6 +90,7 @@ const Sidebar: FunctionComponent = () => {
         <Users />
         Customers
       </Link>
+
     </section>
   )
 }

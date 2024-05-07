@@ -12,7 +12,10 @@ export default class InvoiceItemsSchema extends BaseSchema {
       table.string('unity').nullable()
       table.decimal('quantity').nullable()
       table.decimal('price', 12, 2).notNullable()
+      table.decimal('tva').notNullable()
+
       table.decimal('line_total', 12, 2).notNullable()
+      table.decimal('line_total_tva', 12, 2).notNullable()
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
     })

@@ -1,24 +1,56 @@
 'use client'
 
 import { CirclePlus, FileImage } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import api from "@/config/api";
 
 const Page = () => {
   const [checked, setChecked] = useState(false)
+  const [invoices, setInvoices] = useState([]);  // State to store invoice data
+
+
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const response = await api.get('billing/invoice-data');
+        const data = await response.data;
+        console.log('data');
+        console.log(data);
+        setInvoices(data);  // Store fetched data in state
+      } catch (error) {
+        console.error('Failed to fetch invoices', error);
+      }
+    };
+
+    fetchInvoices();
+  }, []);
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) {
+      return ''
+    }
+
+    const date = new Date(dateString)
+
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
 
   return (
     <section className="px-6 py-6">
       <header className="flex justify-between items-center">
         <div className="flex justify-center items-center gap-12">
-          <h5 className="text-black text-lg font-semibold">Invoices</h5>
+          <h5 className="text-black text-lg font-semibold">Factures</h5>
           <a
-            href="/"
+            href="/dashboard/invoices/add"
             className="flex justify-center gap-1 items-center text-black text-sm"
           >
             <CirclePlus className="w-3 h-3" />
-            Create
+            Créer une facture
           </a>
         </div>
         <div className="relative text-gray-600">
@@ -66,33 +98,31 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-[#e7effc]">
-              <td className="flex items-center gap-2 p-3 text-center">
-                <Checkbox id="default-checkbox-2" checked={checked} />
-                <Label
-                  htmlFor="default-checkbox-2"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  <FileImage className="w-8 h-8" />
-                </Label>
-              </td>
-              <td className="p-3 text-center">Design</td>
-              <td className="p-3 text-center">$100</td>
-              <td className="p-3 text-center">John Doe</td>
-              <td className="p-3 text-center">
-                <span className="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">
-                  Paid
-                </span>
-              </td>
-              <td className="p-3 text-center">12/12/2021</td>
-              <td className="p-3 text-center">
-                <a href="/" className="text-indigo-600 hover:text-indigo-900">
-                  ...
-                </a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          {invoices.map((invoice) => (  // Map over invoices to render rows
+              <tr key={invoice.id} className="bg-[#e7effc]">
+                <td className="flex items-center gap-2 p-3 text-center">
+                  <Checkbox id={`checkbox-${invoice.id}`} checked={checked} onChange={() => setChecked(!checked)} />
+                  <Label htmlFor={`checkbox-${invoice.id}`} className="text-sm font-medium">
+                    <FileImage className="w-8 h-8" />
+                  </Label>
+                </td>
+                <td className="p-3 text-center">{invoice.client.firstName}</td>
+                <td className="p-3 text-center">{invoice.total}€</td>
+                <td className="p-3 text-center">{invoice.client.firstName + invoice.client.lastName}</td>
+                <td className="p-3 text-center">
+                  <span className={`bg-${invoice.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}>
+                    {invoice.status}
+                  </span>
+                </td>
+                <td className="p-3 text-center">{formatDate(invoice.date)}</td>
+                <td className="p-3 text-center">
+                  <a href={`/invoices/${invoice.id}`} className="text-indigo-600 hover:text-indigo-900">
+                    View
+                  </a>
+                </td>
+              </tr>
+          ))}
+          </tbody>        </table>
       </div>
     </section>
   )

@@ -87,6 +87,8 @@ export default class SessionController {
     return ally.use('google').redirect()
   }
 
+
+
   async store({ ally, auth, response }: HttpContext) {
     const google = ally.use('google')
 
