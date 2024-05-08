@@ -7,22 +7,32 @@ import { Checkbox } from '@/components/ui/checkbox'
 import api from "@/config/api";
 
 
+interface Client {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+type InvoiceStatus = "sent" | "draft" | "paid" | "overdue" | "Paid";
+
+// Invoice Model
 interface Invoice {
+  client: Client; // Client object embedded within the invoice
   clientId: string;
   createdAt: string; // ISO format date-time string
   date: string | null; // Can be `null` if not provided
-  discount: string; // Keeping as a string since the example provided was a string
+  discount: string; // Keeping as a string based on your provided data
   dueDate: string | null; // Can be `null` if not provided
   id: string;
   invoiceDate: string | null; // Can be `null` if not provided
   invoiceNumber: string | null; // Can be `null` if not provided
   notes: string;
-  status: "sent" | "draft" | "paid" | "overdue"; // Example status values
+  status: InvoiceStatus;
   terms: string;
-  total: string; // Keeping as a string since the example provided was a string
-  totalAmount: string; // Keeping as a string since the example provided was a string
-  updatedAt: string; // ISO format date-time string
-  userId: string | null; // Can be `null` if not assigned
+  total: string; // Keeping as a string based on your provided data
+  totalAmount: string; // Keeping as a string based on your provided data
+  updatedAt: string;
+  userId: string | undefined;
 }
 
 const Page = () => {
