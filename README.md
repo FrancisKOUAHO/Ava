@@ -57,7 +57,7 @@ npm init adonisjs@latest hello-world -- -K=slim
 
 
 
-#commande à faire 
+#commande à faire
 ``
 yarn add @radix-ui/react-popover -W
 ``
