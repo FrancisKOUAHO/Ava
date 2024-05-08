@@ -58,6 +58,9 @@ interface LineItem {
 
 }
 
+interface ApiResponse<T> {
+  data: T;
+}
 interface InvoiceData {
   user_id: string
   client_id: string
@@ -349,7 +352,7 @@ const Page = () => {
     },
   });
 
-  const SendInvoiceMutation = useMutation<any, Error, InvoiceData>({
+  const SendInvoiceMutation = useMutation<any, Error, InvoiceData, ApiResponse<InvoiceData>>({
     mutationFn: (data) => {
       const fullData = {
         ...data,
@@ -361,26 +364,25 @@ const Page = () => {
     },
     onError: (error: any) => {
       console.error('Error:', error.message);
-      alert('Failed to send invoice.');  // Again, handle with user-friendly feedback
+      alert('Failed to send invoice.');  // User-friendly feedback
     },
-    onSuccess: (invoiceData:InvoiceData) => {
+    onSuccess: (response: ApiResponse<InvoiceData>) => {
       queryClient.invalidateQueries({ queryKey: ['invoice'] });
 
-      if (invoiceData.data.id && Array.isArray(lineItems)) {
+      if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map(item => ({
           ...item,
-          invoice_id: invoiceData.data.id  // Assuming invoice_id is a valid property for LineItem
+          invoice_id: response.data.id  // Accessing ID from response.data
         }));
         const transformedData = itemsWithInvoiceId.map(toSnakeCase);
 
         console.log('Transformed line items data:', transformedData);
-        SendItemsDataMutation.mutate(transformedData as LineItem[]);  // Cast the result to ensure type compatibility
+        SendItemsDataMutation.mutate(transformedData as LineItem[]);  // Ensure type compatibility
       } else {
         console.log("No lineItems to process or 'lineItems' is not an array");
       }
     },
   });
-
 
   const handleSubmit = () => {
 
