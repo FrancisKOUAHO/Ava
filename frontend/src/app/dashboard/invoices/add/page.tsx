@@ -63,6 +63,7 @@ interface ApiResponse<T> {
 }
 interface InvoiceData {
   user_id: string
+  id?: string
   client_id: string
   date?: string
   due_date?: string
@@ -128,7 +129,7 @@ const Page = () => {
     console.log('Checking form validity:', lineItems);
     console.log(formValid);
     if(lineItems.length > 0){
-      const allValid = lineItems.every(item => item.name && item.price && item.quantity);
+      const allValid = lineItems.every((item: LineItem) => item.name && item.price && item.quantity);
       // check if all required fields are filled out in invoiceDat
       setFormValid(allValid);
     }
@@ -221,7 +222,7 @@ const Page = () => {
 
 
   const makeEditable = (index: number): void => {
-    setIsEditable((prevState) => {
+    setIsEditable((prevState: boolean[]) => {
       const newState = [...prevState]
       newState[index] = !newState[index]
       return newState
@@ -229,8 +230,8 @@ const Page = () => {
   }
 
   const saveInvoice = (index: number): void => {
-    setLineItems((prevState) =>
-      prevState.map((lineItem, i) => {
+    setLineItems((prevState: LineItem[]) =>
+      prevState.map((lineItem: LineItem, i: number) => {
         if (i === index) {
           return {
             ...lineItem,
@@ -243,22 +244,22 @@ const Page = () => {
   }
 
   const makeEditableSubtotal = (): void => {
-    setIsEditableSubtotal((prevState) => !prevState)
+    setIsEditableSubtotal((prevState: boolean) => !prevState)
   }
 
   const makeEditablenotes = (): void => {
-    setEditablenotes((prevState) => !prevState)
+    setEditablenotes((prevState: boolean) => !prevState)
   }
 
   const makeEditableTerms = (): void => {
-    setEditableTerms((prevState) => !prevState)
+    setEditableTerms((prevState: boolean) => !prevState)
   }
 
   const addLineItem = (event: React.MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault();
     event.stopPropagation();
     console.log('addLineItem function called');
-    setLineItems((prevState) => [
+    setLineItems((prevState: LineItem[]) => [
       ...prevState,
       {
         name: '',
@@ -273,7 +274,7 @@ const Page = () => {
   }
 
   const removeLineItem = (index: number): void => {
-    setLineItems((prevState) => prevState.filter((_, i) => i !== index))
+    setLineItems((prevState: LineItem[]) => prevState.filter((_: LineItem, i: number) => i !== index))
   }
 
   const SendCustomerMutation = useMutation<any, any, CustomerData>({
@@ -294,7 +295,7 @@ const Page = () => {
     onError: (error: any) => {
       console.error('Error saving customer:', error);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Invalidate and refetch clients query to reflect the update/addition
       // queryClient.invalidateQueries(['clients']);
     }
@@ -377,7 +378,10 @@ const Page = () => {
         const transformedData = itemsWithInvoiceId.map(toSnakeCase);
 
         console.log('Transformed line items data:', transformedData);
-        SendItemsDataMutation.mutate(transformedData as LineItem[]);  // Ensure type compatibility
+        SendItemsDataMutation.mutate(transformedData as LineItem[]);
+        toast.success('Facture bien envoyée', {
+          position: 'top-right',
+        });// Ensure type compatibility
       } else {
         console.log("No lineItems to process or 'lineItems' is not an array");
       }
@@ -459,7 +463,7 @@ const Page = () => {
     };
 
     // Prepare line items data
-    const lineItemsData: LineItem[] = lineItems.map((lineItem) => ({
+    const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
       name: lineItem.name,
       price: lineItem.price,
       unity: lineItem.unity,
@@ -511,7 +515,7 @@ const Page = () => {
     );
 
     // Update subtotal state
-    setSubTotal((prevState) => ({
+    setSubTotal((prevState: SubTotal) => ({
       ...prevState, // Keep other values unchanged
       total: getSubTotal(getTotalInvoices()),
     }));
@@ -532,14 +536,14 @@ const Page = () => {
     }, 0);
   };
 
-  const getSubTotal = (pTotal:number, pdiscount:number):number => {
+  const getSubTotal = (pTotal:number, pdiscount:number =0):number => {
     return pTotal - (pTotal * pdiscount / 100);
   }
 
   const handleCustomerChange = (field: keyof CustomerData, value: string) => {
     const updatedCustomer = { ...customer, [field]: value };
     setCustomer(updatedCustomer);
-    checkIfCustomerIsFull(updatedCustomer);
+    checkIfCustomerIsFull();
   }
 
   const handleTest = () => {
