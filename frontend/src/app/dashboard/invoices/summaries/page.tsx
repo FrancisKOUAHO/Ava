@@ -6,9 +6,28 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import api from "@/config/api";
 
+
+interface Invoice {
+  clientId: string;
+  createdAt: string; // ISO format date-time string
+  date: string | null; // Can be `null` if not provided
+  discount: string; // Keeping as a string since the example provided was a string
+  dueDate: string | null; // Can be `null` if not provided
+  id: string;
+  invoiceDate: string | null; // Can be `null` if not provided
+  invoiceNumber: string | null; // Can be `null` if not provided
+  notes: string;
+  status: "sent" | "draft" | "paid" | "overdue"; // Example status values
+  terms: string;
+  total: string; // Keeping as a string since the example provided was a string
+  totalAmount: string; // Keeping as a string since the example provided was a string
+  updatedAt: string; // ISO format date-time string
+  userId: string | null; // Can be `null` if not assigned
+}
+
 const Page = () => {
   const [checked, setChecked] = useState(false)
-  const [invoices, setInvoices] = useState([]);  // State to store invoice data
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
 
   useEffect(() => {
@@ -16,8 +35,6 @@ const Page = () => {
       try {
         const response = await api.get('billing/invoice-data');
         const data = await response.data;
-        console.log('data');
-        console.log(data);
         setInvoices(data);  // Store fetched data in state
       } catch (error) {
         console.error('Failed to fetch invoices', error);
@@ -98,7 +115,7 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-          {invoices.map((invoice) => (  // Map over invoices to render rows
+          {invoices.map((invoice: Invoice) => (  // Utilisez "any" temporairement pour éviter les erreurs de type
               <tr key={invoice.id} className="bg-[#e7effc]">
                 <td className="flex items-center gap-2 p-3 text-center">
                   <Checkbox id={`checkbox-${invoice.id}`} checked={checked} onChange={() => setChecked(!checked)} />
@@ -106,23 +123,24 @@ const Page = () => {
                     <FileImage className="w-8 h-8" />
                   </Label>
                 </td>
-                <td className="p-3 text-center">{invoice.client.firstName}</td>
-                <td className="p-3 text-center">{invoice.total}€</td>
-                <td className="p-3 text-center">{invoice.client.firstName + invoice.client.lastName}</td>
+                <td className="p-3 text-center">{invoice?.client?.firstName}</td>
+                <td className="p-3 text-center">{invoice?.totalAmount}€</td>
+                <td className="p-3 text-center">{invoice?.client?.firstName} {invoice?.client?.lastName}</td>
                 <td className="p-3 text-center">
-                  <span className={`bg-${invoice.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}>
-                    {invoice.status}
-                  </span>
+            <span className={`bg-${invoice?.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice?.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}>
+                {invoice?.status}
+            </span>
                 </td>
-                <td className="p-3 text-center">{formatDate(invoice.date)}</td>
+                <td className="p-3 text-center">{formatDate(invoice?.date)}</td>
                 <td className="p-3 text-center">
-                  <a href={`/invoices/${invoice.id}`} className="text-indigo-600 hover:text-indigo-900">
+                  <a href={`/invoices/${invoice?.id}`} className="text-indigo-600 hover:text-indigo-900">
                     View
                   </a>
                 </td>
               </tr>
           ))}
-          </tbody>        </table>
+          </tbody>
+        </table>
       </div>
     </section>
   )

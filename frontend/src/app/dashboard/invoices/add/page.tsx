@@ -53,24 +53,27 @@ interface LineItem {
   quantity: number
   lineTotal: number
   lineTotalTva: number
+  tva: number
+  [key: string]: any; // Allow additional properties dynamically
+
 }
 
 interface InvoiceData {
   user_id: string
   client_id: string
-  date: string
-  due_date: string
-  note: string
-  terms: string
+  date?: string
+  due_date?: string
   notes: string
+  terms: string
   total_amount: number
-  discount: number
   status: string
+  discount: number
 }
 
 interface CustomerData {
   id?: string;
   user_id: string;
+  userId: string;
   company: string;
   address: string;
   city: string;
@@ -79,15 +82,19 @@ interface CustomerData {
   phone: string;
   email: string;
   last_name: string;
+  lastName: string;
   first_name: string;
+  firstName: string;
   vat_number: string
+  vatNumber: string
   currency: string
   siren_number: string;
+  sirenNumber: string;
 }
 
 interface SubTotal {
     name?: string;
-    discountRate?: number;
+    discount?: number;
     total?: number;
 }
 
@@ -99,16 +106,16 @@ const Page = () => {
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
   const [isEditableSubtotal, setIsEditableSubtotal] = useState<boolean>(false)
-  const [editableNote, setEditableNote] = useState<boolean>(false)
+  const [editablenotes, setEditablenotes] = useState<boolean>(false)
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
   const [customer, setCustomer] = useState<CustomerData | null>(null);
-  const [note, setNote] = useState<String>("");
+  const [notes, setnotes] = useState<String>("");
   const [terms, setTerms] = useState<String>("");
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
-    discountRate: 0,  // default discount price as an example
+    discount: 0,  // default discount price as an example
     total: 0         // default total as an example
   });
   const [formValid, setFormValid] = useState(false);
@@ -124,7 +131,7 @@ const Page = () => {
     }
   }, [lineItems]);
 
-  const validateInvoiceData = (invoiceData) => {
+  const validateInvoiceData = ( invoiceData: InvoiceData) => {
     const errors = [];
 
     // Check if the client ID is present and valid
@@ -132,14 +139,10 @@ const Page = () => {
       errors.push("Client ID is required.");
     }
 
-    // Check if the discount rate is provided and is a number
-    if (typeof invoiceData.discountRate !== 'number' || isNaN(invoiceData.discountRate)) {
-      errors.push("Valid discount rate is required.");
-    }
 
-    // Ensure the note field is not empty if it's required
-    if (!invoiceData.note) {
-      errors.push("Note is required.");
+    // Ensure the notes field is not empty if it's required
+    if (!invoiceData.notes) {
+      errors.push("notes is required.");
     }
 
     // Ensure terms are provided if necessary
@@ -164,8 +167,8 @@ const Page = () => {
 
 
   }, [customer]); //
-  const handleSelectCustomer = (customerId:number) => {
-    const selectedCustomer = customersData.find(c => c.id === customerId);
+  const handleSelectCustomer = (customerId:string) => {
+    const selectedCustomer : CustomerData = customersData.find((c:CustomerData) => c.id === customerId);
     setCustomer(selectedCustomer); // Schedules state update
     checkIfCustomerIsFull();
     setOpen(false); // Close the dropdown or popover
@@ -191,23 +194,28 @@ const Page = () => {
     }
   }
 
-  const getInputClass = (value) => {
+  const getInputClass = (value:string) => {
     return `mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white ${!value ? 'border-red-500' : ''}`;
   };
 
 
   const handleSubTotalChange = (field: keyof SubTotal, value: string | number) => {
     console.log(`Updating ${field} with value:`, value);
-    setSubTotal((prevState) => {
+    setSubTotal((prevState: SubTotal) => {
+      // Ensure `value` is always a number
+      const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+
       const newState = {
         ...prevState,
-        [field]: value,
-        total: field === 'discountRate' ? getSubTotal(getTotalInvoices(),value) : prevState.total
+        [field]: numericValue,
+        total: field === 'discount' ? getSubTotal(getTotalInvoices(), numericValue) : prevState.total
       };
+
       console.log('New state:', newState);
       return newState;
     });
   };
+
 
   const makeEditable = (index: number): void => {
     setIsEditable((prevState) => {
@@ -235,8 +243,8 @@ const Page = () => {
     setIsEditableSubtotal((prevState) => !prevState)
   }
 
-  const makeEditableNote = (): void => {
-    setEditableNote((prevState) => !prevState)
+  const makeEditablenotes = (): void => {
+    setEditablenotes((prevState) => !prevState)
   }
 
   const makeEditableTerms = (): void => {
@@ -267,12 +275,13 @@ const Page = () => {
 
   const SendCustomerMutation = useMutation<any, any, CustomerData>({
     mutationFn: () => {
-      console.log('Original customer data:', customer);
+      // Ensure 'customer' is not null before proceeding
+      if (!customer) {
+        throw new Error('Customer data is null. Cannot proceed with the mutation.');
+      }
 
-      // Convert customer data from camelCase to snake_case
+      // Safely access customer properties after the check
       const transformedData = toSnakeCase(customer);
-      console.log('Transformed customer data:', transformedData);
-
       const endpoint = customer.id ? `billing/customer/${customer.id}` : 'billing/customer';
       const method = customer.id ? 'put' : 'post';
 
@@ -284,27 +293,33 @@ const Page = () => {
     },
     onSuccess: (data) => {
       // Invalidate and refetch clients query to reflect the update/addition
-      //queryClient.invalidateQueries(['clients']);
+      // queryClient.invalidateQueries(['clients']);
     }
   });
 
 
-  const  toSnakeCase = (obj) => {
-    const snakeCaseObj = {};
+
+  type AnyObject = { [key: string]: any };
+
+  const toSnakeCase = (obj: AnyObject): AnyObject => {
+    const snakeCaseObj: AnyObject = {};
     for (const key in obj) {
-      const transformedKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-      snakeCaseObj[transformedKey] = obj[key];
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        const transformedKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+        snakeCaseObj[transformedKey] = obj[key];
+      }
     }
     return snakeCaseObj;
-  }
+  };
 
-  const validateCustomerData = (customer) => {
+
+  const validateCustomerData = (customer:CustomerData) => {
     const errors = [];
 
     // List required fields and check if they are filled
     const requiredFields = [
       'userId', 'company', 'address', 'city', 'zip', 'state',
-      'phone', 'email', 'lastName', 'firstName', 'vatNumber', 'sirenNumber'
+      'phone', 'email', 'lastName', 'firstName', 'sirenNumber'
     ];
 
     requiredFields.forEach(field => {
@@ -338,8 +353,8 @@ const Page = () => {
     mutationFn: (data) => {
       const fullData = {
         ...data,
-        discountRate: data.discountRate,
-        note: data.note,
+        discount: data.discount,
+        notes: data.notes,
         terms: data.terms,
       };
       return api.post('billing/invoice', fullData);
@@ -348,18 +363,18 @@ const Page = () => {
       console.error('Error:', error.message);
       alert('Failed to send invoice.');  // Again, handle with user-friendly feedback
     },
-    onSuccess: (invoiceData) => {
+    onSuccess: (invoiceData:InvoiceData) => {
       queryClient.invalidateQueries({ queryKey: ['invoice'] });
 
       if (invoiceData.data.id && Array.isArray(lineItems)) {
-        const itemsWithInvoiceId = lineItems.map(item => ({
+        const itemsWithInvoiceId: LineItem[] = lineItems.map(item => ({
           ...item,
-          invoice_id: invoiceData.data.id
+          invoice_id: invoiceData.data.id  // Assuming invoice_id is a valid property for LineItem
         }));
         const transformedData = itemsWithInvoiceId.map(toSnakeCase);
 
         console.log('Transformed line items data:', transformedData);
-        SendItemsDataMutation.mutate(transformedData);  // Send all items at once
+        SendItemsDataMutation.mutate(transformedData as LineItem[]);  // Cast the result to ensure type compatibility
       } else {
         console.log("No lineItems to process or 'lineItems' is not an array");
       }
@@ -368,20 +383,22 @@ const Page = () => {
 
 
   const handleSubmit = () => {
-      const invoiceData = {
-        client_id: customer?.id,  // Ensure you check for existence
-        discountRate: subTotal?.discountRate,
-        note: note,
-        terms: terms,
-        // Other fields as necessary
-      };
 
+    const newInvoiceData: InvoiceData = {
+      client_id: customer?.id.toString(),  // Convert to string; check for existence
+      discount: subTotal?.discount ?? 0,  // Default to 0 if undefined
+      notes: notes,
+      terms: terms,
+      total_amount: Number((getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)),  // Convert to number
+      status: 'sent',
+      user_id: user.id.toString(),  // Ensure this is a string
+    };
 
     if (!formValid) {
       alert('Veuillez remplir tous les champs');  // Or handle this with a more user-friendly notification
       return;  // Stop the submission process
     }
-    const validationInvoiceErrors = validateInvoiceData(invoiceData);
+    const validationInvoiceErrors = validateInvoiceData(newInvoiceData);
 
 
     if(validationInvoiceErrors.length > 0) {
@@ -401,8 +418,8 @@ const Page = () => {
 
 
     // Only call the mutation if all required fields are properly filled
-    if (invoiceData.client_id) {
-      SendInvoiceMutation.mutate(invoiceData);
+    if (newInvoiceData.client_id) {
+      SendInvoiceMutation.mutate(newInvoiceData);
     } else {
       console.error('Customer data is incomplete.');
     }
@@ -410,14 +427,23 @@ const Page = () => {
 
 
   const handleSendInvoice = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+    event.preventDefault();
 
-    const form = event.currentTarget
+    const form = event.currentTarget;
     const values = Object.fromEntries(new FormData(form)) as {
-      [key: string]: string
+      [key: string]: string;
+    };
+
+    // Check if `customer` is null or undefined
+    if (!customer) {
+      console.error('Customer is not available.');
+      toast.error('Customer not available', {
+        position: 'top-right',
+      });
+      return;
     }
 
-
+    // Assuming `user` is always defined, otherwise, add a similar null check
     const invoiceData: any = {
       user_id: user.id,
       client_id: customer.id,
@@ -425,11 +451,12 @@ const Page = () => {
       due_date: new Date().toISOString(),
       total_amount: 0,
       discount: 0,
-      notes: values.notes,
+      notes: values.notes, // Correct the spelling from "notess" to "notes"
       terms: values.terms,
       status: 'draft',
-    }
+    };
 
+    // Prepare line items data
     const lineItemsData: LineItem[] = lineItems.map((lineItem) => ({
       name: lineItem.name,
       price: lineItem.price,
@@ -437,47 +464,55 @@ const Page = () => {
       quantity: lineItem.quantity,
       lineTotal: lineItem.lineTotal,
       lineTotalTva: lineItem.lineTotalTva,
-    }))
-    console.log('lineItemsData', lineItemsData)
+    }));
+    console.log('lineItemsData', lineItemsData);
 
-    // lineItemsData.map(async (lineItem) => {
-    //   return await SendItemsDataMutation.mutateAsync(lineItem)
-    // })
-    const response = await SendInvoiceMutation.mutateAsync(invoiceData)
+    try {
+      // Send the invoice
+      const response = await SendInvoiceMutation.mutateAsync(invoiceData);
 
-    if (!response) {
-      toast.error('Invoice not sent', {
+      if (!response) {
+        toast.error('Invoice not sent', {
+          position: 'top-right',
+        });
+        throw new Error('unknown error');
+      }
+
+      toast.success('Invoice sent successfully', {
         position: 'top-right',
-      })
-
-      throw new Error('unknown error')
+      });
+    } catch (error) {
+      console.error('Error sending invoice:', error);
+      toast.error('Error sending invoice', {
+        position: 'top-right',
+      });
     }
+  };
 
-    toast.success('Invoice sent successfully', {
-      position: 'top-right',
-    })
-  }
-
-  const handleItemChange = (index, field, value) => {
-    setLineItems(prevItems =>
+  const handleItemChange = (index: number, field: string, value: string | number) => {
+    setLineItems((prevItems: LineItem[]) =>
         prevItems.map((item, idx) => {
           if (idx === index) {
             const updatedItem = { ...item, [field]: value };
-            // Automatically calculate lineTotal if price or quantity changes
+
+            // Automatically calculate lineTotal if price, quantity, or tva changes
             if (field === 'price' || field === 'quantity' || field === 'tva') {
               updatedItem.lineTotal = Number(updatedItem.price) * Number(updatedItem.quantity);
-              updatedItem.lineTotalTva = Number(updatedItem.price) * Number(updatedItem.quantity) * (1 + Number(updatedItem.tva) / 100);
+              updatedItem.lineTotalTva = updatedItem.lineTotal * (1 + Number(updatedItem.tva) / 100);
             }
+
             return updatedItem;
           }
+
           return item;
         })
     );
-    setSubTotal(prevState => ({
-      ...prevState,  // Spread the previous state to keep other values
-      total: getSubTotal(getTotalInvoices())
-    }));
 
+    // Update subtotal state
+    setSubTotal((prevState) => ({
+      ...prevState, // Keep other values unchanged
+      total: getSubTotal(getTotalInvoices()),
+    }));
   };
 
   const changeCustomer = () =>{
@@ -495,8 +530,8 @@ const Page = () => {
     }, 0);
   };
 
-  const getSubTotal = (pTotal:number, pDiscountRate:number):number => {
-    return pTotal - (pTotal * pDiscountRate / 100);
+  const getSubTotal = (pTotal:number, pdiscount:number):number => {
+    return pTotal - (pTotal * pdiscount / 100);
   }
 
   const handleCustomerChange = (field: keyof CustomerData, value: string) => {
@@ -579,7 +614,7 @@ const Page = () => {
                       <CommandEmpty>Aucun client trouvé.</CommandEmpty>
                       <CommandGroup>
                         <CommandList>
-                        {customersData.map((listOfCustomerNames) => (
+                        {customersData.map((listOfCustomerNames:CustomerData) => (
                             <CommandItem
                                 key={listOfCustomerNames.id}
                                 value={listOfCustomerNames.id}
@@ -1078,10 +1113,10 @@ const Page = () => {
                             <Input
                               className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                               type="number"
-                              name="discountRate"
-                              id="discountRate"
-                              value={subTotal.discountRate}
-                              onChange={(e) => handleSubTotalChange('discountRate', e.target.value)}
+                              name="discount"
+                              id="discount"
+                              value={(subTotal.discount??0)}
+                              onChange={(e) => handleSubTotalChange('discount', e.target.value)}
                               placeholder="100"
                               readOnly={!isEditableSubtotal}
                               disabled={!isEditableSubtotal}
@@ -1110,7 +1145,8 @@ const Page = () => {
                               disabled={!isEditableSubtotal}
                               readOnly
                               placeholder="1"
-                              value={(getTotalInvoices()-subTotal.discountRate).toFixed(2)}
+                              value={(getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)}
+
                             />
                           )}
                         </td>
@@ -1145,7 +1181,7 @@ const Page = () => {
                               name="total"
                               id="total"
                               placeholder="100"
-                              value={(getTotalInvoices(false)-subTotal.discountRate).toFixed(2)}
+                              value={(getTotalInvoices(false)-(subTotal.discount??0)).toFixed(2)}
 
                               readOnly
 
@@ -1170,7 +1206,8 @@ const Page = () => {
                               type="number"
                               id="totalTva"
                               name="totalTva"
-                              value={(getTotalInvoices()-subTotal.discountRate).toFixed(2)}
+                              value={(getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)}
+
                               readOnly
                               placeholder="100"
                             />
@@ -1190,7 +1227,7 @@ const Page = () => {
                           <h5>Total à régler</h5>
                         </td>
                         <td className="p-3 text-center font-black text-black">
-                          {(getTotalInvoices() - subTotal.discountRate).toFixed(2)}€
+                          {(getTotalInvoices() - (subTotal.discount??0)).toFixed(2)}€
                         </td>
                       </tr>
                     </tbody>
@@ -1200,13 +1237,13 @@ const Page = () => {
 
               <div className="w-full my-">
                 <div className="flex justify-between items-center w-full gap-3 mb-2">
-                  <p className="font-black text-sm">Notes</p>
+                  <p className="font-black text-sm">notess</p>
                 </div>
                 <div className="grid w-full items-center gap-1.5 my-2">
-                  {!editableNote ? (
+                  {!editablenotes ? (
                     <button
                       className="w-full text-sm font-normal"
-                      onClick={makeEditableNote}
+                      onClick={makeEditablenotes}
                     >
                       Les factures devront être réglées en Euros (€) dès
                       réception, et au plus tard dans un délai de X jours (délai
@@ -1214,16 +1251,16 @@ const Page = () => {
                       partir de la date de leur émission
                       <PencilLine
                         className="w-4 h-4 hover:text-blue-700"
-                        id="note"
+                        id="notes"
                       />
                     </button>
                   ) : (
                     <textarea
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                      id="notes"
-                      name="notes"
-                      placeholder="Notes"
-                      onChange={(e) => setNote(e.target.value)}
+                      id="notess"
+                      name="notess"
+                      placeholder="notess"
+                      onChange={(e) => setnotes(e.target.value)}
                     />
                   )}
                 </div>
@@ -1270,7 +1307,6 @@ const Page = () => {
                     label="Envoyer la facture"
                     type="button"  // Make sure to use "button" if it's not a submit inside a form, else use "submit"
                     onClick={handleSubmit}
-                    disabled={!formValid}  // This disables the button when form is not valid
                 />
 
               </div>
