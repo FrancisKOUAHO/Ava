@@ -180,7 +180,6 @@ const Page = () => {
   }
 
   const checkIfCustomerIsFull = () => {
-    console.log('Checking if customer is full:', customer)
     if (customer) {
       if (
         customer.firstName &&
@@ -207,7 +206,6 @@ const Page = () => {
     field: keyof SubTotal,
     value: string | number,
   ) => {
-    console.log(`Updating ${field} with value:`, value)
     setSubTotal((prevState: SubTotal) => {
       const numericValue = typeof value === 'string' ? parseFloat(value) : value
 
@@ -220,7 +218,6 @@ const Page = () => {
             : prevState.total,
       }
 
-      console.log('New state:', newState)
       return newState
     })
   }
@@ -262,7 +259,6 @@ const Page = () => {
   const addLineItem = (event: React.MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault()
     event.stopPropagation()
-    console.log('addLineItem function called')
     setLineItems((prevState: LineItem[]) => [
       ...prevState,
       {
@@ -389,13 +385,12 @@ const Page = () => {
         }))
         const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
-        console.log('Transformed line items data:', transformedData)
         SendItemsDataMutation.mutate(transformedData as LineItem[])
         toast.success('Facture bien envoyée', {
           position: 'top-right',
         })
       } else {
-        console.log("No lineItems to process or 'lineItems' is not an array")
+        toast.error("No lineItems to process or 'lineItems' is not an array")
       }
     },
   })
@@ -414,14 +409,14 @@ const Page = () => {
     }
 
     if (!formValid) {
-      alert('Veuillez remplir tous les champs')
+      toast.warning('Veuillez remplir tous les champs')
       return
     }
     const validationInvoiceErrors = validateInvoiceData(newInvoiceData)
 
     if (validationInvoiceErrors.length > 0) {
       console.error('Validation errors:', validationInvoiceErrors)
-      alert('Veuillez remplir tous les champs \n')
+      toast.warning('Veuillez remplir tous les champs \n')
       return
     }
 
@@ -429,20 +424,22 @@ const Page = () => {
       const validationCustomerErrors = validateCustomerData(customer)
       if (validationCustomerErrors.length > 0) {
         console.error('Validation errors:', validationCustomerErrors)
-        alert(
+        toast.warning(
           'Please correct the following errors: \n' +
             validationCustomerErrors.join('\n'),
         )
         return
       }
     } else {
-      console.error('Customer data is not available.')
+      toast.error('Customer data is not available')
     }
 
     if (newInvoiceData.client_id) {
       SendInvoiceMutation.mutate(newInvoiceData)
     } else {
-      console.error('Customer data is incomplete.')
+      toast.error('Customer data is incomplete', {
+        position: 'top-right',
+      })
     }
   }
 
@@ -483,7 +480,6 @@ const Page = () => {
       lineTotalTva: lineItem.lineTotalTva,
       tva: lineItem.tva,
     }))
-    console.log('lineItemsData', lineItemsData)
 
     try {
       const response = await SendInvoiceMutation.mutateAsync(invoiceData)
@@ -499,7 +495,6 @@ const Page = () => {
         position: 'top-right',
       })
     } catch (error) {
-      console.error('Error sending invoice:', error)
       toast.error('Error sending invoice', {
         position: 'top-right',
       })
@@ -540,7 +535,9 @@ const Page = () => {
     if (customer) {
       SendCustomerMutation.mutate(customer)
     } else {
-      console.error('Customer data is not available.')
+      toast.error('Customer data is not available.', {
+        position: 'top-right',
+      })
     }
   }
 

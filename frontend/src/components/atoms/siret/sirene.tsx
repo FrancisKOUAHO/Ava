@@ -57,15 +57,13 @@ const Sirene = () => {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (data && data[0] && !data[0].sirenNumber) {
+      if (data && data.length === 0) {
         setIsOpen(true)
       }
     }, 1000)
 
     return () => clearTimeout(timeout)
   }, [data])
-
-  console.log('data', data)
 
   return (
     <div
