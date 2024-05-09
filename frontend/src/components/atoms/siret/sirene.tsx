@@ -65,6 +65,8 @@ const Sirene = () => {
     return () => clearTimeout(timeout)
   }, [data])
 
+  console.log('data', data)
+
   return (
     <div
       className={`fixed z-10 inset-0 overflow-y-auto ${isOpen ? 'block' : 'hidden'}`}

@@ -25,6 +25,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<any>(null)
   const [token, setToken] = useState<any>(null)
   const [loadingToken, setLoadingToken] = useState(true)
+  const [isClient, setIsClient] = useState(false)
 
   const connectWithGoogle = async () => {
     const response = await api.get('auth/connect-to-googlee')
@@ -62,19 +63,27 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     whoami()
   }, [])
 
+  useEffect(() => {
+    setIsClient(true)
+  }, [isClient])
+
   return (
-    <AuthContext.Provider
-      value={{
-        setToken,
-        connectWithGoogle,
-        logout,
-        user,
-        token,
-        loadingToken,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <>
+      {isClient && (
+        <AuthContext.Provider
+          value={{
+            setToken,
+            connectWithGoogle,
+            logout,
+            user,
+            token,
+            loadingToken,
+          }}
+        >
+          {children}
+        </AuthContext.Provider>
+      )}
+    </>
   )
 }
 

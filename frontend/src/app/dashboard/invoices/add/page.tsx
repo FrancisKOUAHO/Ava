@@ -142,8 +142,6 @@ const Page = () => {
   const [formValid, setFormValid] = useState(false)
 
   useEffect(() => {
-    console.log('Checking form validity:', lineItems)
-    console.log(formValid)
     if (lineItems.length > 0) {
       const allValid = lineItems.every(
         (item: LineItem) => item.name && item.price && item.quantity,
@@ -172,11 +170,6 @@ const Page = () => {
 
   const { data: customersData } = useFetchData('billing/customer', 'customer')
 
-  useEffect(() => {
-    if (customer) {
-      console.log('Updated customer:', customer)
-    }
-  }, [customer])
   const handleSelectCustomer = (customerId: string | undefined) => {
     const selectedCustomer: CustomerData = customersData.find(
       (c: CustomerData) => c.id === customerId,
@@ -595,9 +588,14 @@ const Page = () => {
   }
 
   const handleTest = () => {
-    console.log('formValid')
     console.log(formValid)
   }
+
+  useEffect(() => {
+    if (customer) {
+      checkIfCustomerIsFull()
+    }
+  }, [customer])
 
   return (
     <section className="px-6 py-6">
@@ -619,32 +617,32 @@ const Page = () => {
 
           <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[80vh]">
             <div className="flex flex-col items-center">
-              {/*<div className="flex justify-between items-center w-full mb-6">*/}
-              {/*  <p className="flex justify-center items-center gap-2">*/}
-              {/*    <Image className="text-blue-700" />*/}
-              {/*    Add Logo*/}
-              {/*  </p>*/}
-              {/*  <Info />*/}
-              {/*</div>*/}
+              <div className="flex justify-between items-center w-full mb-6">
+                <p className="flex justify-center items-center gap-2">
+                  <Image className="text-blue-700" />
+                  Add Logo
+                </p>
+                <Info />
+              </div>
 
-              {/*<div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">*/}
-              {/*  <input*/}
-              {/*    type="file"*/}
-              {/*    name="logo"*/}
-              {/*    multiple*/}
-              {/*    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"*/}
-              {/*  />*/}
-              {/*  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">*/}
-              {/*    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />*/}
-              {/*    <h4>*/}
-              {/*      Glissez une image directement{' '}*/}
-              {/*      <span className="text-blue-700">brower</span>*/}
-              {/*    </h4>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
+              <div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">
+                <input
+                  type="file"
+                  name="logo"
+                  multiple
+                  className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"
+                />
+                <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
+                  <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
+                  <h4>
+                    Glissez une image directement{' '}
+                    <span className="text-blue-700">brower</span>
+                  </h4>
+                </div>
+              </div>
 
-              <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
-                {customersData && (
+              {customersData && customersData && (
+                <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -692,8 +690,8 @@ const Page = () => {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="bg-[#e7effc] rounded-xl w-full">
                 <div className="flex justify-between items-center p-6">
