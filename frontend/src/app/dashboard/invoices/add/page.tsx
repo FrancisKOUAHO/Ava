@@ -52,12 +52,14 @@ interface LineItem {
   lineTotal?: number
   lineTotalTva?: number
   tva?: number
+
   [key: string]: any
 }
 
 interface ApiResponse<T> {
   data: T
 }
+
 interface InvoiceData {
   user_id: string
   id?: string
