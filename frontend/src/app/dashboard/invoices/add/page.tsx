@@ -612,7 +612,7 @@ const Page = () => {
             </div>
           </header>
 
-          <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[80vh]">
+          <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
             <div className="flex flex-col items-center">
               <div className="flex justify-between items-center w-full mb-6">
                 <p className="flex justify-center items-center gap-2">

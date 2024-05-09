@@ -49,8 +49,8 @@ const Preview = () => {
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl my-8 p-2">
-        <div className="bg-white px-6 py-2 rounded-xl overflow-auto h-[70vh]">
+      <div className="bg-[#f2f5fd] rounded-xl my-8 p-2 h-[70vh] overflow-auto">
+        <div className="bg-white px-6 py-2 rounded-xl">
           <div className="flex justify-center p-4">
             <div className="flex w-1/3">
               <ImagePlus className="text-blue-700 w-10 h-10" />
