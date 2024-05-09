@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState,useEffect } from 'react'
+import { FormEvent, useState, useEffect } from 'react'
 
 import {
   CircleCheck,
@@ -24,27 +24,25 @@ import api from '@/config/api'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
 
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
+import * as React from 'react'
+import { Check, ChevronsUpDown } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandItem, CommandList,
-} from "@/components/ui/command"
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import {useFetchData} from "@/app/hooks/useFetch";
-
-
-
+} from '@/components/ui/popover'
+import { useFetchData } from '@/app/hooks/useFetch'
 
 interface LineItem {
   name?: string
@@ -54,12 +52,11 @@ interface LineItem {
   lineTotal?: number
   lineTotalTva?: number
   tva?: number
-  [key: string]: any; // Allow additional properties dynamically
-
+  [key: string]: any
 }
 
 interface ApiResponse<T> {
-  data: T;
+  data: T
 }
 interface InvoiceData {
   user_id: string
@@ -75,33 +72,32 @@ interface InvoiceData {
 }
 
 interface CustomerData {
-  id?: string;
-  user_id: string;
-  userId: string;
-  company: string;
-  address: string;
-  city: string;
-  zip: string;
-  state: string;
-  phone: string;
-  email: string;
-  last_name: string;
-  lastName: string;
-  first_name: string;
-  firstName: string;
+  id?: string
+  user_id: string
+  userId: string
+  company: string
+  address: string
+  city: string
+  zip: string
+  state: string
+  phone: string
+  email: string
+  last_name: string
+  lastName: string
+  first_name: string
+  firstName: string
   vat_number: string
   vatNumber: string
   currency: string
-  siren_number: string;
-  sirenNumber: string;
+  siren_number: string
+  sirenNumber: string
 }
 
 interface SubTotal {
-    name?: string;
-    discount?: number;
-    total?: number;
+  name?: string
+  discount?: number
+  total?: number
 }
-
 
 const Page = () => {
   const { user } = useAuth()
@@ -115,7 +111,7 @@ const Page = () => {
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
   const [customer, setCustomer] = useState<CustomerData | null>({
-    user_id: '',  // Default empty string or appropriate default value
+    user_id: '',
     userId: '',
     company: '',
     address: '',
@@ -133,111 +129,106 @@ const Page = () => {
     currency: '',
     siren_number: '',
     sirenNumber: '',
-  });  const [notes, setnotes] = useState<string>("");
-  const [terms, setTerms] = useState<string>("");
+  })
+  const [notes, setnotes] = useState<string>('')
+  const [terms, setTerms] = useState<string>('')
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
-    discount: 0,  // default discount price as an example
-    total: 0         // default total as an example
-  });
-  const [formValid, setFormValid] = useState(false);
+    discount: 0,
+    total: 0,
+  })
+  const [formValid, setFormValid] = useState(false)
 
   useEffect(() => {
-    // Check if all required fields are filled out and update form validity
-    console.log('Checking form validity:', lineItems);
-    console.log(formValid);
-    if(lineItems.length > 0){
-      const allValid = lineItems.every((item: LineItem) => item.name && item.price && item.quantity);
-      // check if all required fields are filled out in invoiceDat
-      setFormValid(allValid);
+    console.log('Checking form validity:', lineItems)
+    console.log(formValid)
+    if (lineItems.length > 0) {
+      const allValid = lineItems.every(
+        (item: LineItem) => item.name && item.price && item.quantity,
+      )
+      setFormValid(allValid)
     }
-  }, [lineItems]);
+  }, [lineItems])
 
-  const validateInvoiceData = ( invoiceData: InvoiceData) => {
-    const errors = [];
+  const validateInvoiceData = (invoiceData: InvoiceData) => {
+    const errors = []
 
-    // Check if the client ID is present and valid
     if (!invoiceData.client_id) {
-      errors.push("Client ID is required.");
+      errors.push('Client ID is required.')
     }
 
-
-    // Ensure the notes field is not empty if it's required
     if (!invoiceData.notes) {
-      errors.push("notes is required.");
+      errors.push('notes is required.')
     }
 
-    // Ensure terms are provided if necessary
     if (!invoiceData.terms) {
-      errors.push("Terms of service must be accepted.");
+      errors.push('Terms of service must be accepted.')
     }
 
-    // Further checks can be added here for other fields as necessary
-    // Example: checking for a positive price, a date range, etc.
+    return errors
+  }
 
-    return errors;
-  };
-
-
-  const {data: customersData} = useFetchData("billing/customer","customer")
-
+  const { data: customersData } = useFetchData('billing/customer', 'customer')
 
   useEffect(() => {
     if (customer) {
-      console.log('Updated customer:', customer);
+      console.log('Updated customer:', customer)
     }
-
-
-  }, [customer]); //
-  const handleSelectCustomer = (customerId:string| undefined) => {
-    const selectedCustomer : CustomerData = customersData.find((c:CustomerData) => c.id === customerId);
-    setCustomer(selectedCustomer); // Schedules state update
-    checkIfCustomerIsFull();
-    setOpen(false); // Close the dropdown or popover
-  };
+  }, [customer])
+  const handleSelectCustomer = (customerId: string | undefined) => {
+    const selectedCustomer: CustomerData = customersData.find(
+      (c: CustomerData) => c.id === customerId,
+    )
+    setCustomer(selectedCustomer)
+    checkIfCustomerIsFull()
+    setOpen(false)
+  }
 
   const checkIfCustomerIsFull = () => {
-    console.log('Checking if customer is full:', customer);
+    console.log('Checking if customer is full:', customer)
     if (customer) {
       if (
-          customer.firstName &&
-          customer.lastName &&
-          customer.company &&
-          customer.address &&
-          customer.city &&
-          customer.zip &&
-          customer.state &&
-          customer.phone
+        customer.firstName &&
+        customer.lastName &&
+        customer.company &&
+        customer.address &&
+        customer.city &&
+        customer.zip &&
+        customer.state &&
+        customer.phone
       ) {
-        setCompleted(true);
+        setCompleted(true)
       } else {
-        setCompleted(false);
+        setCompleted(false)
       }
     }
   }
 
-  const getInputClass = (value:string) => {
-    return `mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white ${!value ? 'border-red-500' : ''}`;
-  };
+  const getInputClass = (value: string) => {
+    return `mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white ${!value ? 'border-red-500' : ''}`
+  }
 
-
-  const handleSubTotalChange = (field: keyof SubTotal, value: string | number) => {
-    console.log(`Updating ${field} with value:`, value);
+  const handleSubTotalChange = (
+    field: keyof SubTotal,
+    value: string | number,
+  ) => {
+    console.log(`Updating ${field} with value:`, value)
     setSubTotal((prevState: SubTotal) => {
-      // Ensure `value` is always a number
-      const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+      const numericValue = typeof value === 'string' ? parseFloat(value) : value
 
       const newState = {
         ...prevState,
         [field]: numericValue,
-        total: field === 'discount' ? getSubTotal(getTotalInvoices(), numericValue) : prevState.total
-      };
+        total:
+          field === 'discount'
+            ? getSubTotal(getTotalInvoices(), numericValue)
+            : prevState.total,
+      }
 
-      console.log('New state:', newState);
-      return newState;
-    });
-  };
-
+      console.log('New state:', newState)
+      return newState
+    })
+  }
 
   const makeEditable = (index: number): void => {
     setIsEditable((prevState: boolean[]) => {
@@ -253,7 +244,7 @@ const Page = () => {
         if (i === index) {
           return {
             ...lineItem,
-            lineTotal: lineItem.price * lineItem.quantity,
+            lineTotal: (lineItem.price ?? 0) * (lineItem.quantity ?? 0),
           }
         }
         return lineItem
@@ -274,9 +265,9 @@ const Page = () => {
   }
 
   const addLineItem = (event: React.MouseEvent<HTMLButtonElement>): void => {
-    event.preventDefault();
-    event.stopPropagation();
-    console.log('addLineItem function called');
+    event.preventDefault()
+    event.stopPropagation()
+    console.log('addLineItem function called')
     setLineItems((prevState: LineItem[]) => [
       ...prevState,
       {
@@ -288,187 +279,194 @@ const Page = () => {
         lineTotal: 0,
         lineTotalTva: 0,
       },
-    ]);
+    ])
   }
 
   const removeLineItem = (index: number): void => {
-    setLineItems((prevState: LineItem[]) => prevState.filter((_: LineItem, i: number) => i !== index))
+    setLineItems((prevState: LineItem[]) =>
+      prevState.filter((_: LineItem, i: number) => i !== index),
+    )
   }
 
   const SendCustomerMutation = useMutation<any, any, CustomerData>({
     mutationFn: () => {
-      // Ensure 'customer' is not null before proceeding
       if (!customer) {
-        throw new Error('Customer data is null. Cannot proceed with the mutation.');
+        throw new Error(
+          'Customer data is null. Cannot proceed with the mutation.',
+        )
       }
 
-      // Safely access customer properties after the check
-      const transformedData = toSnakeCase(customer);
-      const endpoint = customer.id ? `billing/customer/${customer.id}` : 'billing/customer';
-      const method = customer.id ? 'put' : 'post';
+      const transformedData = toSnakeCase(customer)
+      const endpoint = customer.id
+        ? `billing/customer/${customer.id}`
+        : 'billing/customer'
+      const method = customer.id ? 'put' : 'post'
 
-      // Send the transformed data to the API
-      return api[method](endpoint, transformedData);
+      return api[method](endpoint, transformedData)
     },
     onError: (error: any) => {
-      console.error('Error saving customer:', error);
+      console.error('Error saving customer:', error)
     },
     onSuccess: () => {
-      // Invalidate and refetch clients query to reflect the update/addition
-      // queryClient.invalidateQueries(['clients']);
-    }
-  });
+      queryClient.invalidateQueries({ queryKey: ['customer'] })
+    },
+  })
 
-
-
-  type AnyObject = { [key: string]: any };
+  type AnyObject = { [key: string]: any }
 
   const toSnakeCase = (obj: AnyObject): AnyObject => {
-    const snakeCaseObj: AnyObject = {};
+    const snakeCaseObj: AnyObject = {}
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const transformedKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-        snakeCaseObj[transformedKey] = obj[key];
+        const transformedKey = key.replace(/([A-Z])/g, '_$1').toLowerCase()
+        snakeCaseObj[transformedKey] = obj[key]
       }
     }
-    return snakeCaseObj;
-  };
+    return snakeCaseObj
+  }
 
+  const validateCustomerData = (customer: CustomerData) => {
+    const errors = []
 
-  const validateCustomerData = (customer:CustomerData) => {
-    const errors = [];
-
-    // List required fields and check if they are filled
     const requiredFields = [
-      'userId', 'company', 'address', 'city', 'zip', 'state',
-      'phone', 'email', 'lastName', 'firstName', 'sirenNumber'
-    ];
+      'userId',
+      'company',
+      'address',
+      'city',
+      'zip',
+      'state',
+      'phone',
+      'email',
+      'lastName',
+      'firstName',
+      'sirenNumber',
+    ]
 
-    requiredFields.forEach(field => {
-      // Check if the field in customer is undefined or null
+    requiredFields.forEach((field) => {
       if (customer[field as keyof CustomerData] === undefined) {
-        errors.push(`${field} is required.`);
+        errors.push(`${field} is required.`)
       }
-    });
+    })
 
-    // Check for specific format requirements, e.g., email validation
     if (customer.email && !/^\S+@\S+\.\S+$/.test(customer.email)) {
-      errors.push("Invalid email format.");
+      errors.push('Invalid email format.')
     }
 
-    // Further validations can be added here (e.g., ZIP code format, phone number format)
-
-    return errors;
-  };
-
+    return errors
+  }
 
   const SendItemsDataMutation = useMutation<LineItem[], Error, LineItem>({
     mutationFn: (data) => api.post('billing/invoice-item-many', data),
     onError: (error: any) => {
-      throw new Error(error.message);
+      throw new Error(error.message)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoice-item'] });
+      queryClient.invalidateQueries({ queryKey: ['invoice-item'] })
     },
-  });
+  })
 
-  const SendInvoiceMutation = useMutation<any, Error, InvoiceData, ApiResponse<InvoiceData>>({
+  const SendInvoiceMutation = useMutation<
+    any,
+    Error,
+    InvoiceData,
+    ApiResponse<InvoiceData>
+  >({
     mutationFn: (data) => {
       const fullData = {
         ...data,
         discount: data.discount,
         notes: data.notes,
         terms: data.terms,
-      };
-      return api.post('billing/invoice', fullData);
+      }
+      return api.post('billing/invoice', fullData)
     },
     onError: (error: any) => {
-      console.error('Error:', error.message);
-      alert('Failed to send invoice.');  // User-friendly feedback
+      console.error('Error:', error.message)
+      alert('Failed to send invoice.')
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
-      queryClient.invalidateQueries({ queryKey: ['invoice'] });
+      queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
-        const itemsWithInvoiceId: LineItem[] = lineItems.map(item => ({
+        const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
           ...item,
-          invoice_id: response.data.id  // Accessing ID from response.data
-        }));
-        const transformedData = itemsWithInvoiceId.map(toSnakeCase);
+          invoice_id: response.data.id,
+        }))
+        const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
-        console.log('Transformed line items data:', transformedData);
-        SendItemsDataMutation.mutate(transformedData as LineItem[]);
+        console.log('Transformed line items data:', transformedData)
+        SendItemsDataMutation.mutate(transformedData as LineItem[])
         toast.success('Facture bien envoyée', {
           position: 'top-right',
-        });// Ensure type compatibility
+        })
       } else {
-        console.log("No lineItems to process or 'lineItems' is not an array");
+        console.log("No lineItems to process or 'lineItems' is not an array")
       }
     },
-  });
+  })
 
   const handleSubmit = () => {
-
     const newInvoiceData: InvoiceData = {
-      client_id: customer?.id.toString(),  // Convert to string; check for existence
+      client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
       notes: notes,
       terms: terms,
-      total_amount: Number((getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)),  // Convert to number
+      total_amount: Number(
+        (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
+      ),
       status: 'sent',
-      user_id: user.id.toString(),  // Ensure this is a string
-    };
+      user_id: user.id.toString(),
+    }
 
     if (!formValid) {
-      alert('Veuillez remplir tous les champs');  // Or handle this with a more user-friendly notification
-      return;  // Stop the submission process
+      alert('Veuillez remplir tous les champs')
+      return
     }
-    const validationInvoiceErrors = validateInvoiceData(newInvoiceData);
+    const validationInvoiceErrors = validateInvoiceData(newInvoiceData)
 
-
-    if(validationInvoiceErrors.length > 0) {
-      console.error("Validation errors:", validationInvoiceErrors);
-      alert("Veuillez remplir tous les champs \n");
-      return;  // Stop the submission process
-    }
-
-    const validationCustomerErrors = validateCustomerData(customer);
-    if (validationCustomerErrors.length > 0) {
-      console.error("Validation errors:", validationCustomerErrors);
-      alert("Please correct the following errors: \n" + validationCustomerErrors.join("\n"));
-      return;  // Stop the submission process if there are errors
+    if (validationInvoiceErrors.length > 0) {
+      console.error('Validation errors:', validationInvoiceErrors)
+      alert('Veuillez remplir tous les champs \n')
+      return
     }
 
-    // Construct the data object from your form state or context
-
-
-    // Only call the mutation if all required fields are properly filled
-    if (newInvoiceData.client_id) {
-      SendInvoiceMutation.mutate(newInvoiceData);
+    if (customer) {
+      const validationCustomerErrors = validateCustomerData(customer)
+      if (validationCustomerErrors.length > 0) {
+        console.error('Validation errors:', validationCustomerErrors)
+        alert(
+          'Please correct the following errors: \n' +
+            validationCustomerErrors.join('\n'),
+        )
+        return
+      }
     } else {
-      console.error('Customer data is incomplete.');
+      console.error('Customer data is not available.')
     }
-  };
 
+    if (newInvoiceData.client_id) {
+      SendInvoiceMutation.mutate(newInvoiceData)
+    } else {
+      console.error('Customer data is incomplete.')
+    }
+  }
 
   const handleSendInvoice = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
 
-    const form = event.currentTarget;
+    const form = event.currentTarget
     const values = Object.fromEntries(new FormData(form)) as {
-      [key: string]: string;
-    };
-
-    // Check if `customer` is null or undefined
-    if (!customer) {
-      console.error('Customer is not available.');
-      toast.error('Customer not available', {
-        position: 'top-right',
-      });
-      return;
+      [key: string]: string
     }
 
-    // Assuming `user` is always defined, otherwise, add a similar null check
+    if (!customer) {
+      console.error('Customer is not available.')
+      toast.error('Customer not available', {
+        position: 'top-right',
+      })
+      return
+    }
+
     const invoiceData: any = {
       user_id: user.id,
       client_id: customer?.id,
@@ -476,12 +474,11 @@ const Page = () => {
       due_date: new Date().toISOString(),
       total_amount: 0,
       discount: 0,
-      notes: values.notes, // Correct the spelling from "notess" to "notes"
+      notes: values.notes,
       terms: values.terms,
       status: 'draft',
-    };
+    }
 
-    // Prepare line items data
     const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
       name: lineItem.name,
       price: lineItem.price,
@@ -490,91 +487,119 @@ const Page = () => {
       lineTotal: lineItem.lineTotal,
       lineTotalTva: lineItem.lineTotalTva,
       tva: lineItem.tva,
-    }));
-    console.log('lineItemsData', lineItemsData);
+    }))
+    console.log('lineItemsData', lineItemsData)
 
     try {
-      // Send the invoice
-      const response = await SendInvoiceMutation.mutateAsync(invoiceData);
+      const response = await SendInvoiceMutation.mutateAsync(invoiceData)
 
       if (!response) {
         toast.error('Invoice not sent', {
           position: 'top-right',
-        });
-        throw new Error('unknown error');
+        })
+        throw new Error('unknown error')
       }
 
       toast.success('Invoice sent successfully', {
         position: 'top-right',
-      });
+      })
     } catch (error) {
-      console.error('Error sending invoice:', error);
+      console.error('Error sending invoice:', error)
       toast.error('Error sending invoice', {
         position: 'top-right',
-      });
+      })
     }
-  };
+  }
 
-  const handleItemChange = (index: number, field: string, value: string | number) => {
+  const handleItemChange = (
+    index: number,
+    field: string,
+    value: string | number,
+  ) => {
     setLineItems((prevItems: LineItem[]) =>
-        prevItems.map((item, idx) => {
-          if (idx === index) {
-            const updatedItem = { ...item, [field]: value };
+      prevItems.map((item, idx) => {
+        if (idx === index) {
+          const updatedItem = { ...item, [field]: value }
 
-            // Automatically calculate lineTotal if price, quantity, or tva changes
-            if (field === 'price' || field === 'quantity' || field === 'tva') {
-              updatedItem.lineTotal = Number(updatedItem.price) * Number(updatedItem.quantity);
-              updatedItem.lineTotalTva = updatedItem.lineTotal * (1 + Number(updatedItem.tva) / 100);
-            }
-
-            return updatedItem;
+          if (field === 'price' || field === 'quantity' || field === 'tva') {
+            updatedItem.lineTotal =
+              Number(updatedItem.price) * Number(updatedItem.quantity)
+            updatedItem.lineTotalTva =
+              updatedItem.lineTotal * (1 + Number(updatedItem.tva) / 100)
           }
 
-          return item;
-        })
-    );
+          return updatedItem
+        }
 
-    // Update subtotal state
+        return item
+      }),
+    )
+
     setSubTotal((prevState: SubTotal) => ({
-      ...prevState, // Keep other values unchanged
+      ...prevState,
       total: getSubTotal(getTotalInvoices()),
-    }));
-  };
+    }))
+  }
 
-  const changeCustomer = () =>{
-    SendCustomerMutation.mutate();
+  const changeCustomer = () => {
+    if (customer) {
+      SendCustomerMutation.mutate(customer)
+    } else {
+      console.error('Customer data is not available.')
+    }
   }
 
   const getTotalInvoices = (withTva = true) => {
     if (!Array.isArray(lineItems)) {
-      return 0;
+      return 0
     }
 
     return lineItems.reduce((acc, lineItem) => {
-      // Ensure the ternary operator's result is used correctly in the summation
-      return acc + (withTva ? lineItem.lineTotalTva : lineItem.lineTotal);
-    }, 0);
-  };
+      return (
+        acc + (withTva ? lineItem.lineTotalTva ?? 0 : lineItem.lineTotal ?? 0)
+      )
+    }, 0)
+  }
 
-  const getSubTotal = (pTotal:number, pdiscount:number =0):number => {
-    return pTotal - (pTotal * pdiscount / 100);
+  const getSubTotal = (pTotal: number, pdiscount: number = 0): number => {
+    return pTotal - (pTotal * pdiscount) / 100
   }
 
   const handleCustomerChange = (field: keyof CustomerData, value: string) => {
-    const updatedCustomer = { ...customer, [field]: value };
-    setCustomer(updatedCustomer);
-    checkIfCustomerIsFull();
+    const updatedCustomer = { ...customer, [field]: value }
+    const validatedCustomer: CustomerData = {
+      id: updatedCustomer.id ?? '',
+      user_id: updatedCustomer.user_id ?? '',
+      userId: updatedCustomer.userId ?? '',
+      company: updatedCustomer.company ?? '',
+      address: updatedCustomer.address ?? '',
+      city: updatedCustomer.city ?? '',
+      zip: updatedCustomer.zip ?? '',
+      state: updatedCustomer.state ?? '',
+      phone: updatedCustomer.phone ?? '',
+      email: updatedCustomer.email ?? '',
+      last_name: updatedCustomer.last_name ?? '',
+      lastName: updatedCustomer.lastName ?? '',
+      first_name: updatedCustomer.first_name ?? '',
+      firstName: updatedCustomer.firstName ?? '',
+      vat_number: updatedCustomer.vat_number ?? '',
+      vatNumber: updatedCustomer.vatNumber ?? '',
+      currency: updatedCustomer.currency ?? '',
+      siren_number: updatedCustomer.siren_number ?? '',
+      sirenNumber: updatedCustomer.sirenNumber ?? '',
+    }
+    setCustomer(validatedCustomer)
+    checkIfCustomerIsFull()
   }
 
   const handleTest = () => {
-    console.log("formValid")
+    console.log('formValid')
     console.log(formValid)
   }
 
   return (
     <section className="px-6 py-6">
       <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-
         <div className="w-3/4">
           <header className="flex justify-between items-center gap-12">
             <div className="flex justify-center items-center">
@@ -618,50 +643,54 @@ const Page = () => {
 
               <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                 {customersData && (
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-[200px] justify-between"
+                      >
+                        {customer
+                          ? `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
+                          : 'Sélectionner une entreprise'}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
 
-                    <Popover open={open} onOpenChange={setOpen} >
-                      <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="w-[200px] justify-between"
-                        >
-                          {customer
-                              ? `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
-                              : "Sélectionner une entreprise"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-[200px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Rechercher client..." />
-                      <CommandEmpty>Aucun client trouvé.</CommandEmpty>
-                      <CommandGroup>
-                        <CommandList>
-                        {customersData.map((listOfCustomerNames:CustomerData) => (
-                            <CommandItem
-                                key={listOfCustomerNames.id}
-                                value={listOfCustomerNames.id}
-                                onSelect={() => handleSelectCustomer(listOfCustomerNames.id)}
-
-                            >
-                              <Check
-                                  className={cn(
-                                      "mr-2 h-4 w-4",
-                                      customer === listOfCustomerNames.id ? "opacity-100" : "opacity-0"
-                                  )}
-                              />
-                              {listOfCustomerNames.firstName}
-                            </CommandItem>
-                        ))}
-                        </CommandList>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                    )}
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Rechercher client..." />
+                        <CommandEmpty>Aucun client trouvé.</CommandEmpty>
+                        <CommandGroup>
+                          <CommandList>
+                            {customersData.map(
+                              (listOfCustomerNames: CustomerData) => (
+                                <CommandItem
+                                  key={listOfCustomerNames.id}
+                                  value={listOfCustomerNames.id}
+                                  onSelect={() =>
+                                    handleSelectCustomer(listOfCustomerNames.id)
+                                  }
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      customer?.id === listOfCustomerNames.id
+                                        ? 'opacity-100'
+                                        : 'opacity-0',
+                                    )}
+                                  />
+                                  {listOfCustomerNames.firstName}
+                                </CommandItem>
+                              ),
+                            )}
+                          </CommandList>
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                )}
               </div>
 
               <div className="bg-[#e7effc] rounded-xl w-full">
@@ -678,20 +707,20 @@ const Page = () => {
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-2 gap-6">
-
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                       <Label htmlFor="sirenNumber" className="mb-2">
                         Numero de Siren
                       </Label>
                       <Input
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                          type="text"
-                          id="sirenNumber"
-                          name="sirenNumber"
-                          value={customer ? customer.sirenNumber  : ''}
-                          onChange={(e) => handleCustomerChange('sirenNumber',  e.target.value)}
-
-                          placeholder="987654321"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                        type="text"
+                        id="sirenNumber"
+                        name="sirenNumber"
+                        value={customer ? customer.sirenNumber : ''}
+                        onChange={(e) =>
+                          handleCustomerChange('sirenNumber', e.target.value)
+                        }
+                        placeholder="987654321"
                       />
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -699,14 +728,15 @@ const Page = () => {
                         Prénom
                       </Label>
                       <Input
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                          type="text"
-                          id="first_name"
-                          name="first_name"
-                          value={customer ? customer.firstName  : ''}
-                          onChange={(e) => handleCustomerChange('firstName',  e.target.value)}
-
-                          placeholder="Jean"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                        type="text"
+                        id="first_name"
+                        name="first_name"
+                        value={customer ? customer.firstName : ''}
+                        onChange={(e) =>
+                          handleCustomerChange('firstName', e.target.value)
+                        }
+                        placeholder="Jean"
                       />
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -714,14 +744,15 @@ const Page = () => {
                         Nom
                       </Label>
                       <Input
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                          type="text"
-                          id="last_name"
-                          name="last_name"
-                          value={customer ? customer.lastName  : ''}
-                          onChange={(e) => handleCustomerChange('lastName',  e.target.value)}
-
-                          placeholder="Dupont"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                        type="text"
+                        id="last_name"
+                        name="last_name"
+                        value={customer ? customer.lastName : ''}
+                        onChange={(e) =>
+                          handleCustomerChange('lastName', e.target.value)
+                        }
+                        placeholder="Dupont"
                       />
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -729,14 +760,15 @@ const Page = () => {
                         Société
                       </Label>
                       <Input
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                          type="text"
-                          id="company"
-                          name="company"
-                          value={customer ? customer.company  : ''}
-                          onChange={(e) => handleCustomerChange('company',  e.target.value)}
-
-                          placeholder="Super Corp"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                        type="text"
+                        id="company"
+                        name="company"
+                        value={customer ? customer.company : ''}
+                        onChange={(e) =>
+                          handleCustomerChange('company', e.target.value)
+                        }
+                        placeholder="Super Corp"
                       />
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -744,14 +776,15 @@ const Page = () => {
                         Devise
                       </Label>
                       <Input
-                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                          type="text"
-                          id="currency"
-                          name="currency"
-                          value={customer ? customer.currency  : ''}
-                          onChange={(e) => handleCustomerChange('currency',  e.target.value)}
-
-                          placeholder="EUR"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                        type="text"
+                        id="currency"
+                        name="currency"
+                        value={customer ? customer.currency : ''}
+                        onChange={(e) =>
+                          handleCustomerChange('currency', e.target.value)
+                        }
+                        placeholder="EUR"
                       />
                     </div>
                     {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
@@ -770,7 +803,6 @@ const Page = () => {
                     {/*  />*/}
                     {/*</div>*/}
 
-
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                       <Label htmlFor="address" className="mb-2">
                         Addresse principale
@@ -780,9 +812,10 @@ const Page = () => {
                         type="text"
                         id="address"
                         name="address"
-                        value={customer ? customer.address  : ''}
-                        onChange={(e) => handleCustomerChange('address',  e.target.value)}
-
+                        value={customer ? customer.address : ''}
+                        onChange={(e) =>
+                          handleCustomerChange('address', e.target.value)
+                        }
                         placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"
                       />
                     </div>
@@ -811,8 +844,9 @@ const Page = () => {
                         name="city"
                         id="city"
                         value={customer ? customer.city : ''}
-                        onChange={(e) => handleCustomerChange('city',  e.target.value)}
-
+                        onChange={(e) =>
+                          handleCustomerChange('city', e.target.value)
+                        }
                         placeholder="Vancouver"
                       />
                     </div>
@@ -827,8 +861,9 @@ const Page = () => {
                         name="zip"
                         id="zip"
                         value={customer ? customer.zip : ''}
-                        onChange={(e) => handleCustomerChange('zip',  e.target.value)}
-
+                        onChange={(e) =>
+                          handleCustomerChange('zip', e.target.value)
+                        }
                         placeholder="V6B 1V9"
                       />
                     </div>
@@ -843,8 +878,9 @@ const Page = () => {
                         id="state"
                         name="state"
                         value={customer ? customer.state : ''}
-                        onChange={(e) => handleCustomerChange('state',  e.target.value)}
-
+                        onChange={(e) =>
+                          handleCustomerChange('state', e.target.value)
+                        }
                         placeholder="Canada"
                       />
                     </div>
@@ -859,17 +895,19 @@ const Page = () => {
                         id="phone"
                         name="phone"
                         value={customer ? customer.phone || '' : ''}
-                        // onChange={(e) => handleCustomerChange({phone: e.target.value})}
-                        onChange={(e) => handleCustomerChange('phone', e.target.value)} // Fournir le nom du champ et la nouvelle valeur
-
+                        onChange={(e) =>
+                          handleCustomerChange('phone', e.target.value)
+                        }
                         placeholder="+1 604-682-2344"
                       />
                     </div>
 
-
-                    <ButtonUi label="Mettre à jour entreprise" type="button" onClick={() => changeCustomer()} size="small"// Tailwind classes for padding and text size
+                    <ButtonUi
+                      label="Mettre à jour entreprise"
+                      type="button"
+                      onClick={() => changeCustomer()}
+                      size="small"
                     />
-
                   </div>
                 </div>
               </div>
@@ -904,17 +942,19 @@ const Page = () => {
                               />
                             </button>
                           ) : (
-                              <Input
-                                  className={getInputClass(lineItem.name)}
-                                  type="text"
-                                  id={`name-${index}`}
-                                  name={`name-${index}`}
-                                  placeholder="Nom produit"
-                                  disabled={!isEditable[index]}
-                                  onChange={(e) => handleItemChange(index, 'name', e.target.value)}
-                                  value={lineItem.name || ''}
-                                  readOnly={!isEditable[index]}
-                              />
+                            <Input
+                              className={getInputClass(lineItem.name ?? '')}
+                              type="text"
+                              id={`name-${index}`}
+                              name={`name-${index}`}
+                              placeholder="Nom produit"
+                              disabled={!isEditable[index]}
+                              onChange={(e) =>
+                                handleItemChange(index, 'name', e.target.value)
+                              }
+                              value={lineItem.name || ''}
+                              readOnly={!isEditable[index]}
+                            />
                           )}
                         </td>
                         <td className="p-3 text-center">
@@ -930,17 +970,21 @@ const Page = () => {
                               />
                             </button>
                           ) : (
-                              <Input
-                                  className={getInputClass(lineItem.price)}
-                                  type="number"
-                                  id={`price-${index}`}
-                                  name={`price-${index}`}
-                                  placeholder="100"
-                                  disabled={!isEditable[index]}
-                                  onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                                  value={lineItem.price || ''}
-                                  readOnly={!isEditable[index]}
-                              />
+                            <Input
+                              className={getInputClass(
+                                lineItem.price?.toString() ?? '',
+                              )}
+                              type="number"
+                              id={`price-${index}`}
+                              name={`price-${index}`}
+                              placeholder="100"
+                              disabled={!isEditable[index]}
+                              onChange={(e) =>
+                                handleItemChange(index, 'price', e.target.value)
+                              }
+                              value={lineItem.price || ''}
+                              readOnly={!isEditable[index]}
+                            />
                           )}
                         </td>
                         <td className="p-3 text-center">
@@ -956,43 +1000,56 @@ const Page = () => {
                               />
                             </button>
                           ) : (
-                              <Input
-                                  className={getInputClass(lineItem.quantity)}
-                                  type="number"
-                                  id={`quantity-${index}`}
-                                  name={`quantity-${index}`}
-                                  placeholder="1"
-                                  disabled={!isEditable[index]}
-                                  onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                                  value={lineItem.quantity || ''}
-                                  readOnly={!isEditable[index]}
-                              />
+                            <Input
+                              className={getInputClass(
+                                lineItem.quantity?.toString() ?? '',
+                              )}
+                              type="number"
+                              id={`quantity-${index}`}
+                              name={`quantity-${index}`}
+                              placeholder="1"
+                              disabled={!isEditable[index]}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  index,
+                                  'quantity',
+                                  e.target.value,
+                                )
+                              }
+                              value={lineItem.quantity || ''}
+                              readOnly={!isEditable[index]}
+                            />
                           )}
                         </td>
                         <td className="p-3 text-center">
                           {!isEditable[index] ? (
-                              <button
-                                  className="flex justify-center items-center gap-2 w-full"
-                                  onClick={() => makeEditable(index)}
-                              >
-                                {lineItem.unity}
-                                <PencilLine className="w-4 h-4 hover:text-blue-700" id="item" />
-                              </button>
+                            <button
+                              className="flex justify-center items-center gap-2 w-full"
+                              onClick={() => makeEditable(index)}
+                            >
+                              {lineItem.unity}
+                              <PencilLine
+                                className="w-4 h-4 hover:text-blue-700"
+                                id="item"
+                              />
+                            </button>
                           ) : (
-                              <select
-                                  className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                                  id="unity"
-                                  name={`unity-${index}`}
-                                  value={lineItem.unity}
-                                  onChange={(e) => handleItemChange(index, 'unity', e.target.value)}
-                              >
-                                <option value="Journalier">Journalier</option>
-                                <option value="Horraire">Horraire</option>
-                                <option value="Hebdomadaire">Hebdomadaire</option>
-                                <option value="Mensuel">Mensuel</option>
-                                <option value="Annuel">Annuel</option>
-                                <option value="Total">Total</option>
-                              </select>
+                            <select
+                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                              id="unity"
+                              name={`unity-${index}`}
+                              value={lineItem.unity}
+                              onChange={(e) =>
+                                handleItemChange(index, 'unity', e.target.value)
+                              }
+                            >
+                              <option value="Journalier">Journalier</option>
+                              <option value="Horraire">Horraire</option>
+                              <option value="Hebdomadaire">Hebdomadaire</option>
+                              <option value="Mensuel">Mensuel</option>
+                              <option value="Annuel">Annuel</option>
+                              <option value="Total">Total</option>
+                            </select>
                           )}
                         </td>
 
@@ -1010,15 +1067,17 @@ const Page = () => {
                             </button>
                           ) : (
                             <Input
-                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                                type="text"
-                                id="tva"
-                                name={`tva-${index}`}
-                                placeholder="Tva"
-                                disabled={!isEditable[index]}
-                                onChange={(e) => handleItemChange(index, 'tva', e.target.value)}
-                                value={lineItem.tva}
-                                readOnly={!isEditable[index]}
+                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                              type="text"
+                              id="tva"
+                              name={`tva-${index}`}
+                              placeholder="Tva"
+                              disabled={!isEditable[index]}
+                              onChange={(e) =>
+                                handleItemChange(index, 'tva', e.target.value)
+                              }
+                              value={lineItem.tva}
+                              readOnly={!isEditable[index]}
                             />
                           )}
                         </td>
@@ -1036,27 +1095,29 @@ const Page = () => {
                                 />
                               </button>
                             ) : (
-                                <Input
-                                    className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                                    type="number"
-                                    id="lineTotalTva"
-                                    name={`lineTotalTva-${index}`}
-                                    placeholder="100"
-                                    readOnly // Make it read-only since it's automatically calculated
-                                    value={lineItem.lineTotalTva.toFixed(2)} // Assuming lineTotal is a number
-                                />
-
+                              <Input
+                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                                type="number"
+                                id="lineTotalTva"
+                                name={`lineTotalTva-${index}`}
+                                placeholder="100"
+                                readOnly
+                                value={
+                                  lineItem.lineTotalTva
+                                    ? lineItem.lineTotalTva.toFixed(2)
+                                    : '0.00'
+                                }
+                              />
                             )}
 
                             {isEditable[index] ? (
-                                <button
-                                    className="flex justify-center items-center gap-2 w-full"
-                                    onClick={() => removeLineItem(index)}
-                                >
-                                  <Trash2 className="w-4 h-4 hover:text-blue-700" />
-                                </button>
+                              <button
+                                className="flex justify-center items-center gap-2 w-full"
+                                onClick={() => removeLineItem(index)}
+                              >
+                                <Trash2 className="w-4 h-4 hover:text-blue-700" />
+                              </button>
                             ) : null}
-
                           </div>
                         </td>
                       </tr>
@@ -1087,11 +1148,13 @@ const Page = () => {
                 <div>
                   <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                     <thead className="border-b-2 border-gray-300 mb-4">
-                    <tr>
-                      <th className="p-3 text-center">Nom</th>
-                      <th className="p-3 text-center">Montant de Réduction</th>
-                      <th className="p-3 text-center">Total</th>
-                    </tr>
+                      <tr>
+                        <th className="p-3 text-center">Nom</th>
+                        <th className="p-3 text-center">
+                          Montant de Réduction
+                        </th>
+                        <th className="p-3 text-center">Total</th>
+                      </tr>
                     </thead>
                     <tbody>
                       <tr className="bg-[#e7effc] rounded-xl">
@@ -1114,12 +1177,12 @@ const Page = () => {
                               id="name"
                               name="name"
                               value={subTotal?.name}
-                              onChange={(e) => handleSubTotalChange('name', e.target.value)}
+                              onChange={(e) =>
+                                handleSubTotalChange('name', e.target.value)
+                              }
                               placeholder="Réduction"
                               readOnly={!isEditableSubtotal}
                               disabled={!isEditableSubtotal}
-
-
                             />
                           )}
                         </td>
@@ -1141,12 +1204,13 @@ const Page = () => {
                               type="number"
                               name="discount"
                               id="discount"
-                              value={(subTotal.discount??0)}
-                              onChange={(e) => handleSubTotalChange('discount', e.target.value)}
+                              value={subTotal.discount ?? 0}
+                              onChange={(e) =>
+                                handleSubTotalChange('discount', e.target.value)
+                              }
                               placeholder="100"
                               readOnly={!isEditableSubtotal}
                               disabled={!isEditableSubtotal}
-
                             />
                           )}
                         </td>
@@ -1171,8 +1235,9 @@ const Page = () => {
                               disabled={!isEditableSubtotal}
                               readOnly
                               placeholder="1"
-                              value={(getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)}
-
+                              value={(
+                                getTotalInvoices() - (subTotal.discount ?? 0)
+                              ).toFixed(2)}
                             />
                           )}
                         </td>
@@ -1190,53 +1255,54 @@ const Page = () => {
                 <div>
                   <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                     <thead className="border-b-2 border-gray-300 mb-4">
-                    <tr>
-
-                      <th className="p-3 text-center">Total HT</th>
-                      <th className="p-3 text-center">Total sans réduction</th>
-                      <th className="p-3 text-center">Total avec réduction</th>
-                    </tr>
+                      <tr>
+                        <th className="p-3 text-center">Total HT</th>
+                        <th className="p-3 text-center">
+                          Total sans réduction
+                        </th>
+                        <th className="p-3 text-center">
+                          Total avec réduction
+                        </th>
+                      </tr>
                     </thead>
                     <tbody>
                       <tr className="bg-[#e7effc] rounded-xl">
                         <td className="flex items-center gap-2 p-3 text-center">
-
-                            <Input
-                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                              type="text"
-                              name="total"
-                              id="total"
-                              placeholder="100"
-                              value={(getTotalInvoices(false)-(subTotal.discount??0)).toFixed(2)}
-
-                              readOnly
-
-                            />
+                          <Input
+                            className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                            type="text"
+                            name="total"
+                            id="total"
+                            placeholder="100"
+                            value={(
+                              getTotalInvoices(false) - (subTotal.discount ?? 0)
+                            ).toFixed(2)}
+                            readOnly
+                          />
                         </td>
                         <td className="p-3 text-center">
-
-                            <Input
-                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                              type="number"
-                              id="totalTva"
-                              name="totalTva"
-                              value={(getTotalInvoices()).toFixed(2)}
-                              readOnly
-                              placeholder="100"
-                            />
+                          <Input
+                            className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                            type="number"
+                            id="totalTva"
+                            name="totalTva"
+                            value={getTotalInvoices().toFixed(2)}
+                            readOnly
+                            placeholder="100"
+                          />
                         </td>
                         <td className="p-3 text-center">
-
-                            <Input
-                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                              type="number"
-                              id="totalTva"
-                              name="totalTva"
-                              value={(getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)}
-
-                              readOnly
-                              placeholder="100"
-                            />
+                          <Input
+                            className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                            type="number"
+                            id="totalTva"
+                            name="totalTva"
+                            value={(
+                              getTotalInvoices() - (subTotal.discount ?? 0)
+                            ).toFixed(2)}
+                            readOnly
+                            placeholder="100"
+                          />
                         </td>
                       </tr>
                     </tbody>
@@ -1253,7 +1319,10 @@ const Page = () => {
                           <h5>Total à régler</h5>
                         </td>
                         <td className="p-3 text-center font-black text-black">
-                          {(getTotalInvoices() - (subTotal.discount??0)).toFixed(2)}€
+                          {(
+                            getTotalInvoices() - (subTotal.discount ?? 0)
+                          ).toFixed(2)}
+                          €
                         </td>
                       </tr>
                     </tbody>
@@ -1327,14 +1396,15 @@ const Page = () => {
                 <ButtonUi
                   label="Enregistrer en tant que brouillon"
                   type="button"
-                    onClick={() => {handleTest()}}
+                  onClick={() => {
+                    handleTest()
+                  }}
                 />
                 <ButtonUi
-                    label="Envoyer la facture"
-                    type="button"  // Make sure to use "button" if it's not a submit inside a form, else use "submit"
-                    onClick={handleSubmit}
+                  label="Envoyer la facture"
+                  type="button"
+                  onClick={handleSubmit}
                 />
-
               </div>
             </div>
           </div>
