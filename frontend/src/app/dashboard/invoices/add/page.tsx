@@ -638,7 +638,7 @@ const Page = () => {
                 </div>
               </div>
 
-              {customersData && customersData && (
+              {customersData && customersData.length > 1 && (
                 <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
@@ -646,7 +646,7 @@ const Page = () => {
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        className="w-[200px] justify-between"
+                        className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 pl-3 text-left font-normal text-muted-foreground"
                       >
                         {customer
                           ? `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
@@ -655,7 +655,7 @@ const Page = () => {
                       </Button>
                     </PopoverTrigger>
 
-                    <PopoverContent className="w-[200px] p-0">
+                    <PopoverContent className="w-full p-0">
                       <Command>
                         <CommandInput placeholder="Rechercher client..." />
                         <CommandEmpty>Aucun client trouvé.</CommandEmpty>
