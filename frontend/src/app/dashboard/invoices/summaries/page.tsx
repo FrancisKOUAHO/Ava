@@ -1,58 +1,55 @@
 'use client'
 
 import { CirclePlus, FileImage } from 'lucide-react'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import api from "@/config/api";
-
+import api from '@/config/api'
 
 interface Client {
-  id: string;
-  firstName: string;
-  lastName: string;
+  id: string
+  firstName: string
+  lastName: string
 }
 
-type InvoiceStatus = "sent" | "draft" | "paid" | "overdue" | "Paid";
+type InvoiceStatus = 'sent' | 'draft' | 'paid' | 'overdue' | 'Paid'
 
-// Invoice Model
 interface Invoice {
-  client: Client; // Client object embedded within the invoice
-  clientId: string;
-  createdAt: string; // ISO format date-time string
-  date: string | null; // Can be `null` if not provided
-  discount: string; // Keeping as a string based on your provided data
-  dueDate: string | null; // Can be `null` if not provided
-  id: string;
-  invoiceDate: string | null; // Can be `null` if not provided
-  invoiceNumber: string | null; // Can be `null` if not provided
-  notes: string;
-  status: InvoiceStatus;
-  terms: string;
-  total: string; // Keeping as a string based on your provided data
-  totalAmount: string; // Keeping as a string based on your provided data
-  updatedAt: string;
-  userId: string | undefined;
+  client: Client
+  clientId: string
+  createdAt: string
+  date: string | null
+  discount: string
+  dueDate: string | null
+  id: string
+  invoiceDate: string | null
+  invoiceNumber: string | null
+  notes: string
+  status: InvoiceStatus
+  terms: string
+  total: string
+  totalAmount: string
+  updatedAt: string
+  userId: string | undefined
 }
 
 const Page = () => {
   const [checked, setChecked] = useState(false)
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-
+  const [invoices, setInvoices] = useState<Invoice[]>([])
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await api.get('billing/invoice-data');
-        const data = await response.data;
-        setInvoices(data);  // Store fetched data in state
+        const response = await api.get('billing/invoice-data')
+        const data = await response.data
+        setInvoices(data)
       } catch (error) {
-        console.error('Failed to fetch invoices', error);
+        console.error('Failed to fetch invoices', error)
       }
-    };
+    }
 
-    fetchInvoices();
-  }, []);
+    fetchInvoices()
+  }, [])
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) {
       return ''
@@ -125,30 +122,48 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-          {invoices.map((invoice: Invoice) => (  // Utilisez "any" temporairement pour éviter les erreurs de type
+            {invoices.map((invoice: Invoice) => (
               <tr key={invoice.id} className="bg-[#e7effc]">
                 <td className="flex items-center gap-2 p-3 text-center">
-                  <Checkbox id={`checkbox-${invoice.id}`} checked={checked} onChange={() => setChecked(!checked)} />
-                  <Label htmlFor={`checkbox-${invoice.id}`} className="text-sm font-medium">
+                  <Checkbox
+                    id={`checkbox-${invoice.id}`}
+                    checked={checked}
+                    onChange={() => setChecked(!checked)}
+                  />
+                  <Label
+                    htmlFor={`checkbox-${invoice.id}`}
+                    className="text-sm font-medium"
+                  >
                     <FileImage className="w-8 h-8" />
                   </Label>
                 </td>
-                <td className="p-3 text-center">{invoice?.client?.firstName}</td>
-                <td className="p-3 text-center">{invoice?.totalAmount}€</td>
-                <td className="p-3 text-center">{invoice?.client?.firstName} {invoice?.client?.lastName}</td>
                 <td className="p-3 text-center">
-            <span className={`bg-${invoice?.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice?.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}>
-                {invoice?.status}
-            </span>
+                  {invoice?.client?.firstName}
                 </td>
-                <td className="p-3 text-center">{formatDate(invoice?.date)}</td>
+                <td className="p-3 text-center">{invoice?.totalAmount}€</td>
                 <td className="p-3 text-center">
-                  <a href={`/invoices/${invoice?.id}`} className="text-indigo-600 hover:text-indigo-900">
+                  {invoice?.client?.firstName} {invoice?.client?.lastName}
+                </td>
+                <td className="p-3 text-center">
+                  <span
+                    className={`bg-${invoice?.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice?.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}
+                  >
+                    {invoice?.status}
+                  </span>
+                </td>
+                <td className="p-3 text-center">
+                  {formatDate(invoice?.date ?? '')}
+                </td>
+                <td className="p-3 text-center">
+                  <a
+                    href={`/invoices/${invoice?.id}`}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
                     View
                   </a>
                 </td>
               </tr>
-          ))}
+            ))}
           </tbody>
         </table>
       </div>
