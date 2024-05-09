@@ -1,33 +1,35 @@
 import api from '@/config/api'
-import { Client } from '@/types/Client'
+import { ClientProps } from '@/types/ClientProps'
 
 const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
 
 const convertKeysToSnakeCase = (
-  data: Client | string,
-): Client | Client[] | string => {
+  data: ClientProps | string,
+): ClientProps | ClientProps[] | string => {
   if (Array.isArray(data)) {
-    return data.map((item: Client) => convertKeysToSnakeCase(item)) as Client[]
+    return data.map((item: ClientProps) =>
+      convertKeysToSnakeCase(item),
+    ) as ClientProps[]
   } else if (data !== null && typeof data === 'object') {
-    return Object.keys(data).reduce((acc: Client, key: string) => {
+    return Object.keys(data).reduce((acc: ClientProps, key: string) => {
       const snakeCaseKey = camelToSnakeCase(key)
       const value = data[key]
       if (typeof value === 'string') {
         acc[snakeCaseKey] = value
       } else if (Array.isArray(value)) {
         acc[snakeCaseKey] = JSON.stringify(
-          (value as Client[]).map((item: Client) =>
+          (value as ClientProps[]).map((item: ClientProps) =>
             convertKeysToSnakeCase(item),
           ),
         )
       } else if (value !== null && typeof value === 'object') {
         acc[snakeCaseKey] = JSON.stringify(
-          convertKeysToSnakeCase(value as Client),
+          convertKeysToSnakeCase(value as ClientProps),
         )
       }
       return acc
-    }, {} as Client)
+    }, {} as ClientProps)
   }
   return data
 }
@@ -55,10 +57,9 @@ export const deleteClient = async (clientId: string): Promise<any> => {
 export const fetchClientDetails = async (): Promise<any> => {
   try {
     const response = await api.get('billing/customer')
-    // const { data } = await api.get('billing/connect-to-google')
-    // console.log('data gooogle')
-    // console.log(data)
-    return response.data.map((client: Client) => convertKeysToSnakeCase(client))
+    return response.data.map((client: ClientProps) =>
+      convertKeysToSnakeCase(client),
+    )
   } catch (error: unknown) {
     console.error('Failed to fetch client details:', error)
     throw error
@@ -66,7 +67,7 @@ export const fetchClientDetails = async (): Promise<any> => {
 }
 
 export const updateCustomer = async (
-  customerData: Client | Client[],
+  customerData: ClientProps | ClientProps[],
 ): Promise<any> => {
   try {
     if (Array.isArray(customerData)) {
@@ -94,7 +95,7 @@ export const updateCustomer = async (
 }
 
 export const createCustomer = async (
-  customerData: Client | Client[],
+  customerData: ClientProps | ClientProps[],
 ): Promise<any> => {
   try {
     const response = await api.post('billing/customer', customerData)
