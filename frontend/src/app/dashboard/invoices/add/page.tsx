@@ -47,13 +47,13 @@ import {useFetchData} from "@/app/hooks/useFetch";
 
 
 interface LineItem {
-  name: string
-  price: number
-  unity: string
-  quantity: number
-  lineTotal: number
-  lineTotalTva: number
-  tva: number
+  name?: string
+  price?: number
+  unity?: string
+  quantity?: number
+  lineTotal?: number
+  lineTotalTva?: number
+  tva?: number
   [key: string]: any; // Allow additional properties dynamically
 
 }
@@ -114,9 +114,27 @@ const Page = () => {
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
-  const [customer, setCustomer] = useState<CustomerData | null>(null);
-  const [notes, setnotes] = useState<String>("");
-  const [terms, setTerms] = useState<String>("");
+  const [customer, setCustomer] = useState<CustomerData | null>({
+    user_id: '',  // Default empty string or appropriate default value
+    userId: '',
+    company: '',
+    address: '',
+    city: '',
+    zip: '',
+    state: '',
+    phone: '',
+    email: '',
+    last_name: '',
+    lastName: '',
+    first_name: '',
+    firstName: '',
+    vat_number: '',
+    vatNumber: '',
+    currency: '',
+    siren_number: '',
+    sirenNumber: '',
+  });  const [notes, setnotes] = useState<string>("");
+  const [terms, setTerms] = useState<string>("");
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
     discount: 0,  // default discount price as an example
@@ -171,7 +189,7 @@ const Page = () => {
 
 
   }, [customer]); //
-  const handleSelectCustomer = (customerId:string) => {
+  const handleSelectCustomer = (customerId:string| undefined) => {
     const selectedCustomer : CustomerData = customersData.find((c:CustomerData) => c.id === customerId);
     setCustomer(selectedCustomer); // Schedules state update
     checkIfCustomerIsFull();
@@ -327,7 +345,8 @@ const Page = () => {
     ];
 
     requiredFields.forEach(field => {
-      if (!customer[field]) {
+      // Check if the field in customer is undefined or null
+      if (customer[field as keyof CustomerData] === undefined) {
         errors.push(`${field} is required.`);
       }
     });
@@ -392,7 +411,7 @@ const Page = () => {
 
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id.toString(),  // Convert to string; check for existence
-      discount: subTotal?.discount ?? 0,  // Default to 0 if undefined
+      discount: subTotal?.discount ?? 0,
       notes: notes,
       terms: terms,
       total_amount: Number((getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2)),  // Convert to number
@@ -452,7 +471,7 @@ const Page = () => {
     // Assuming `user` is always defined, otherwise, add a similar null check
     const invoiceData: any = {
       user_id: user.id,
-      client_id: customer.id,
+      client_id: customer?.id,
       date: new Date().toISOString(),
       due_date: new Date().toISOString(),
       total_amount: 0,
@@ -470,6 +489,7 @@ const Page = () => {
       quantity: lineItem.quantity,
       lineTotal: lineItem.lineTotal,
       lineTotalTva: lineItem.lineTotalTva,
+      tva: lineItem.tva,
     }));
     console.log('lineItemsData', lineItemsData);
 
