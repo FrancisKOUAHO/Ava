@@ -1,31 +1,71 @@
 'use client'
 
-import { CirclePlus, FileImage } from 'lucide-react'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import api from "@/config/api";
+import api from '@/config/api'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup, DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import {Button} from "@/components/ui/button";
+import { CirclePlus, MoreHorizontal, Trash, Edit,FileImage } from 'lucide-react'
+import {ClientProps} from "@/types/ClientProps";
+import DeleteCustomer from "@/components/molecules/modal/customer/DeleteCustomer";
+import {deleteClient} from "@/lib/customer";
+import Link from 'next/link'
+
+interface Client {
+  id: string
+  firstName: string
+  lastName: string
+}
+
+type InvoiceStatus = 'sent' | 'draft' | 'paid' | 'overdue' | 'Paid'
+
+interface Invoice {
+  client: Client
+  clientId: string
+  createdAt: string
+  date: string | null
+  discount: string
+  dueDate: string | null
+  id: string
+  invoiceDate: string | null
+  invoiceNumber: string | null
+  notes: string
+  status: InvoiceStatus
+  terms: string
+  total: string
+  totalAmount: string
+  updatedAt: string
+  userId: string | undefined
+}
 
 const Page = () => {
   const [checked, setChecked] = useState(false)
-  const [invoices, setInvoices] = useState([]);  // State to store invoice data
-
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false)
+  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(null)
+  const [isUpdating, setIsUpdating] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await api.get('billing/invoice-data');
-        const data = await response.data;
-        console.log('data');
-        console.log(data);
-        setInvoices(data);  // Store fetched data in state
+        const response = await api.get('billing/invoice-data')
+        const data = await response.data
+        setInvoices(data)
       } catch (error) {
-        console.error('Failed to fetch invoices', error);
+        console.error('Failed to fetch invoices', error)
       }
-    };
+    }
 
-    fetchInvoices();
-  }, []);
+    fetchInvoices()
+  }, [])
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) {
       return ''
@@ -38,6 +78,34 @@ const Page = () => {
       month: '2-digit',
       year: 'numeric',
     })
+  }
+
+  const toggleDropdown = (id: string | undefined) => {
+    setOpenDropdownId((prevId) => (prevId === id ? null : id || null))
+  }
+
+  const openDeleteModal = (invoiceId: string | undefined) => {
+    setInvoiceIdToDelete(invoiceId || null)
+    setDeleteModalOpen(true)
+  }
+
+
+  const handleDeleteConfirm = async () => {
+    try {
+      if (invoiceIdToDelete) {
+        try {
+          const response = await api.delete(`billing/invoice/${invoiceIdToDelete}`)
+          //return convertKeysToSnakeCase(response.data)
+        } catch (error: unknown) {
+          throw new Error('Failed to delete client: ' + error)
+        }
+        setInvoices((invoices: Invoice[]): Invoice[] =>
+            invoices.filter((invoice) => invoice.id !== invoiceIdToDelete),
+        )
+        setDeleteModalOpen(false)
+        setInvoiceIdToDelete(null)
+      }
+    } catch (error) {}
   }
 
   return (
@@ -98,32 +166,89 @@ const Page = () => {
             </tr>
           </thead>
           <tbody>
-          {invoices.map((invoice) => (  // Map over invoices to render rows
+            {invoices.map((invoice: Invoice) => (
               <tr key={invoice.id} className="bg-[#e7effc]">
                 <td className="flex items-center gap-2 p-3 text-center">
-                  <Checkbox id={`checkbox-${invoice.id}`} checked={checked} onChange={() => setChecked(!checked)} />
-                  <Label htmlFor={`checkbox-${invoice.id}`} className="text-sm font-medium">
+                  <Checkbox
+                    id={`checkbox-${invoice.id}`}
+                    checked={checked}
+                    onChange={() => setChecked(!checked)}
+                  />
+                  <Label
+                    htmlFor={`checkbox-${invoice.id}`}
+                    className="text-sm font-medium"
+                  >
                     <FileImage className="w-8 h-8" />
                   </Label>
                 </td>
-                <td className="p-3 text-center">{invoice.client.firstName}</td>
-                <td className="p-3 text-center">{invoice.total}€</td>
-                <td className="p-3 text-center">{invoice.client.firstName + invoice.client.lastName}</td>
                 <td className="p-3 text-center">
-                  <span className={`bg-${invoice.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}>
-                    {invoice.status}
+                  {invoice?.client?.firstName}
+                </td>
+                <td className="p-3 text-center">{invoice?.totalAmount}€</td>
+                <td className="p-3 text-center">
+                  {invoice?.client?.firstName} {invoice?.client?.lastName}
+                </td>
+                <td className="p-3 text-center">
+                  <span
+                    className={`bg-${invoice?.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice?.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}
+                  >
+                    {invoice?.status}
                   </span>
                 </td>
-                <td className="p-3 text-center">{formatDate(invoice.date)}</td>
                 <td className="p-3 text-center">
-                  <a href={`/invoices/${invoice.id}`} className="text-indigo-600 hover:text-indigo-900">
-                    View
-                  </a>
+                  {formatDate(invoice?.createdAt ?? '')}
                 </td>
+                <td className="p-3 text-center">
+                  <DropdownMenu
+                      open={openDropdownId === invoice.id}
+                      onOpenChange={() => toggleDropdown(invoice.id)}
+                  >
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[200px]">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem
+                            onClick={() => openDeleteModal(invoice.id)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Supprimer
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                        >
+                          <Link
+                              href={`/dashboard/invoices/edit/${invoice.id}`}
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Modifier
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </td>
+
+                {/*<td className="p-3 text-center">*/}
+                {/*  <a*/}
+                {/*    href={`/invoices/${invoice?.id}`}*/}
+                {/*    className="text-indigo-600 hover:text-indigo-900"*/}
+                {/*  >*/}
+                {/*    View*/}
+                {/*  </a>*/}
+                {/*</td>*/}
               </tr>
-          ))}
-          </tbody>        </table>
+            ))}
+          </tbody>
+        </table>
       </div>
+      <DeleteCustomer
+          isOpen={isDeleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={handleDeleteConfirm}
+      />
     </section>
   )
 }

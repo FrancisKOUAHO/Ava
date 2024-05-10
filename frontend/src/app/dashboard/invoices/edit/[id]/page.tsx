@@ -101,9 +101,10 @@ interface SubTotal {
   total?: number
 }
 
-const Page = () => {
+const Page = ({ params }: { params: { id: string } }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
 
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
@@ -140,6 +141,22 @@ const Page = () => {
     total: 0,
   })
   const [formValid, setFormValid] = useState(false)
+  const [invoiceId, setInvoiceId] = useState<string>('')
+
+  useEffect(() => {
+    setInvoiceId(params.id)
+    const fetchData = async () => {
+      const { data: invoiceDetails } = await useFetchData(`billing/invoice/${invoiceId}`, 'invoice');
+      if (invoiceDetails) {
+        setInvoiceData(invoiceDetails);
+        const { data: customerDetails } = await useFetchData(`billing/customer/${invoiceDetails.customerId}`, 'customer');
+        setCustomer(customerDetails);
+        setLineItems(invoiceDetails.lineItems || []);
+      }
+    };
+
+    fetchData();
+  }, [invoiceId]);
 
   useEffect(() => {
     if (lineItems.length > 0) {
@@ -1352,6 +1369,7 @@ const Page = () => {
                       id="notess"
                       name="notess"
                       placeholder="notess"
+                      value={invoiceData?.notes}
                       onChange={(e) => setnotes(e.target.value)}
                     />
                   )}
@@ -1382,6 +1400,8 @@ const Page = () => {
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                       id="terms"
                       name="terms"
+                      value={invoiceData?.terms}
+
                       placeholder="Terms"
                       onChange={(e) => setTerms(e.target.value)}
                     />
