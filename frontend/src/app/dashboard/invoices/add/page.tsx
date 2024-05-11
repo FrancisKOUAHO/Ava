@@ -102,8 +102,10 @@ interface SubTotal {
 }
 
 const Page = () => {
-  const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  const { user } = useAuth()
+  const { data: customersData } = useFetchData('billing/customer', 'customer')
 
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
@@ -167,8 +169,6 @@ const Page = () => {
 
     return errors
   }
-
-  const { data: customersData } = useFetchData('billing/customer', 'customer')
 
   const handleSelectCustomer = (customerId: string | undefined) => {
     const selectedCustomer: CustomerData = customersData.find(
@@ -594,6 +594,8 @@ const Page = () => {
     }
   }, [customer])
 
+  console.log('customersData', customersData)
+
   return (
     <section className="px-6 py-6">
       <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
@@ -638,7 +640,7 @@ const Page = () => {
                 </div>
               </div>
 
-              {customersData && customersData.length > 1 && (
+              {customersData && customersData.length >= 1 && (
                 <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
@@ -648,9 +650,7 @@ const Page = () => {
                         aria-expanded={open}
                         className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 pl-3 text-left font-normal text-muted-foreground"
                       >
-                        {customer
-                          ? `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
-                          : 'Sélectionner une entreprise'}
+                        Sélectionner une entreprise
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
@@ -784,22 +784,6 @@ const Page = () => {
                         placeholder="EUR"
                       />
                     </div>
-                    {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                    {/*  <Label htmlFor="vatNumber" className="mb-2">*/}
-                    {/*    Numéro de TVA*/}
-                    {/*  </Label>*/}
-                    {/*  <Input*/}
-                    {/*      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                    {/*      type="text"*/}
-                    {/*      id="vatNumber"*/}
-                    {/*      name="vatNumber"*/}
-                    {/*      value={customer ? customer.vatNumber  : ''}*/}
-                    {/*      onChange={(e) => handleCustomerChange({...customer, vatNumber: e.target.value})}*/}
-
-                    {/*      placeholder="987"*/}
-                    {/*  />*/}
-                    {/*</div>*/}
-
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                       <Label htmlFor="address" className="mb-2">
                         Addresse principale
@@ -816,20 +800,6 @@ const Page = () => {
                         placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"
                       />
                     </div>
-
-                    {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                    {/*  <Label htmlFor="address2" className="mb-2">*/}
-                    {/*    Addresse 2*/}
-                    {/*  </Label>*/}
-                    {/*  <Input*/}
-                    {/*    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                    {/*    type="text"*/}
-                    {/*    id="address2"*/}
-                    {/*    name="address2"*/}
-
-                    {/*    placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"*/}
-                    {/*  />*/}
-                    {/*</div>*/}
 
                     <div className="grid w-full max-w-sm items-center gap-1.5">
                       <Label htmlFor="city" className="mb-2">

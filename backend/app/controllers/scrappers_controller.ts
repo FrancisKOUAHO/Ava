@@ -62,6 +62,7 @@ export default class ScrappersController {
 
   async sirene({ request, response, auth }: HttpContext) {
     const user = auth.user!
+
     const data = request.only(['siren_number'])
 
     const client = await axios.get(
@@ -115,36 +116,48 @@ export default class ScrappersController {
       }
 
       const clientResponse = await axios.get(url, { headers })
+
       if (clientResponse.data && clientResponse.data.formality) {
         const data = clientResponse.data
 
-        const fullTypeVoie = this.getFullTypeVoie(
-          data.formality.content.personnePhysique.adresseEntreprise.adresse.typeVoie
-        )
-        const clientData = {
-          user_id: suerId,
-          first_name:
-            data.formality.content.personnePhysique.identite.entrepreneur.descriptionPersonne.prenoms.join(
-              ' '
-            ),
-          last_name:
-            data.formality.content.personnePhysique.identite.entrepreneur.descriptionPersonne.nom,
-          email: '',
-          sirenNumber: siren_number,
-          phone: '',
-          address: `${data.formality.content.personnePhysique.adresseEntreprise.adresse.numVoie} ${fullTypeVoie} ${data.formality.content.personnePhysique.adresseEntreprise.adresse.voie}`,
-          city: data.formality.content.personnePhysique.adresseEntreprise.adresse.commune,
-          state: '',
-          zip: data.formality.content.personnePhysique.adresseEntreprise.adresse.codePostal,
-          country: data.formality.content.personnePhysique.adresseEntreprise.adresse.pays,
-          company:
-            data.formality.content.personnePhysique.etablissementPrincipal.descriptionEtablissement
-              .nomCommercial,
-          vat_number: '',
-          currency: 'EUR',
-          language: 'FR',
+        let adresseEntreprise
+        if (data.formality.content.personnePhysique) {
+          adresseEntreprise = data.formality.content.personnePhysique.adresseEntreprise
+        } else if (data.formality.content.personneMorale) {
+          adresseEntreprise = data.formality.content.personneMorale.adresseEntreprise
         }
-        return response.ok(clientData)
+
+        if (adresseEntreprise) {
+          const fullTypeVoie = this.getFullTypeVoie(adresseEntreprise.adresse.typeVoie)
+          const clientData = {
+            user_id: suerId,
+            first_name: data.formality.content.personnePhysique
+              ? data.formality.content.personnePhysique.identite.entrepreneur.descriptionPersonne.prenoms.join(
+                  ' '
+                )
+              : '',
+            last_name: data.formality.content.personnePhysique
+              ? data.formality.content.personnePhysique.identite.entrepreneur.descriptionPersonne
+                  .nom
+              : '',
+            email: '',
+            sirenNumber: siren_number,
+            phone: '',
+            address: `${adresseEntreprise.adresse.numVoie} ${fullTypeVoie} ${adresseEntreprise.adresse.voie}`,
+            city: adresseEntreprise.adresse.commune,
+            state: '',
+            zip: adresseEntreprise.adresse.codePostal,
+            country: adresseEntreprise.adresse.pays,
+            company: data.formality.content.personnePhysique
+              ? data.formality.content.personnePhysique.etablissementPrincipal
+                  .descriptionEtablissement.nomCommercial
+              : '',
+            vat_number: '',
+            currency: 'EUR',
+            language: 'FR',
+          }
+          return response.ok(clientData)
+        }
       }
       return response.notFound('No data found for the provided SIREN number.')
     } catch (error) {

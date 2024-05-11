@@ -38,8 +38,8 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={data[0].companyName}
-                      placeholder={data[0].companyName}
+                      defaultValue={data[0]?.companyName}
+                      placeholder={data[0]?.companyName}
                     />
                   </div>
                 </div>
@@ -106,8 +106,8 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={data[0].sirenNumber}
-                      placeholder={data[0].sirenNumber}
+                      defaultValue={data[0]?.sirenNumber}
+                      placeholder={data[0]?.sirenNumber}
                     />
                   </div>
                 </div>
@@ -122,8 +122,8 @@ const Page = () => {
                     <input
                       type="email"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={data[0].tvaNumber}
-                      placeholder={data[0].sirenNumber}
+                      defaultValue={data[0]?.tvaNumber}
+                      placeholder={data[0]?.sirenNumber}
                     />
                   </div>
                 </div>
@@ -138,8 +138,8 @@ const Page = () => {
                     <input
                       type="email"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={data[0].legalStructure}
-                      placeholder={data[0].legalStructure}
+                      defaultValue={data[0]?.legalStructure}
+                      placeholder={data[0]?.legalStructure}
                     />
                   </div>
                 </div>
@@ -154,8 +154,8 @@ const Page = () => {
                     <input
                       type="email"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={data[0].legalStatus}
-                      placeholder={data[0].legalStatus}
+                      defaultValue={data[0]?.legalStatus}
+                      placeholder={data[0]?.legalStatus}
                     />
                   </div>
                 </div>
@@ -178,7 +178,7 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue={data.company_name}
+                      defaultValue={data?.company_name}
                     />
                   </div>
                 </div>
