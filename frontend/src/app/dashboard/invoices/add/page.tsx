@@ -1409,7 +1409,11 @@ const Page = () => {
           </div>
         </div>
 
-        <Preview customer={null} lineItems={null} subTotal={null} />
+        <Preview
+          customer={customer}
+          lineItems={lineItems}
+          subTotal={subTotal}
+        />
       </form>
     </section>
   )
