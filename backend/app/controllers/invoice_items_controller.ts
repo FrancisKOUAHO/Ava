@@ -143,7 +143,7 @@ export default class InvoiceItemsController {
       const invoiceId = params.invoice_id
     console.log('invoiceId', invoiceId)
       // Ensure the invoice exists
-      const invoice: Invoice = await Invoice.findOrFail(invoiceId)
+      await Invoice.findOrFail(invoiceId)
 
       // Get invoice items for the given invoice
       const invoiceItems = await InvoiceItem.query().where('invoice_id', invoiceId)
@@ -165,7 +165,7 @@ export default class InvoiceItemsController {
     const payload = request.all();
     console.log('Received invoice items:', payload);
     let isInserting:boolean = true;
-    let invoiceItem:InvoiceItem;
+    let invoiceItem:InvoiceItem| null;
     try {
       const results:InvoiceItem[] = [];
 
