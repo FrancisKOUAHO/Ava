@@ -395,7 +395,7 @@ const Page = () => {
     },
   })
 
-  const handleSubmit = (isDraft:boolean = true) => {
+  const handleSubmit = (isDraft: boolean = true) => {
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
@@ -404,7 +404,7 @@ const Page = () => {
       total_amount: Number(
         (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
       ),
-      status: isDraft? 'brouillon' :'envoyé',
+      status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
     }
 
@@ -1391,25 +1391,25 @@ const Page = () => {
 
               <div className="flex justify-end items-center gap-2 w-full my-8">
                 <ButtonUi
-                    label="Enregistrer en tant que brouillon"
-                    type="button"
-                    onClick={() => {
-                      handleSubmit(true)
-                    }}
+                  label="Enregistrer en tant que brouillon"
+                  type="button"
+                  onClick={() => {
+                    handleSubmit(true)
+                  }}
                 />
                 <ButtonUi
-                    label="Envoyer la facture"
-                    type="button"
-                    onClick={() => {
-                      handleSubmit(false)
-                    }}
+                  label="Envoyer la facture"
+                  type="button"
+                  onClick={() => {
+                    handleSubmit(false)
+                  }}
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <Preview />
+        <Preview customer={null} lineItems={null} subTotal={null} />
       </form>
     </section>
   )
