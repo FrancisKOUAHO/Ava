@@ -190,7 +190,7 @@ const Page = () => {
                 </td>
                 <td className="p-3 text-center">
                   <span
-                    className={`bg-${invoice?.status === 'Paid' ? 'green-200' : 'red-200'} text-${invoice?.status === 'Paid' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}
+                    className={`bg-${invoice?.status === 'payé' ? 'green-200' : 'red-200'} text-${invoice?.status === 'payé' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}
                   >
                     {invoice?.status}
                   </span>

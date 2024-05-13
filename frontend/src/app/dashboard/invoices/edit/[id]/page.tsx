@@ -152,14 +152,14 @@ const Page = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     if (invoiceDetails) {
       setInvoiceData(invoiceDetails);
-      const foundCustomer = customersData.find(cust => cust.id === invoiceDetails.customerId);
+      const foundCustomer = customersData.find((cust:InvoiceData) => cust.id === invoiceDetails.customerId);
       if (foundCustomer && foundCustomer !== customer) {
         setCustomer(foundCustomer);
       }
     }
 
     if (invoiceItemDetails && invoiceItemDetails.data.length > 0) {
-      const enhancedItems = invoiceItemDetails.data.map(item => ({
+      const enhancedItems = invoiceItemDetails.data.map((item:LineItem) => ({
         ...item,
         price: parseFloat(item.price),
         quantity: parseFloat(item.quantity),
