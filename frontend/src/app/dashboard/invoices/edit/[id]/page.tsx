@@ -104,7 +104,7 @@ interface SubTotal {
 const Page = ({ params }: { params: { id: string } }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
@@ -136,66 +136,75 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [notes, setnotes] = useState<string>('')
   const [terms, setTerms] = useState<string>('')
   const [totalInvoices, setTotalInvoices] = useState<number>(0)
-  const [totalInvoicesWithoutTva, setTotalInvoicesWithoutTva] = useState<number>(0)
+  const [totalInvoicesWithoutTva, setTotalInvoicesWithoutTva] =
+    useState<number>(0)
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
     discount: 0,
     total: 0,
   })
   const [formValid, setFormValid] = useState(true)
-  const { data: customersData } = useFetchData('billing/customer', 'customer');
-  const { data: invoiceDetails } = useFetchData(`billing/invoice/${params.id}`, 'invoice');
-  const { data: invoiceItemDetails } = useFetchData(`billing/invoice-items/${params.id}`, 'invoice-item');
+  const { data: customersData } = useFetchData('billing/customer', 'customer')
+  const { data: invoiceDetails } = useFetchData(
+    `billing/invoice/${params.id}`,
+    'invoice',
+  )
+  const { data: invoiceItemDetails } = useFetchData(
+    `billing/invoice-items/${params.id}`,
+    'invoice-item',
+  )
 
-// Effect for loading initial data
+  // Effect for loading initial data
   useEffect(() => {
     if (invoiceDetails) {
-      setInvoiceData(invoiceDetails);
-      const foundCustomer = customersData.find((cust:InvoiceData) => cust.id === invoiceDetails.customerId);
+      setInvoiceData(invoiceDetails)
+      const foundCustomer = customersData.find(
+        (cust: InvoiceData) => cust.id === invoiceDetails.customerId,
+      )
       if (foundCustomer && foundCustomer !== customer) {
-        setCustomer(foundCustomer);
+        setCustomer(foundCustomer)
       }
     }
 
     if (invoiceItemDetails && invoiceItemDetails.data.length > 0) {
-      const enhancedItems = invoiceItemDetails.data.map((item:LineItem) => ({
+      const enhancedItems = invoiceItemDetails.data.map((item: LineItem) => ({
         ...item,
         price: Number(item.price),
         quantity: Number(item.quantity),
         lineTotal: Number(item.lineTotal),
         lineTotalTva: Number(item.lineTotalTva),
         tva: Number(item.tva),
-      }));
-      setLineItems(enhancedItems);
-
+      }))
+      setLineItems(enhancedItems)
     }
-  }, [invoiceDetails, customersData, invoiceItemDetails]);
+  }, [invoiceDetails, customersData, invoiceItemDetails])
 
-// Effect for auto-selecting first customer
+  // Effect for auto-selecting first customer
   useEffect(() => {
-    if (customersData && customersData.length > 0 && customer?.id !== customersData[0].id) {
-      handleSelectCustomer(customersData[0].id);
+    if (
+      customersData &&
+      customersData.length > 0 &&
+      customer?.id !== customersData[0].id
+    ) {
+      handleSelectCustomer(customersData[0].id)
     }
-  }, [customersData]);  // Removed `customer` from dependencies to avoid re-triggering when customer is set
+  }, [customersData]) // Removed `customer` from dependencies to avoid re-triggering when customer is set
 
-// Effect for validating line items
+  // Effect for validating line items
   useEffect(() => {
     const allValid = lineItems.every(
-        item => item.name && item.price && item.quantity
-    );
-    setFormValid(allValid);
-    setTotalInvoices(getTotalInvoices());
-    setTotalInvoicesWithoutTva(getTotalInvoices(false));
-
-  }, [lineItems]);
+      (item) => item.name && item.price && item.quantity,
+    )
+    setFormValid(allValid)
+    setTotalInvoices(getTotalInvoices())
+    setTotalInvoicesWithoutTva(getTotalInvoices(false))
+  }, [lineItems])
 
   useEffect(() => {
     console.log('invoiceDetails 00')
 
     console.log(invoiceData)
-
-  }, [invoiceData]);
-
+  }, [invoiceData])
 
   const validateInvoiceData = (invoiceData: InvoiceData) => {
     const errors = []
@@ -215,7 +224,6 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     return errors
   }
-
 
   const handleSelectCustomer = (customerId: string | undefined) => {
     const selectedCustomer: CustomerData = customersData.find(
@@ -394,7 +402,8 @@ const Page = ({ params }: { params: { id: string } }) => {
   }
 
   const SendItemsDataMutation = useMutation<LineItem[], Error, LineItem>({
-    mutationFn: (data) => api.post('billing/update-or-insert-invoice-item', data),
+    mutationFn: (data) =>
+      api.post('billing/update-or-insert-invoice-item', data),
     onError: (error: any) => {
       throw new Error(error.message)
     },
@@ -442,7 +451,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     },
   })
 
-  const handleSubmit = (isDraft:boolean = true) => {
+  const handleSubmit = (isDraft: boolean = true) => {
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
@@ -451,7 +460,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       total_amount: Number(
         (totalInvoices - (subTotal.discount ?? 0)).toFixed(2),
       ),
-      status: isDraft? 'brouillon' :'envoyé',
+      status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
     }
 
@@ -518,8 +527,6 @@ const Page = ({ params }: { params: { id: string } }) => {
       status: 'draft',
     }
 
-
-
     try {
       const response = await SendInvoiceMutation.mutateAsync(invoiceData)
 
@@ -583,15 +590,15 @@ const Page = ({ params }: { params: { id: string } }) => {
   const getTotalInvoices = (withTva = true) => {
     console.log('lineItems :', lineItems)
     if (!Array.isArray(lineItems) || lineItems.length === 0) {
-      return 0;
+      return 0
     }
     console.log('ic :')
 
     return lineItems.reduce((acc, lineItem) => {
-      const total = withTva ? lineItem.lineTotalTva : lineItem.lineTotal;
-        console.log('total :', total)
-      return acc + (total ?? 0);
-    }, 0);
+      const total = withTva ? lineItem.lineTotalTva : lineItem.lineTotal
+      console.log('total :', total)
+      return acc + (total ?? 0)
+    }, 0)
   }
   const getSubTotal = (pTotal: number, pdiscount: number = 0): number => {
     return pTotal - (pTotal * pdiscount) / 100
@@ -1273,7 +1280,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                               readOnly
                               placeholder="1"
                               value={(
-                                  totalInvoices - (subTotal.discount ?? 0)
+                                totalInvoices - (subTotal.discount ?? 0)
                               ).toFixed(2)}
                             />
                           )}
@@ -1312,7 +1319,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                             id="total"
                             placeholder="100"
                             value={(
-                                totalInvoicesWithoutTva - (subTotal.discount ?? 0)
+                              totalInvoicesWithoutTva - (subTotal.discount ?? 0)
                             ).toFixed(2)}
                             readOnly
                           />
@@ -1335,7 +1342,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                             id="totalTva"
                             name="totalTva"
                             value={(
-                                totalInvoices - (subTotal.discount ?? 0)
+                              totalInvoices - (subTotal.discount ?? 0)
                             ).toFixed(2)}
                             readOnly
                             placeholder="100"
@@ -1356,9 +1363,9 @@ const Page = ({ params }: { params: { id: string } }) => {
                           <h5>Total à régler</h5>
                         </td>
                         <td className="p-3 text-center font-black text-black">
-                          {(
-                              totalInvoices - (subTotal.discount ?? 0)
-                          ).toFixed(2)}
+                          {(totalInvoices - (subTotal.discount ?? 0)).toFixed(
+                            2,
+                          )}
                           €
                         </td>
                       </tr>
@@ -1377,8 +1384,8 @@ const Page = ({ params }: { params: { id: string } }) => {
                       className="w-full text-sm font-normal"
                       onClick={makeEditablenotes}
                     >
-
-                      {invoiceData?.notes || "Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission"}
+                      {invoiceData?.notes ||
+                        'Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
 
                       <PencilLine
                         className="w-4 h-4 hover:text-blue-700"
@@ -1408,7 +1415,8 @@ const Page = ({ params }: { params: { id: string } }) => {
                       className="w-full text-sm font-normal"
                       onClick={makeEditableTerms}
                     >
-                      {invoiceData?.terms || "Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission"}
+                      {invoiceData?.terms ||
+                        'Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
 
                       <PencilLine
                         className="w-4 h-4 hover:text-blue-700"
@@ -1421,7 +1429,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                       id="terms"
                       name="terms"
                       value={invoiceData?.terms}
-
                       placeholder="Terms"
                       onChange={(e) => setTerms(e.target.value)}
                     />
@@ -1449,7 +1456,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           </div>
         </div>
 
-        <Preview />
+        <Preview customer={null} lineItems={null} subTotal={null} />
       </form>
     </section>
   )
