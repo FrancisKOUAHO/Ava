@@ -143,7 +143,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     total: 0,
   })
   const [formValid, setFormValid] = useState(true)
-  const [invoiceId, setInvoiceId] = useState<string>('')
   const { data: customersData } = useFetchData('billing/customer', 'customer');
   const { data: invoiceDetails } = useFetchData(`billing/invoice/${params.id}`, 'invoice');
   const { data: invoiceItemDetails } = useFetchData(`billing/invoice-items/${params.id}`, 'invoice-item');
@@ -161,11 +160,11 @@ const Page = ({ params }: { params: { id: string } }) => {
     if (invoiceItemDetails && invoiceItemDetails.data.length > 0) {
       const enhancedItems = invoiceItemDetails.data.map((item:LineItem) => ({
         ...item,
-        price: parseFloat(item.price),
-        quantity: parseFloat(item.quantity),
-        lineTotal: parseFloat(item.lineTotal),
-        lineTotalTva: parseFloat(item.lineTotalTva),
-        tva: parseFloat(item.tva),
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        lineTotal: Number(item.lineTotal),
+        lineTotalTva: Number(item.lineTotalTva),
+        tva: Number(item.tva),
       }));
       setLineItems(enhancedItems);
 
@@ -519,15 +518,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       status: 'draft',
     }
 
-    const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
-      name: lineItem.name,
-      price: lineItem.price,
-      unity: lineItem.unity,
-      quantity: lineItem.quantity,
-      lineTotal: lineItem.lineTotal,
-      lineTotalTva: lineItem.lineTotalTva,
-      tva: lineItem.tva,
-    }))
+
 
     try {
       const response = await SendInvoiceMutation.mutateAsync(invoiceData)
@@ -1009,7 +1000,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                               className="flex justify-center items-center gap-2 w-full"
                               onClick={() => makeEditable(index)}
                             >
-                              €{lineItem.price}
+                              {lineItem.price}€
                               <PencilLine
                                 className="w-4 h-4 hover:text-blue-700"
                                 id="item"
