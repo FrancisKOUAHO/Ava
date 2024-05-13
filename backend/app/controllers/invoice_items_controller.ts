@@ -1,6 +1,7 @@
 import { HttpContext } from '@adonisjs/core/http'
 import InvoiceItem from '#models/invoice_item'
 import { createInvoiceItemValidator, updateInvoiceItemValidator } from '#validators/invoice_item'
+import Invoice from "#models/invoice";
 
 export default class InvoiceItemsController {
   /**
@@ -135,4 +136,89 @@ export default class InvoiceItemsController {
 
     return response.noContent()
   }
+
+
+  public async getInvoiceItems({ params, response }: HttpContext) {
+    try {
+      const invoiceId = params.invoice_id
+    console.log('invoiceId', invoiceId)
+      // Ensure the invoice exists
+      const invoice = await Invoice.findOrFail(invoiceId)
+
+      // Get invoice items for the given invoice
+      const invoiceItems = await InvoiceItem.query().where('invoice_id', invoiceId)
+      console.log('invoiceId', invoiceItems)
+
+      return response.status(200).json({
+        message: 'Invoice items retrieved successfully',
+        data: invoiceItems
+      })
+    } catch (error) {
+      return response.status(500).json({
+        message: 'Error retrieving invoice items',
+        error: error.message
+      })
+    }
+  }
+
+  public async upsert({ request, response }: HttpContext) {
+    const payload = request.all();
+    console.log('Received invoice items:', payload);
+    let isInserting:boolean = true;
+    let invoiceItem = null;
+    try {
+      const results = [];
+
+      // Convert object to array and iterate
+      Object.values(payload).forEach(async (item) => {
+        const {
+          id, invoice_id, quantity, price, unity, name, line_total, line_total_tva, tva
+        } = item;
+        if(id){
+           invoiceItem = await InvoiceItem.find(id);
+          if (invoiceItem ) {
+            isInserting = false;
+            // Update existing invoice item
+            invoiceItem.merge({
+              invoice_id,
+              quantity,
+              price,
+              unity,
+              name,
+              line_total,
+              line_total_tva,
+              tva
+            });
+            await invoiceItem.save();
+          }
+        }
+         if(isInserting) {
+          // Insert new invoice item
+          invoiceItem = await InvoiceItem.create({
+            invoice_id,
+            quantity,
+            price,
+            unity,
+            name,
+            line_total,
+            line_total_tva,
+            tva
+          });
+        }
+
+        results.push(invoiceItem);
+      });
+
+      return response.status(200).json({
+        message: 'Invoice items upserted successfully',
+        data: results,
+      });
+    } catch (error) {
+      return response.status(500).json({
+        message: 'Error upserting invoice items',
+        error: error.message,
+      });
+    }
+  }
+
 }

@@ -395,7 +395,7 @@ const Page = () => {
     },
   })
 
-  const handleSubmit = () => {
+  const handleSubmit = (isDraft:boolean = true) => {
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
@@ -404,7 +404,7 @@ const Page = () => {
       total_amount: Number(
         (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
       ),
-      status: 'sent',
+      status: isDraft? 'brouillon' :'envoyé',
       user_id: user.id.toString(),
     }
 
@@ -638,7 +638,7 @@ const Page = () => {
               {/*  </div>*/}
               {/*</div>*/}
 
-              {customersData && customersData.length > 1 && (
+              {customersData && customersData.length >= 1 && (
                 <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                   <Popover open={open} onOpenChange={setOpen}>
                     <PopoverTrigger asChild>
@@ -648,8 +648,8 @@ const Page = () => {
                         aria-expanded={open}
                         className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 pl-3 text-left font-normal text-muted-foreground"
                       >
-                        {customer
-                          ? `${customer.firstName ?? ''} ${customer.lastName ?? ''}`
+                        {customer && customer.firstName.length > 1
+                          ? `${customer.firstName ?? 'Sélectionner une entreprise'} ${customer.lastName ?? ''}`
                           : 'Sélectionner une entreprise'}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
@@ -1391,16 +1391,18 @@ const Page = () => {
 
               <div className="flex justify-end items-center gap-2 w-full my-8">
                 <ButtonUi
-                  label="Enregistrer en tant que brouillon"
-                  type="button"
-                  onClick={() => {
-                    handleTest()
-                  }}
+                    label="Enregistrer en tant que brouillon"
+                    type="button"
+                    onClick={() => {
+                      handleSubmit(true)
+                    }}
                 />
                 <ButtonUi
-                  label="Envoyer la facture"
-                  type="button"
-                  onClick={handleSubmit}
+                    label="Envoyer la facture"
+                    type="button"
+                    onClick={() => {
+                      handleSubmit(false)
+                    }}
                 />
               </div>
             </div>
