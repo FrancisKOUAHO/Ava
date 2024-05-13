@@ -24,7 +24,7 @@ interface Client {
   lastName: string
 }
 
-type InvoiceStatus = 'sent' | 'draft' | 'paid' | 'overdue' | 'Paid'
+type InvoiceStatus = 'envoyé' | 'brouillon' | 'payé' | 'caduque' | 'en cours de paiement'
 
 interface Invoice {
   client: Client
@@ -221,9 +221,10 @@ const Page = () => {
                         >
                           <Link
                               href={`/dashboard/invoices/edit/${invoice.id}`}
+                              className="flex items-center" // Add these classes
                           >
                             <Edit className="mr-2 h-4 w-4" />
-                            Modifier
+                            <span>Modifier</span> {/* Wrapped text in a span for better control */}
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
