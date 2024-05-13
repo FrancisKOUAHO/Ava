@@ -1,9 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
 import Invoice from '#models/invoice'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations';
-
-import User from "#models/user";
+import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 
 export default class InvoiceItem extends BaseModel {
   @column({ isPrimary: true })
@@ -34,10 +32,9 @@ export default class InvoiceItem extends BaseModel {
   declare tva: number
 
   @belongsTo(() => Invoice, {
-      foreignKey: 'invoice_id',
+    foreignKey: 'invoice_id',
   })
   declare invoice: BelongsTo<typeof Invoice>
-
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
