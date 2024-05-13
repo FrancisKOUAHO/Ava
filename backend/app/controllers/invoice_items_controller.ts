@@ -206,7 +206,9 @@ export default class InvoiceItemsController {
           });
         }
 
-        results.push(invoiceItem);
+         if(invoiceItem){
+           results.push(invoiceItem);
+         }
       });
 
       return response.status(200).json({
