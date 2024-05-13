@@ -43,62 +43,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useFetchData } from '@/app/hooks/useFetch'
-
-interface LineItem {
-  name?: string
-  price?: number
-  unity?: string
-  quantity?: number
-  lineTotal?: number
-  lineTotalTva?: number
-  tva?: number
-
-  [key: string]: any
-}
+import { CustomerProps } from '@/types/CustomerProps'
+import { LineItem } from '@/types/LineItemProps'
+import { SubTotal } from '@/types/SubTotalProps'
+import { InvoiceProps } from '@/types/InvoiceProps'
 
 interface ApiResponse<T> {
   data: T
-}
-
-interface InvoiceData {
-  user_id: string
-  id?: string
-  client_id: string
-  date?: string
-  due_date?: string
-  notes: string
-  terms: string
-  total_amount: number
-  status: string
-  discount: number
-}
-
-interface CustomerData {
-  id?: string
-  user_id: string
-  userId: string
-  company: string
-  address: string
-  city: string
-  zip: string
-  state: string
-  phone: string
-  email: string
-  last_name: string
-  lastName: string
-  first_name: string
-  firstName: string
-  vat_number: string
-  vatNumber: string
-  currency: string
-  siren_number: string
-  sirenNumber: string
-}
-
-interface SubTotal {
-  name?: string
-  discount?: number
-  total?: number
 }
 
 const Page = () => {
@@ -114,7 +65,7 @@ const Page = () => {
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
-  const [customer, setCustomer] = useState<CustomerData | null>({
+  const [customer, setCustomer] = useState<CustomerProps | null>({
     user_id: '',
     userId: '',
     company: '',
@@ -152,7 +103,7 @@ const Page = () => {
     }
   }, [lineItems])
 
-  const validateInvoiceData = (invoiceData: InvoiceData) => {
+  const validateInvoiceData = (invoiceData: InvoiceProps) => {
     const errors = []
 
     if (!invoiceData.client_id) {
@@ -171,8 +122,8 @@ const Page = () => {
   }
 
   const handleSelectCustomer = (customerId: string | undefined) => {
-    const selectedCustomer: CustomerData = customersData.find(
-      (c: CustomerData) => c.id === customerId,
+    const selectedCustomer: CustomerProps = customersData.find(
+      (c: CustomerProps) => c.id === customerId,
     )
     setCustomer(selectedCustomer)
     checkIfCustomerIsFull()
@@ -279,7 +230,7 @@ const Page = () => {
     )
   }
 
-  const SendCustomerMutation = useMutation<any, any, CustomerData>({
+  const SendCustomerMutation = useMutation<any, any, CustomerProps>({
     mutationFn: () => {
       if (!customer) {
         throw new Error(
@@ -316,7 +267,7 @@ const Page = () => {
     return snakeCaseObj
   }
 
-  const validateCustomerData = (customer: CustomerData) => {
+  const validateCustomerData = (customer: CustomerProps) => {
     const errors = []
 
     const requiredFields = [
@@ -334,7 +285,7 @@ const Page = () => {
     ]
 
     requiredFields.forEach((field) => {
-      if (customer[field as keyof CustomerData] === undefined) {
+      if (customer[field as keyof CustomerProps] === undefined) {
         errors.push(`${field} is required.`)
       }
     })
@@ -359,8 +310,8 @@ const Page = () => {
   const SendInvoiceMutation = useMutation<
     any,
     Error,
-    InvoiceData,
-    ApiResponse<InvoiceData>
+    InvoiceProps,
+    ApiResponse<InvoiceProps>
   >({
     mutationFn: (data) => {
       const fullData = {
@@ -375,7 +326,7 @@ const Page = () => {
       console.error('Error:', error.message)
       alert('Failed to send invoice.')
     },
-    onSuccess: (response: ApiResponse<InvoiceData>) => {
+    onSuccess: (response: ApiResponse<InvoiceProps>) => {
       queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
@@ -396,7 +347,7 @@ const Page = () => {
   })
 
   const handleSubmit = () => {
-    const newInvoiceData: InvoiceData = {
+    const newInvoiceData: InvoiceProps = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
       notes: notes,
@@ -557,9 +508,9 @@ const Page = () => {
     return pTotal - (pTotal * pdiscount) / 100
   }
 
-  const handleCustomerChange = (field: keyof CustomerData, value: string) => {
+  const handleCustomerChange = (field: keyof CustomerProps, value: string) => {
     const updatedCustomer = { ...customer, [field]: value }
-    const validatedCustomer: CustomerData = {
+    const validatedCustomer: CustomerProps = {
       id: updatedCustomer.id ?? '',
       user_id: updatedCustomer.user_id ?? '',
       userId: updatedCustomer.userId ?? '',
@@ -662,7 +613,7 @@ const Page = () => {
                         <CommandGroup>
                           <CommandList>
                             {customersData.map(
-                              (listOfCustomerNames: CustomerData) => (
+                              (listOfCustomerNames: CustomerProps) => (
                                 <CommandItem
                                   key={listOfCustomerNames.id}
                                   value={listOfCustomerNames.id}
@@ -1377,7 +1328,11 @@ const Page = () => {
           </div>
         </div>
 
-        <Preview />
+        <Preview
+          customer={customer}
+          lineItems={lineItems}
+          subTotal={subTotal}
+        />
       </form>
     </section>
   )

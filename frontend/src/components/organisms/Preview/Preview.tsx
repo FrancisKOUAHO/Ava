@@ -1,36 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { FunctionComponent } from 'react'
 import { FileText, ImagePlus, Printer, Scan } from 'lucide-react'
+import { useSirene } from '@/app/hooks/useSirene'
+import { CustomerProps } from '@/types/CustomerProps'
+import { LineItem } from '@/types/LineItemProps'
+import { SubTotal } from '@/types/SubTotalProps'
 
-interface LineItem {
-  item: string
-  rate: number
-  qty: number
-  lineTotal: number
+interface PreviewProps {
+  customer: CustomerProps | null
+  lineItems: LineItem[] | null
+  subTotal: SubTotal | null
 }
 
-const Preview = () => {
-  const [lineItems, setLineItems] = useState<LineItem[]>([
-    {
-      item: 'Design',
-      rate: 100,
-      qty: 1,
-      lineTotal: 100,
-    },
-    {
-      item: 'Development',
-      rate: 200,
-      qty: 1,
-      lineTotal: 200,
-    },
-    {
-      item: 'Marketing',
-      rate: 300,
-      qty: 1,
-      lineTotal: 300,
-    },
-  ])
+const Preview: FunctionComponent<PreviewProps> = ({
+  customer,
+  lineItems,
+  subTotal,
+}) => {
+  const { data: compagny } = useSirene()
+
+  console.log('lineItems', lineItems)
+  console.log('subTotal', subTotal)
+
+  if (!compagny || !customer || !subTotal) return null
 
   return (
     <div className="w-2/4 bg-white px-6 py-6 rounded-xl">
@@ -64,31 +57,23 @@ const Preview = () => {
                         <td className="flex items-center gap-2 p-1 text-center">
                           <div className="w-full">
                             <p className="text-black text-sm">Company</p>
-                            <p className="text-sm text-black/70">LetsGo</p>
+                            <p className="text-sm text-black/70">
+                              {compagny[0].companyName}
+                            </p>
                           </div>
                         </td>
                         <td className="p-1 text-center">
                           <div className="w-full">
                             <p className="text-black text-sm">Address</p>
                             <p className="text-sm text-black/70">
-                              1234 Main Street, Suite 123
+                              1234 Main Street
                             </p>
                           </div>
                         </td>
-                      </tr>
-                      <tr>
                         <td className="flex items-center gap-2 p-1 text-center">
                           <div className="w-full">
                             <p className="text-black text-sm">City</p>
                             <p className="text-sm text-black/70">New York</p>
-                          </div>
-                        </td>
-                        <td className="p-3 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm">Address n°2</p>
-                            <p className="text-sm text-black/70">
-                              1234 Main Street, Suite 123
-                            </p>
                           </div>
                         </td>
                       </tr>
@@ -123,12 +108,12 @@ const Preview = () => {
             </div>
           </div>
 
-          <div className="bg-blue-700 rounded-sm p-2 text-white">
+          <div className="bg-blue-700 rounded-sm p-2 text-white mb-2">
             <div className="flex justify-between">
               <p>Billed To</p>
               <div className="flex justify-center items-center gap-2">
-                <p>Amount Due</p>
-                <p>$ 1,234.00</p>
+                <p>Total à régler</p>
+                <p>{subTotal && subTotal.total} €</p>
               </div>
             </div>
           </div>
@@ -143,7 +128,7 @@ const Preview = () => {
                         <div className="w-full">
                           <p className="text-black text-sm">Client</p>
                           <p className="text-sm text-black/70">
-                            Francis KOUAHO
+                            {customer.company}
                           </p>
                         </div>
                       </td>
@@ -151,45 +136,41 @@ const Preview = () => {
                         <div className="w-full">
                           <p className="text-black text-sm">Address</p>
                           <p className="text-sm text-black/70">
-                            1234 Main Street, Suite 123
+                            {customer.address}
                           </p>
                         </div>
                       </td>
                       <td className="flex items-center gap-2 p-1 text-center">
                         <div className="w-full">
                           <p className="text-black text-sm">City</p>
-                          <p className="text-sm text-black/70">New York</p>
+                          <p className="text-sm text-black/70">
+                            {customer.city}
+                          </p>
                         </div>
                       </td>
                     </tr>
                     <tr>
-                      <td className="p-3 text-center">
-                        <div className="w-full">
-                          <p className="text-black text-sm">Address n°2</p>
-                          <p className="text-sm text-black/70">
-                            1234 Main Street, Suite 123
-                          </p>
-                        </div>
-                      </td>
                       <td className="flex items-center gap-2 p-1 text-center">
                         <div className="w-full">
                           <p className="text-black text-sm">Country</p>
-                          <p className="text-sm text-black/70">United States</p>
+                          <p className="text-sm text-black/70">
+                            {customer.country}
+                          </p>
                         </div>
                       </td>
                       <td className="p-1 text-center">
                         <div className="w-full">
                           <p className="text-black text-sm">ZIP Code</p>
-                          <p className="text-sm text-black/70">12345</p>
+                          <p className="text-sm text-black/70">
+                            {customer.zip}
+                          </p>
                         </div>
                       </td>
-                    </tr>
-                    <tr>
                       <td className="p-1 text-center">
                         <div className="w-full">
-                          <p className="text-black text-sm">Phone</p>
+                          <p className="text-black text-sm"> Numero SIREN</p>
                           <p className="text-sm text-black/70">
-                            +1 123 456 7890
+                            {customer.sirenNumber}
                           </p>
                         </div>
                       </td>
@@ -207,9 +188,9 @@ const Preview = () => {
                   <th className="flex items-center gap-2 p-3 text-center">
                     Item
                   </th>
-                  <th className="p-3 text-center">Rate</th>
                   <th className="p-3 text-center">Qty</th>
-                  <th className="p-3 text-center">Line Total</th>
+                  <th className="p-3 text-center">Rate</th>
+                  <th className="p-3 text-center">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -217,10 +198,10 @@ const Preview = () => {
                   lineItems.map((lineItem: LineItem, index: number) => (
                     <tr key={index} className="bg-[#e7effc] rounded-lg">
                       <td className="flex items-center gap-2 p-3 text-center">
-                        {lineItem.item}
+                        {lineItem.name}
                       </td>
-                      <td className="p-3 text-center">{lineItem.rate}</td>
-                      <td className="p-3 text-center">{lineItem.qty}</td>
+                      <td className="p-3 text-center">{lineItem.quantity}</td>
+                      <td className="p-3 text-center">{lineItem.tva}</td>
                       <td className="p-3 text-center">{lineItem.lineTotal}</td>
                     </tr>
                   ))}
@@ -230,7 +211,7 @@ const Preview = () => {
 
           <div className="flex flex-col w-full mb-6">
             <div className="flex justify-start items-center w-full gap-3 mb-2">
-              <p className="text-sm">Subtotal</p>
+              <p className="text-sm">Appliquer une réduction</p>
               <hr className="w-full text-blue-700" />
             </div>
             <div>
@@ -274,10 +255,10 @@ const Preview = () => {
                 <tbody>
                   <tr>
                     <td className="font-black text-black">
-                      <h5>Amount Due</h5>
+                      <h5>Total à régler</h5>
                     </td>
                     <td className="p-3 text-center font-black text-black">
-                      €100
+                      {subTotal && subTotal.total}
                     </td>
                   </tr>
                 </tbody>
