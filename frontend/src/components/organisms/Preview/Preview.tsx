@@ -58,7 +58,7 @@ const Preview: FunctionComponent<PreviewProps> = ({
                           <div className="w-full">
                             <p className="text-black text-sm">Company</p>
                             <p className="text-sm text-black/70">
-                              {compagny[0].companyName}
+                              {compagny[0]?.companyName}
                             </p>
                           </div>
                         </td>

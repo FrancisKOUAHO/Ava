@@ -17,6 +17,7 @@ export default class InvoicesSchema extends BaseSchema {
       table.decimal('discount', 12, 2).notNullable()
       table.decimal('total_amount', 12, 2).nullable()
       table.string('status').nullable()
+      table.boolean('is_invoice')
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
     })

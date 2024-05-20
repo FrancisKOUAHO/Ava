@@ -71,7 +71,6 @@ interface InvoiceData {
   total_amount: number
   status: string
   discount: number
-  is_invoice: number
 }
 
 interface CustomerData {
@@ -102,9 +101,10 @@ interface SubTotal {
   total?: number
 }
 
-const Page = () => {
+const Page = ({ params }: { params: { id: string } }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
@@ -135,25 +135,81 @@ const Page = () => {
   })
   const [notes, setnotes] = useState<string>('')
   const [terms, setTerms] = useState<string>('')
+  const [totalInvoices, setTotalInvoices] = useState<number>(0)
+  const [totalInvoicesWithoutTva, setTotalInvoicesWithoutTva] =
+    useState<number>(0)
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
     discount: 0,
     total: 0,
   })
-  const [formValid, setFormValid] = useState(false)
+  const [formValid, setFormValid] = useState(true)
+  const { data: customersData } = useFetchData('billing/customer', 'customer')
+  const { data: invoiceDetails } = useFetchData(
+    `billing/invoice/${params.id}`,
+    'invoice',
+  )
+  const { data: invoiceItemDetails } = useFetchData(
+    `billing/invoice-items/${params.id}`,
+    'invoice-item',
+  )
+
+  // Effect for loading initial data
+  useEffect(() => {
+    if (invoiceDetails) {
+      setInvoiceData(invoiceDetails)
+      const foundCustomer = customersData.find(
+        (cust: InvoiceData) => cust.id === invoiceDetails.customerId,
+      )
+      if (foundCustomer && foundCustomer !== customer) {
+        setCustomer(foundCustomer)
+      }
+    }
+
+    if (invoiceItemDetails && invoiceItemDetails.data.length > 0) {
+      const enhancedItems = invoiceItemDetails.data.map((item: LineItem) => ({
+        ...item,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+        lineTotal: Number(item.lineTotal),
+        lineTotalTva: Number(item.lineTotalTva),
+        tva: Number(item.tva),
+      }))
+      setLineItems(enhancedItems)
+    }
+  }, [invoiceDetails, customersData, invoiceItemDetails])
+
+  // Effect for auto-selecting first customer
+  useEffect(() => {
+    if (
+      customersData &&
+      customersData.length > 0 &&
+      customer?.id !== customersData[0].id
+    ) {
+      handleSelectCustomer(customersData[0].id)
+    }
+  }, [customersData]) // Removed `customer` from dependencies to avoid re-triggering when customer is set
+
+  // Effect for validating line items
+  useEffect(() => {
+    const allValid = lineItems.every(
+      (item) => item.name && item.price && item.quantity,
+    )
+    setFormValid(allValid)
+    setTotalInvoices(getTotalInvoices())
+    setTotalInvoicesWithoutTva(getTotalInvoices(false))
+  }, [lineItems])
 
   useEffect(() => {
-    if (lineItems.length > 0) {
-      const allValid = lineItems.every(
-        (item: LineItem) => item.name && item.price && item.quantity,
-      )
-      setFormValid(allValid)
-    }
-  }, [lineItems])
+    console.log('invoiceDetails 00')
+
+    console.log(invoiceData)
+  }, [invoiceData])
 
   const validateInvoiceData = (invoiceData: InvoiceData) => {
     const errors = []
-
+    console.log('invoiceData')
+    console.log(invoiceData)
     if (!invoiceData.client_id) {
       errors.push('Client ID is required.')
     }
@@ -168,8 +224,6 @@ const Page = () => {
 
     return errors
   }
-
-  const { data: customersData } = useFetchData('billing/customer', 'customer')
 
   const handleSelectCustomer = (customerId: string | undefined) => {
     const selectedCustomer: CustomerData = customersData.find(
@@ -215,7 +269,7 @@ const Page = () => {
         [field]: numericValue,
         total:
           field === 'discount'
-            ? getSubTotal(getTotalInvoices(), numericValue)
+            ? getSubTotal(totalInvoices, numericValue)
             : prevState.total,
       }
 
@@ -348,7 +402,8 @@ const Page = () => {
   }
 
   const SendItemsDataMutation = useMutation<LineItem[], Error, LineItem>({
-    mutationFn: (data) => api.post('billing/invoice-item-many', data),
+    mutationFn: (data) =>
+      api.post('billing/update-or-insert-invoice-item', data),
     onError: (error: any) => {
       throw new Error(error.message)
     },
@@ -369,9 +424,8 @@ const Page = () => {
         discount: data.discount,
         notes: data.notes,
         terms: data.terms,
-        is_invoice: 1,
       }
-      return api.post('billing/invoice', fullData)
+      return api.put(`billing/invoice/${params.id}`, fullData)
     },
     onError: (error: any) => {
       console.error('Error:', error.message)
@@ -383,12 +437,12 @@ const Page = () => {
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
           ...item,
-          invoice_id: response.data.id,
+          invoice_id: params.id,
         }))
         const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
         SendItemsDataMutation.mutate(transformedData as LineItem[])
-        toast.success('Facture bien envoyée', {
+        toast.success('Devis bien envoyée', {
           position: 'top-right',
         })
       } else {
@@ -401,10 +455,10 @@ const Page = () => {
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
-      notes: notes,
-      terms: terms,
+      notes: invoiceData?.notes ?? '',
+      terms: invoiceData?.terms ?? '',
       total_amount: Number(
-        (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
+        (totalInvoices - (subTotal.discount ?? 0)).toFixed(2),
       ),
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
@@ -473,16 +527,6 @@ const Page = () => {
       status: 'draft',
     }
 
-    const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
-      name: lineItem.name,
-      price: lineItem.price,
-      unity: lineItem.unity,
-      quantity: lineItem.quantity,
-      lineTotal: lineItem.lineTotal,
-      lineTotalTva: lineItem.lineTotalTva,
-      tva: lineItem.tva,
-    }))
-
     try {
       const response = await SendInvoiceMutation.mutateAsync(invoiceData)
 
@@ -529,7 +573,7 @@ const Page = () => {
 
     setSubTotal((prevState: SubTotal) => ({
       ...prevState,
-      total: getSubTotal(getTotalInvoices()),
+      total: getSubTotal(totalInvoices),
     }))
   }
 
@@ -544,17 +588,18 @@ const Page = () => {
   }
 
   const getTotalInvoices = (withTva = true) => {
-    if (!Array.isArray(lineItems)) {
+    console.log('lineItems :', lineItems)
+    if (!Array.isArray(lineItems) || lineItems.length === 0) {
       return 0
     }
+    console.log('ic :')
 
     return lineItems.reduce((acc, lineItem) => {
-      return (
-        acc + (withTva ? lineItem.lineTotalTva ?? 0 : lineItem.lineTotal ?? 0)
-      )
+      const total = withTva ? lineItem.lineTotalTva : lineItem.lineTotal
+      console.log('total :', total)
+      return acc + (total ?? 0)
     }, 0)
   }
-
   const getSubTotal = (pTotal: number, pdiscount: number = 0): number => {
     return pTotal - (pTotal * pdiscount) / 100
   }
@@ -603,13 +648,13 @@ const Page = () => {
           <header className="flex justify-between items-center gap-12">
             <div className="flex justify-center items-center">
               <h3 className="text-black text-lg font-semibold">
-                Créer une Facture
+                Créer un Devis
               </h3>
             </div>
             <div className="text-black">
               <a href="/" className="flex justify-center items-center gap-2">
                 <SquareMenu />
-                Liste de facture
+                Liste de Devis
               </a>
             </div>
           </header>
@@ -720,22 +765,6 @@ const Page = () => {
                           handleCustomerChange('sirenNumber', e.target.value)
                         }
                         placeholder="987654321"
-                      />
-                    </div>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="firstName" className="mb-2">
-                        E-mail
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="email"
-                        name="email"
-                        value={customer ? customer.email : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('email', e.target.value)
-                        }
-                        placeholder="Jean@mail.fr"
                       />
                     </div>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
@@ -950,7 +979,7 @@ const Page = () => {
                               className="flex items-center gap-2 w-full"
                               onClick={() => makeEditable(index)}
                             >
-                              Entrer un produit à facturer
+                              Entrer un produit à Devisr
                               <PencilLine
                                 className="w-4 h-4 hover:text-blue-700"
                                 id="name"
@@ -978,7 +1007,7 @@ const Page = () => {
                               className="flex justify-center items-center gap-2 w-full"
                               onClick={() => makeEditable(index)}
                             >
-                              €{lineItem.price}
+                              {lineItem.price}€
                               <PencilLine
                                 className="w-4 h-4 hover:text-blue-700"
                                 id="item"
@@ -1251,7 +1280,7 @@ const Page = () => {
                               readOnly
                               placeholder="1"
                               value={(
-                                getTotalInvoices() - (subTotal.discount ?? 0)
+                                totalInvoices - (subTotal.discount ?? 0)
                               ).toFixed(2)}
                             />
                           )}
@@ -1290,7 +1319,7 @@ const Page = () => {
                             id="total"
                             placeholder="100"
                             value={(
-                              getTotalInvoices(false) - (subTotal.discount ?? 0)
+                              totalInvoicesWithoutTva - (subTotal.discount ?? 0)
                             ).toFixed(2)}
                             readOnly
                           />
@@ -1301,7 +1330,7 @@ const Page = () => {
                             type="number"
                             id="totalTva"
                             name="totalTva"
-                            value={getTotalInvoices().toFixed(2)}
+                            value={totalInvoices.toFixed(2)}
                             readOnly
                             placeholder="100"
                           />
@@ -1313,7 +1342,7 @@ const Page = () => {
                             id="totalTva"
                             name="totalTva"
                             value={(
-                              getTotalInvoices() - (subTotal.discount ?? 0)
+                              totalInvoices - (subTotal.discount ?? 0)
                             ).toFixed(2)}
                             readOnly
                             placeholder="100"
@@ -1334,9 +1363,9 @@ const Page = () => {
                           <h5>Total à régler</h5>
                         </td>
                         <td className="p-3 text-center font-black text-black">
-                          {(
-                            getTotalInvoices() - (subTotal.discount ?? 0)
-                          ).toFixed(2)}
+                          {(totalInvoices - (subTotal.discount ?? 0)).toFixed(
+                            2,
+                          )}
                           €
                         </td>
                       </tr>
@@ -1355,10 +1384,9 @@ const Page = () => {
                       className="w-full text-sm font-normal"
                       onClick={makeEditablenotes}
                     >
-                      Les factures devront être réglées en Euros (€) dès
-                      réception, et au plus tard dans un délai de X jours (délai
-                      inférieur ou égal à 45 jours fin de mois ou 60 jours) à
-                      partir de la date de leur émission
+                      {invoiceData?.notes ||
+                        'Les Devis devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
+
                       <PencilLine
                         className="w-4 h-4 hover:text-blue-700"
                         id="notes"
@@ -1370,6 +1398,7 @@ const Page = () => {
                       id="notess"
                       name="notess"
                       placeholder="notess"
+                      value={invoiceData?.notes}
                       onChange={(e) => setnotes(e.target.value)}
                     />
                   )}
@@ -1386,10 +1415,9 @@ const Page = () => {
                       className="w-full text-sm font-normal"
                       onClick={makeEditableTerms}
                     >
-                      Les factures devront être réglées en Euros (€) dès
-                      réception, et au plus tard dans un délai de X jours (délai
-                      inférieur ou égal à 45 jours fin de mois ou 60 jours) à
-                      partir de la date de leur émission
+                      {invoiceData?.terms ||
+                        'Les Devis devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
+
                       <PencilLine
                         className="w-4 h-4 hover:text-blue-700"
                         id="terms"
@@ -1400,6 +1428,7 @@ const Page = () => {
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                       id="terms"
                       name="terms"
+                      value={invoiceData?.terms}
                       placeholder="Terms"
                       onChange={(e) => setTerms(e.target.value)}
                     />
@@ -1416,7 +1445,7 @@ const Page = () => {
                   }}
                 />
                 <ButtonUi
-                  label="Envoyer la facture"
+                  label="Envoyer le Devis"
                   type="button"
                   onClick={() => {
                     handleSubmit(false)
@@ -1427,11 +1456,7 @@ const Page = () => {
           </div>
         </div>
 
-        <Preview
-          customer={customer}
-          lineItems={lineItems}
-          subTotal={subTotal}
-        />
+        <Preview customer={null} lineItems={null} subTotal={null} />
       </form>
     </section>
   )

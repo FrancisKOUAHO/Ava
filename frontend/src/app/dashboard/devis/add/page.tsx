@@ -369,7 +369,8 @@ const Page = () => {
         discount: data.discount,
         notes: data.notes,
         terms: data.terms,
-        is_invoice: 1,
+        is_invoice: 0,
+
       }
       return api.post('billing/invoice', fullData)
     },
@@ -388,7 +389,7 @@ const Page = () => {
         const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
         SendItemsDataMutation.mutate(transformedData as LineItem[])
-        toast.success('Facture bien envoyée', {
+        toast.success('Devis bien envoyée', {
           position: 'top-right',
         })
       } else {
@@ -603,13 +604,13 @@ const Page = () => {
           <header className="flex justify-between items-center gap-12">
             <div className="flex justify-center items-center">
               <h3 className="text-black text-lg font-semibold">
-                Créer une Facture
+                Créer un Devis
               </h3>
             </div>
             <div className="text-black">
               <a href="/" className="flex justify-center items-center gap-2">
                 <SquareMenu />
-                Liste de facture
+                Liste de Devis
               </a>
             </div>
           </header>
@@ -950,7 +951,7 @@ const Page = () => {
                               className="flex items-center gap-2 w-full"
                               onClick={() => makeEditable(index)}
                             >
-                              Entrer un produit à facturer
+                              Entrer un produit à Devisr
                               <PencilLine
                                 className="w-4 h-4 hover:text-blue-700"
                                 id="name"
@@ -1355,7 +1356,7 @@ const Page = () => {
                       className="w-full text-sm font-normal"
                       onClick={makeEditablenotes}
                     >
-                      Les factures devront être réglées en Euros (€) dès
+                      Les Devis devront être réglées en Euros (€) dès
                       réception, et au plus tard dans un délai de X jours (délai
                       inférieur ou égal à 45 jours fin de mois ou 60 jours) à
                       partir de la date de leur émission
@@ -1386,7 +1387,7 @@ const Page = () => {
                       className="w-full text-sm font-normal"
                       onClick={makeEditableTerms}
                     >
-                      Les factures devront être réglées en Euros (€) dès
+                      Les Devis devront être réglées en Euros (€) dès
                       réception, et au plus tard dans un délai de X jours (délai
                       inférieur ou égal à 45 jours fin de mois ou 60 jours) à
                       partir de la date de leur émission
@@ -1416,7 +1417,7 @@ const Page = () => {
                   }}
                 />
                 <ButtonUi
-                  label="Envoyer la facture"
+                  label="Envoyer la Devis"
                   type="button"
                   onClick={() => {
                     handleSubmit(false)

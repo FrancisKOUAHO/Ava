@@ -17,9 +17,12 @@ import { usePathname } from 'next/navigation'
 const Sidebar: FunctionComponent = () => {
   const pathname = usePathname()
 
-  const [hide, sethide] = useState<boolean>(false)
+    const [showInvoiceMenu, setShowInvoiceMenu] = useState(false);
+    const [showDevisMenu, setShowDevisMenu] = useState(false);
 
-  const toggle = () => sethide(!hide)
+    // Toggle functions for each submenu
+    const toggleInvoiceMenu = () => setShowInvoiceMenu(!showInvoiceMenu);
+    const toggleDevisMenu = () => setShowDevisMenu(!showDevisMenu);
 
   return (
     <section className="c-sidebar">
@@ -30,13 +33,13 @@ const Sidebar: FunctionComponent = () => {
       <Link
         href="/dashboard"
         className={pathname === '/dashboard' ? 'active' : ''}
-        onClick={() => sethide(false)}
+        onClick={() => setShowInvoiceMenu(false)}
       >
         <Home />
         Dashboard
       </Link>
       <button
-        onClick={toggle}
+        onClick={toggleInvoiceMenu}
         className={
           pathname === '/dashboard/invoices' ||
           pathname === '/dashboard/invoices/add' ||
@@ -50,7 +53,7 @@ const Sidebar: FunctionComponent = () => {
       </button>
       <div
         className={
-          !hide
+          !showInvoiceMenu
             ? 'c-sidebar__sub-menu c-sidebar__sub-menu--hide'
             : 'c-sidebar__sub-menu c-sidebar__sub-menu--link active'
         }
@@ -73,10 +76,48 @@ const Sidebar: FunctionComponent = () => {
         </Link>
       </div>
 
+        <button
+        onClick={toggleDevisMenu}
+        className={
+          pathname === '/dashboard/devis' ||
+          pathname === '/dashboard/devis/add' ||
+          pathname === '/dashboard/devis/download'
+            ? 'active'
+            : ''
+        }
+      >
+        <Files />
+        Devis
+      </button>
+      <div
+        className={
+          !showDevisMenu
+            ? 'c-sidebar__sub-menu c-sidebar__sub-menu--hide'
+            : 'c-sidebar__sub-menu c-sidebar__sub-menu--link active'
+        }
+      >
+        <Link
+          href="/dashboard/devis/add"
+          className={pathname === '/dashboard/devis/add' ? 'active' : ''}
+        >
+          <FilePlus />
+          Créer une devis
+        </Link>
+        <Link
+          href="/dashboard/devis/summaries"
+          className={
+            pathname === '/dashboard/devis/summaries' ? 'active' : ''
+          }
+        >
+          <FileSearch2 />
+          Liste des devis
+        </Link>
+      </div>
+
       <Link
         href="/dashboard/calendar"
         className={pathname === '/dashboard/calendar' ? 'active' : ''}
-        onClick={() => sethide(false)}
+        onClick={() => setShowDevisMenu(false)}
       >
         <CalendarDays />
         Calendar
