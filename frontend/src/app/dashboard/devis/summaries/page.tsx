@@ -56,11 +56,11 @@ const Page = () => {
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const response = await api.get('billing/invoice-data')
+        const response = await api.get('billing/devis-data')
         const data = await response.data
         setInvoices(data)
       } catch (error) {
-        console.error('Failed to fetch invoices', error)
+        console.error('Failed to fetch devis', error)
       }
     }
 
@@ -83,27 +83,6 @@ const Page = () => {
   const toggleDropdown = (id: string | undefined) => {
     setOpenDropdownId((prevId) => (prevId === id ? null : id || null))
   }
-
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      const response = await api.put(`billing/invoice/${id}`, { status });
-      if (response.status === 200) {
-        // Update the state with the new status
-        setInvoices(invoices => invoices.map(invoice => {
-          if (invoice.id === id) {
-            return { ...invoice, status };
-          }
-          return invoice;
-        }));
-      } else {
-        // Handle possible errors
-        console.error('Failed to update the invoice status:', response);
-      }
-    } catch (error) {
-      console.error('Error updating the invoice status:', error);
-    }
-  };
-
 
   const openDeleteModal = (invoiceId: string | undefined) => {
     setInvoiceIdToDelete(invoiceId || null)
@@ -129,17 +108,38 @@ const Page = () => {
     } catch (error) {}
   }
 
+  const updateStatus = async (id: string, status: string) => {
+    try {
+      const response = await api.put(`billing/invoice/${id}`, { status });
+      if (response.status === 200) {
+        // Update the state with the new status
+        setInvoices(invoices => invoices.map(invoice => {
+          if (invoice.id === id) {
+            return { ...invoice, status };
+          }
+          return invoice;
+        }));
+      } else {
+        // Handle possible errors
+        console.error('Failed to update the invoice status:', response);
+      }
+    } catch (error) {
+      console.error('Error updating the invoice status:', error);
+    }
+  };
+
+
   return (
     <section className="px-6 py-6">
       <header className="flex justify-between items-center">
         <div className="flex justify-center items-center gap-12">
-          <h5 className="text-black text-lg font-semibold">Factures</h5>
+          <h5 className="text-black text-lg font-semibold">Devis</h5>
           <a
-            href="/dashboard/invoices/add"
+            href="/dashboard/devis/add"
             className="flex justify-center gap-1 items-center text-black text-sm"
           >
             <CirclePlus className="w-3 h-3" />
-            Créer une Facture
+            Créer un Devis
           </a>
         </div>
         <div className="relative text-gray-600">
@@ -260,7 +260,7 @@ const Page = () => {
                             onClick={() => updateStatus(invoice.id,"brouillon")}
 
                         >
-                            <span>Brouillon</span> {/* Wrapped text in a span for better control */}
+                          <span>Brouillon</span> {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => updateStatus(invoice.id,"payé")}
@@ -272,7 +272,7 @@ const Page = () => {
                             onClick={() => updateStatus(invoice.id,"caduque")}
 
                         >
-                            <span>Caduque</span> {/* Wrapped text in a span for better control */}
+                          <span>Caduque</span> {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>

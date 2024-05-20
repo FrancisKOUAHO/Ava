@@ -36,6 +36,9 @@ export default class Invoice extends BaseModel {
   @column()
   declare discount: number
 
+  @column()
+  declare is_invoice: boolean
+
   @belongsTo(() => User, {
     foreignKey: 'user_id',
   })

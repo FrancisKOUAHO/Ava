@@ -49,10 +49,12 @@
             .group(() => {
               router.resource('customer', ClientsController).apiOnly()
               router.resource('invoice-item', InvoiceItemsController).apiOnly()
+              router.resource('devis-item', InvoiceItemsController).apiOnly()
               router.get('invoice-items/:invoice_id', [InvoiceItemsController,'getInvoiceItems'])
               router.post('invoice-item-many', [InvoiceItemsController, 'storeAll'])
               router.post('update-or-insert-invoice-item', [InvoiceItemsController, 'upsert'])
               router.get('invoice-data', [InvoicesController, 'getAllInvoiceData'])
+              router.get('devis-data', [InvoicesController, 'getAllDevisData'])
                 router.get('connect-to-google', [SessionController, 'connectToGoogle'])
 
               router.resource('invoice', InvoicesController).apiOnly()

@@ -7,8 +7,10 @@ export default class InvoicesController {
   /**
    * Display a list of resource
    */
-  async index({}: HttpContext) {
-    return Invoice.all()
+  async index({ request, response }: HttpContext) {
+    const is_invoice = request.input('is_invoice', false); // Defaults to fetching invoices
+    const documents = await Invoice.query().where('is_invoice', is_invoice);
+    return response.ok(documents);
   }
 
   /**
@@ -99,24 +101,47 @@ export default class InvoicesController {
     return response.noContent()
   }
 
-  public async getAllInvoiceData({ response }: HttpContext) {
+  public async getAllInvoiceData({  response }: HttpContext) {
     try {
       const invoices = await Invoice.query()
-        .preload('client', (query) => {
-          query.select('id', 'first_name', 'last_name') // Select specific fields from the client
-        })
-        .select(
-          'invoices.*',
-          db.rawQuery(
-            `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
+          .where('is_invoice', 1) // Dynamically filter based on the input
+          .preload('client', (query) => {
+            query.select('id', 'first_name', 'last_name') // Select specific fields from the client
+          })
+          .select(
+              'invoices.*',
+              db.rawQuery(
+                  `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
+              )
           )
-        )
-        .orderBy('invoices.created_at', 'desc')
+          .orderBy('invoices.created_at', 'desc')
 
-      return response.ok(invoices)
+      return response.ok(invoices);
     } catch (error) {
-      console.error('Failed to fetch invoices', error)
-      return response.status(500).send('Failed to fetch invoices')
+      console.error('Failed to fetch documents', error);
+      return response.status(500).send('Failed to fetch documents');
     }
   }
+  public async getAllDevisData({ response }: HttpContext) {
+    try {
+      const invoices = await Invoice.query()
+          .where('is_invoice', 0) // Dynamically filter based on the input
+          .preload('client', (query) => {
+            query.select('id', 'first_name', 'last_name') // Select specific fields from the client
+          })
+          .select(
+              'invoices.*',
+              db.rawQuery(
+                  `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
+              )
+          )
+          .orderBy('invoices.created_at', 'desc')
+
+      return response.ok(invoices);
+    } catch (error) {
+      console.error('Failed to fetch documents', error);
+      return response.status(500).send('Failed to fetch documents');
+    }
+  }
+
 }
