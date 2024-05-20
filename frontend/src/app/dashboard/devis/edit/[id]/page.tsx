@@ -528,7 +528,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       discount: 0,
       notes: values.notes,
       terms: values.terms,
-      status: 'draft',
+      status: 'brouillon',
       is_invoice:0,
     }
 
