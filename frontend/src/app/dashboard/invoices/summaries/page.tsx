@@ -84,13 +84,14 @@ const Page = () => {
     setOpenDropdownId((prevId) => (prevId === id ? null : id || null))
   }
 
-  const updateStatus = async (id: string, status: string) => {
+  const updateStatus = async (id: string, status: InvoiceStatus) => {
     try {
       const response = await api.put(`billing/invoice/${id}`, { status });
       if (response.status === 200) {
         // Update the state with the new status
         setInvoices(invoices => invoices.map(invoice => {
           if (invoice.id === id) {
+            // Ensure that the type of `status` is compatible with `InvoiceStatus`
             return { ...invoice, status };
           }
           return invoice;
@@ -103,6 +104,7 @@ const Page = () => {
       console.error('Error updating the invoice status:', error);
     }
   };
+
 
 
   const openDeleteModal = (invoiceId: string | undefined) => {
