@@ -409,7 +409,6 @@ const Page = () => {
       ),
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
-      is_invoice: 0,
     }
 
     if (!formValid) {
@@ -473,7 +472,6 @@ const Page = () => {
       notes: values.notes,
       terms: values.terms,
       status: 'draft',
-      is_invoice: 0,
     }
 
     const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
