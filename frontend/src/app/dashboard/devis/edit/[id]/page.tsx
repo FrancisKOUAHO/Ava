@@ -462,6 +462,8 @@ const Page = ({ params }: { params: { id: string } }) => {
       ),
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
+      is_invoice: 0,
+
     }
 
     if (!formValid) {
