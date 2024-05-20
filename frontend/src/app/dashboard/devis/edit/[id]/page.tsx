@@ -70,8 +70,7 @@ interface InvoiceData {
   terms: string
   total_amount: number
   status: string
-  discount: number,
-  is_invoice?: number
+  discount: number
 }
 
 interface CustomerData {
@@ -425,7 +424,6 @@ const Page = ({ params }: { params: { id: string } }) => {
         discount: data.discount,
         notes: data.notes,
         terms: data.terms,
-        is_invoice:0,
       }
       return api.put(`billing/invoice/${params.id}`, fullData)
     },
@@ -464,8 +462,6 @@ const Page = ({ params }: { params: { id: string } }) => {
       ),
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
-      is_invoice: 0,
-
     }
 
     if (!formValid) {
@@ -528,8 +524,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       discount: 0,
       notes: values.notes,
       terms: values.terms,
-      status: 'brouillon',
-      is_invoice:0,
+      status: 'draft',
     }
 
     try {

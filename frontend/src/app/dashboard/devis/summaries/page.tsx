@@ -108,14 +108,13 @@ const Page = () => {
     } catch (error) {}
   }
 
-  const updateStatus = async (id: string, status: InvoiceStatus) => {
+  const updateStatus = async (id: string, status: string) => {
     try {
       const response = await api.put(`billing/invoice/${id}`, { status });
       if (response.status === 200) {
         // Update the state with the new status
         setInvoices(invoices => invoices.map(invoice => {
           if (invoice.id === id) {
-            // Ensure that the type of `status` is compatible with `InvoiceStatus`
             return { ...invoice, status };
           }
           return invoice;
