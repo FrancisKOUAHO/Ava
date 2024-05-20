@@ -19,6 +19,10 @@ const Sidebar: FunctionComponent = () => {
 
     const [showInvoiceMenu, setShowInvoiceMenu] = useState(false);
     const [showDevisMenu, setShowDevisMenu] = useState(false);
+    const [hide, sethide] = useState<boolean>(false)
+
+    const toggle = () => sethide(!hide)
+    const toggle = () => sethide(!hide)
 
     // Toggle functions for each submenu
     const toggleInvoiceMenu = () => setShowInvoiceMenu(!showInvoiceMenu);
