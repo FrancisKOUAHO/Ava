@@ -71,6 +71,7 @@ interface InvoiceData {
   total_amount: number
   status: string
   discount: number
+  is_invoice?:number
 }
 
 interface CustomerData {
@@ -424,6 +425,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         discount: data.discount,
         notes: data.notes,
         terms: data.terms,
+        is_invoice:1,
       }
       return api.put(`billing/invoice/${params.id}`, fullData)
     },
@@ -527,6 +529,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       notes: values.notes,
       terms: values.terms,
       status: 'draft',
+      is_invoice:0
     }
 
     try {

@@ -473,6 +473,7 @@ const Page = () => {
       notes: values.notes,
       terms: values.terms,
       status: 'draft',
+      is_invoice:number,
     }
 
     const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
