@@ -1,11 +1,15 @@
 'use client'
 
-import { FunctionComponent } from 'react'
+import React, { FunctionComponent,useRef } from 'react'
 import { FileText, ImagePlus, Printer, Scan } from 'lucide-react'
 import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+
 
 interface PreviewProps {
   customer: CustomerProps | null
@@ -25,24 +29,71 @@ const Preview: FunctionComponent<PreviewProps> = ({
 
   if (!compagny || !customer || !subTotal) return null
 
+  const pdfRef = useRef();
+
+
+  const downloadPDF = () => {
+    const input = pdfRef.current;
+    console.log("input")
+    console.log(input)
+    console.log(input.scrollHeight)
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    // Dynamically calculate scale to fit the content into the PDF page width
+    const pageWidth = pdf.internal.pageSize.getWidth() - 20; // Allow for some margin
+    const scale = pageWidth / input.scrollWidth;
+
+    // Now, capture the entire height of the element, not just what is visible on screen
+    const fullHeight = input.scrollHeight;
+
+    // Set html2canvas options to capture the full scrollable area
+    const options = {
+      scale: scale,
+      //scrollY: -window.scrollY, // Negate the window's current scroll position
+      //scrollX: -window.scrollX,
+      windowHeight: 1500,
+      //windowWidth: input.scrollWidth
+    };
+
+    // Render the HTML using the options set above
+    pdf.html(input, {
+      html2canvas: options,
+      callback: function (doc) {
+        // Auto-add pages if content exceeds one page
+        const contentHeight = fullHeight * scale;
+        let yPos = 10;
+        while (contentHeight > yPos + 10) {
+          yPos += pdf.internal.pageSize.getHeight() - 20; // margin considered
+          if (contentHeight > yPos) {
+            pdf.addPage();
+          }
+        }
+        doc.save('download.pdf');
+      },
+      x: 10,
+      y: 10
+    });
+  };
+
+
+
+
+
   return (
     <div className="w-2/4 bg-white px-6 py-6 rounded-xl">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
-          <button>
-            <Scan className="text-black hover:text-blue-700 w-5 h-5" />
-          </button>
-          <button>
-            <FileText className="text-black hover:text-blue-700 w-5 h-5" />
-          </button>
-          <button>
-            <Printer className="text-black hover:text-blue-700 w-5 h-5" />
+
+          <button onClick={downloadPDF}>
+
+          <FileText className="text-black hover:text-blue-700 w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl my-8 p-2 h-[70vh] overflow-auto">
+      <div className="bg-[#f2f5fd] rounded-xl my-8 p-2 h-[70vh] overflow-auto" ref={pdfRef}>
         <div className="bg-white px-6 py-2 rounded-xl">
           <div className="flex justify-center p-4">
             <div className="flex w-1/3">
@@ -294,6 +345,7 @@ const Preview: FunctionComponent<PreviewProps> = ({
             </div>
           </div>
         </div>
+
       </div>
     </div>
   )

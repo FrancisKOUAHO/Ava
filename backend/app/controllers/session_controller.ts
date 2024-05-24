@@ -37,25 +37,38 @@ export default class SessionController {
       .json({ message: 'Veuillez consulter votre boîte de réception pour vous connecter.' })
   }
 
-  async sendLoginEmail(user: User) {
-    await mail.use('resend').sendLater((message) => {
-      message.from('contact@plumera.fr').to(user.email).subject('Invitation à rejoindre une équipe')
-        .html(`
+  async sendLoginEmail(user) {
+    await mail.use('resend').sendLater(message => {
+      message
+          .from('contact@plumera.fr')
+          .to(user.email)
+          .subject('Invitation à rejoindre une équipe')
+          .html(`
         <!DOCTYPE html>
         <html lang="fr">
           <head>
-            <title>Invitation à signer un document</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Invitation à rejoindre une équipe</title>
+            <style>
+              body { font-family: 'Arial', sans-serif; line-height: 1.6; }
+              p { color: #333; }
+            </style>
           </head>
           <body>
-           <p>
-             Cliquez sur le lien ci-dessous pour vous connecter:
-             http://localhost:3000/verify/?magic_link_token=${user.magic_link_token}
-           </p>
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+              <h1>Bienvenue chez Plumera!</h1>
+              <p>
+                Veuillez cliquer sur le lien ci-dessous pour vous connecter:
+                <a href="http://localhost:3000/verify/?magic_link_token=${user.magic_link_token}" style="color: #0652DD;">Cliquez ici pour vous connecter</a>
+              </p>
+            </div>
           </body>
         </html>
-        `)
-    })
+      `)
+    });
   }
+
 
   async loginWithToken({ params, response, auth }: HttpContext) {
     const token = params.id

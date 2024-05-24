@@ -656,12 +656,12 @@ const Page = ({ params }: { params: { id: string } }) => {
                 Créer une Facture
               </h3>
             </div>
-            <div className="text-black">
-              <a href="/" className="flex justify-center items-center gap-2">
-                <SquareMenu />
-                Liste de facture
-              </a>
-            </div>
+            {/*<div className="text-black">*/}
+            {/*  <a href="/" className="flex justify-center items-center gap-2">*/}
+            {/*    <SquareMenu />*/}
+            {/*    Liste de facture*/}
+            {/*  </a>*/}
+            {/*</div>*/}
           </header>
 
           <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
@@ -1381,7 +1381,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
               <div className="w-full my-">
                 <div className="flex justify-between items-center w-full gap-3 mb-2">
-                  <p className="font-black text-sm">notess</p>
+                  <p className="font-black text-sm">notes</p>
                 </div>
                 <div className="grid w-full items-center gap-1.5 my-2">
                   {!editablenotes ? (
@@ -1400,9 +1400,9 @@ const Page = ({ params }: { params: { id: string } }) => {
                   ) : (
                     <textarea
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                      id="notess"
-                      name="notess"
-                      placeholder="notess"
+                      id="notes"
+                      name="notes"
+                      placeholder="notes"
                       value={invoiceData?.notes}
                       onChange={(e) => setnotes(e.target.value)}
                     />
