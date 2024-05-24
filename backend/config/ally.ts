@@ -5,7 +5,7 @@ const allyConfig = defineConfig({
   google: services.google({
     clientId: env.get('GOOGLE_CLIENT_ID'),
     clientSecret: env.get('GOOGLE_CLIENT_SECRET'),
-    callbackUrl: 'http://localhost:3333/api/v1/auth/signin-callback',
+    callbackUrl: 'https://api.plumera.fr/api/v1/auth/signin-callback',
   }),
 })
 
