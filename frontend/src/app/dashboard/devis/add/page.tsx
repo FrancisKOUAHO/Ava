@@ -601,6 +601,8 @@ const Page = () => {
 
   return (
     <section className="px-6 py-6">
+      <div className="flex text-black">
+
       <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
         <div className="w-3/4">
           <header className="flex justify-between items-center gap-12">
@@ -1430,12 +1432,14 @@ const Page = () => {
           </div>
         </div>
 
-        <Preview
+
+      </form>
+      <Preview
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
-        />
-      </form>
+      />
+      </div>
     </section>
   )
 }

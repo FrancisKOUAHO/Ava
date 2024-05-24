@@ -37,7 +37,7 @@ export default class SessionController {
       .json({ message: 'Veuillez consulter votre boîte de réception pour vous connecter.' })
   }
 
-  async sendLoginEmail(user) {
+  async sendLoginEmail(user: User) {
     await mail.use('resend').sendLater(message => {
       message
           .from('contact@plumera.fr')
