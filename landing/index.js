@@ -1458,7 +1458,7 @@
             shouldBrand = true
           }
           if (shouldBrand && !isPhantom) {
-            brandElement = brandElement
+            brandElement = brandElement || createBadge()
             ensureBrand()
             setTimeout(ensureBrand, 500)
             $2(doc).off(fullScreenEvents, onFullScreenChange).on(fullScreenEvents, onFullScreenChange)
@@ -1468,6 +1468,10 @@
         function onFullScreenChange() {
           var fullScreen = doc.fullScreen || doc.mozFullScreen || doc.webkitIsFullScreen || doc.msFullscreenElement || Boolean(doc.webkitFullscreenElement)
           $2(brandElement).attr('style', fullScreen ? 'display: none !important;' : '')
+        }
+
+        function createBadge() {
+          return;
         }
 
         function ensureBrand() {
@@ -6336,10 +6340,7 @@ Webflow.require('ix').init([
   {
     'slug': 'hide-popup',
     'name': 'Hide Popup',
-    'value': {
-      'style': { 'display': 'none', 'opacity': 0, 'scaleX': 1.1, 'scaleY': 1.1, 'scaleZ': 1 },
-      'triggers': [],
-    },
+    'value': { 'style': { 'display': 'none', 'opacity': 0, 'scaleX': 1.1, 'scaleY': 1.1, 'scaleZ': 1 }, 'triggers': [] },
   },
   {
     'slug': 'close-popup',
