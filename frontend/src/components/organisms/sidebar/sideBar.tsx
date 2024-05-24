@@ -4,11 +4,11 @@ import { FunctionComponent, useState } from 'react'
 
 import Link from 'next/link'
 import {
-  CalendarDays,
   FilePlus,
   Files,
   FileSearch2,
   Home,
+  TextQuote,
   Users,
 } from 'lucide-react'
 
@@ -22,7 +22,6 @@ const Sidebar: FunctionComponent = () => {
   const [hide, sethide] = useState<boolean>(false)
   const toggle = () => sethide(!hide)
 
-  // Toggle functions for each submenu
   const toggleInvoiceMenu = () => setShowInvoiceMenu(!showInvoiceMenu)
   const toggleDevisMenu = () => setShowDevisMenu(!showDevisMenu)
 
@@ -88,7 +87,7 @@ const Sidebar: FunctionComponent = () => {
             : ''
         }
       >
-        <Files />
+        <TextQuote />
         Devis
       </button>
       <div
