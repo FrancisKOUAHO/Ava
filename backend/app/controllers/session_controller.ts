@@ -38,12 +38,9 @@ export default class SessionController {
   }
 
   async sendLoginEmail(user: User) {
-    await mail.use('resend').sendLater(message => {
-      message
-          .from('contact@plumera.fr')
-          .to(user.email)
-          .subject('Invitation à rejoindre une équipe')
-          .html(`
+    await mail.use('resend').sendLater((message) => {
+      message.from('contact@plumera.fr').to(user.email).subject('Invitation à rejoindre une équipe')
+        .html(`
         <!DOCTYPE html>
         <html lang="fr">
           <head>
@@ -66,9 +63,8 @@ export default class SessionController {
           </body>
         </html>
       `)
-    });
+    })
   }
-
 
   async loginWithToken({ params, response, auth }: HttpContext) {
     const token = params.id
@@ -99,8 +95,6 @@ export default class SessionController {
   async connectToGoogle({ ally }: HttpContext) {
     return ally.use('google').redirect()
   }
-
-
 
   async store({ ally, auth, response }: HttpContext) {
     const google = ally.use('google')
