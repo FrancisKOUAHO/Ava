@@ -51,6 +51,11 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
           </NextUIProvider>
         </main>
       </body>
+      <script
+        defer
+        data-domain="app.plumera.fr"
+        src="https://plausible-analytics-production-3969.up.railway.app/js/script.js"
+      ></script>
     </html>
   )
 }
