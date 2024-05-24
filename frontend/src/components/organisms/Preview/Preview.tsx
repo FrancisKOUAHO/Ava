@@ -53,12 +53,16 @@ const Preview: FunctionComponent<PreviewProps> = ({
       callback: function (doc) {
         const contentHeight = fullHeight * scale
         let yPos = 10
-        while (contentHeight > yPos + 10) {
-          yPos += pdf.internal.pageSize.getHeight() - 20
-          if (contentHeight > yPos) {
-            pdf.addPage()
-          }
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20; // margins of 10 mm top and bottom
+
+        // Calculate the number of pages needed
+        const numberOfPages = Math.ceil(contentHeight / pageHeight);
+
+        // Add pages if more than one is needed
+        for (let i = 1; i < numberOfPages -1; i++) {
+          pdf.addPage();
         }
+
         doc.save('download.pdf')
       },
       x: 10,
