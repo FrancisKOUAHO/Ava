@@ -7,15 +7,20 @@ import api from '@/config/api'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup, DropdownMenuItem,
+  DropdownMenuGroup,
+  DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import {Button} from "@/components/ui/button";
-import { CirclePlus, MoreHorizontal, Trash, Edit,FileImage } from 'lucide-react'
-import {ClientProps} from "@/types/ClientProps";
-import DeleteCustomer from "@/components/molecules/modal/customer/DeleteCustomer";
-import {deleteClient} from "@/lib/customer";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import {
+  CirclePlus,
+  MoreHorizontal,
+  Trash,
+  Edit,
+  FileImage,
+} from 'lucide-react'
+import DeleteCustomer from '@/components/molecules/modal/customer/DeleteCustomer'
 import Link from 'next/link'
 
 interface Client {
@@ -24,7 +29,12 @@ interface Client {
   lastName: string
 }
 
-type InvoiceStatus = 'envoyé' | 'brouillon' | 'payé' | 'caduque' | 'en cours de paiement'
+type InvoiceStatus =
+  | 'envoyé'
+  | 'brouillon'
+  | 'payé'
+  | 'caduque'
+  | 'en cours de paiement'
 
 interface Invoice {
   client: Client
@@ -50,7 +60,9 @@ const Page = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
   const [isDeleteModalOpen, setDeleteModalOpen] = useState<boolean>(false)
-  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(null)
+  const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
+    null,
+  )
   const [isUpdating, setIsUpdating] = useState<boolean>(false)
 
   useEffect(() => {
@@ -89,18 +101,19 @@ const Page = () => {
     setDeleteModalOpen(true)
   }
 
-
   const handleDeleteConfirm = async () => {
     try {
       if (invoiceIdToDelete) {
         try {
-          const response = await api.delete(`billing/invoice/${invoiceIdToDelete}`)
+          const response = await api.delete(
+            `billing/invoice/${invoiceIdToDelete}`,
+          )
           //return convertKeysToSnakeCase(response.data)
         } catch (error: unknown) {
           throw new Error('Failed to delete client: ' + error)
         }
         setInvoices((invoices: Invoice[]): Invoice[] =>
-            invoices.filter((invoice) => invoice.id !== invoiceIdToDelete),
+          invoices.filter((invoice) => invoice.id !== invoiceIdToDelete),
         )
         setDeleteModalOpen(false)
         setInvoiceIdToDelete(null)
@@ -110,25 +123,26 @@ const Page = () => {
 
   const updateStatus = async (id: string, status: InvoiceStatus) => {
     try {
-      const response = await api.put(`billing/invoice/${id}`, { status });
+      const response = await api.put(`billing/invoice/${id}`, { status })
       if (response.status === 200) {
         // Update the state with the new status
-        setInvoices(invoices => invoices.map(invoice => {
-          if (invoice.id === id) {
-            // Ensure that the type of `status` is compatible with `InvoiceStatus`
-            return { ...invoice, status };
-          }
-          return invoice;
-        }));
+        setInvoices((invoices) =>
+          invoices.map((invoice) => {
+            if (invoice.id === id) {
+              // Ensure that the type of `status` is compatible with `InvoiceStatus`
+              return { ...invoice, status }
+            }
+            return invoice
+          }),
+        )
       } else {
         // Handle possible errors
-        console.error('Failed to update the invoice status:', response);
+        console.error('Failed to update the invoice status:', response)
       }
     } catch (error) {
-      console.error('Error updating the invoice status:', error);
+      console.error('Error updating the invoice status:', error)
     }
-  };
-
+  }
 
   return (
     <section className="px-6 py-6">
@@ -222,8 +236,8 @@ const Page = () => {
                 </td>
                 <td className="p-3 text-center">
                   <DropdownMenu
-                      open={openDropdownId === invoice.id}
-                      onOpenChange={() => toggleDropdown(invoice.id)}
+                    open={openDropdownId === invoice.id}
+                    onOpenChange={() => toggleDropdown(invoice.id)}
                   >
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
@@ -234,46 +248,46 @@ const Page = () => {
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
-                            onClick={() => openDeleteModal(invoice.id)}
+                          onClick={() => openDeleteModal(invoice.id)}
                         >
                           <Trash className="mr-2 h-4 w-4" />
                           Supprimer
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                        >
+                        <DropdownMenuItem>
                           <Link
-                              href={`/dashboard/invoices/edit/${invoice.id}`}
-                              className="flex items-center" // Add these classes
+                            href={`/dashboard/invoices/edit/${invoice.id}`}
+                            className="flex items-center" // Add these classes
                           >
                             <Edit className="mr-2 h-4 w-4" />
-                            <span>Modifier</span> {/* Wrapped text in a span for better control */}
+                            <span>Modifier</span>{' '}
+                            {/* Wrapped text in a span for better control */}
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                       <DropdownMenuLabel>Statut</DropdownMenuLabel>
                       <DropdownMenuGroup>
                         <DropdownMenuItem
-                            onClick={() => updateStatus(invoice.id,"envoyé")}
+                          onClick={() => updateStatus(invoice.id, 'envoyé')}
                         >
                           Envoyé
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => updateStatus(invoice.id,"brouillon")}
-
+                          onClick={() => updateStatus(invoice.id, 'brouillon')}
                         >
-                          <span>Brouillon</span> {/* Wrapped text in a span for better control */}
+                          <span>Brouillon</span>{' '}
+                          {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => updateStatus(invoice.id,"payé")}
-
+                          onClick={() => updateStatus(invoice.id, 'payé')}
                         >
-                          <span>Payé</span> {/* Wrapped text in a span for better control */}
+                          <span>Payé</span>{' '}
+                          {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => updateStatus(invoice.id,"caduque")}
-
+                          onClick={() => updateStatus(invoice.id, 'caduque')}
                         >
-                          <span>Caduque</span> {/* Wrapped text in a span for better control */}
+                          <span>Caduque</span>{' '}
+                          {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -294,9 +308,9 @@ const Page = () => {
         </table>
       </div>
       <DeleteCustomer
-          isOpen={isDeleteModalOpen}
-          onClose={() => setDeleteModalOpen(false)}
-          onConfirm={handleDeleteConfirm}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
       />
     </section>
   )

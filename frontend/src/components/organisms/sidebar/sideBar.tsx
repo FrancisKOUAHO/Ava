@@ -17,14 +17,14 @@ import { usePathname } from 'next/navigation'
 const Sidebar: FunctionComponent = () => {
   const pathname = usePathname()
 
-    const [showInvoiceMenu, setShowInvoiceMenu] = useState(false);
-    const [showDevisMenu, setShowDevisMenu] = useState(false);
-    const [hide, sethide] = useState<boolean>(false)
-    const toggle = () => sethide(!hide)
+  const [showInvoiceMenu, setShowInvoiceMenu] = useState(false)
+  const [showDevisMenu, setShowDevisMenu] = useState(false)
+  const [hide, sethide] = useState<boolean>(false)
+  const toggle = () => sethide(!hide)
 
-    // Toggle functions for each submenu
-    const toggleInvoiceMenu = () => setShowInvoiceMenu(!showInvoiceMenu);
-    const toggleDevisMenu = () => setShowDevisMenu(!showDevisMenu);
+  // Toggle functions for each submenu
+  const toggleInvoiceMenu = () => setShowInvoiceMenu(!showInvoiceMenu)
+  const toggleDevisMenu = () => setShowDevisMenu(!showDevisMenu)
 
   return (
     <section className="c-sidebar">
@@ -78,7 +78,7 @@ const Sidebar: FunctionComponent = () => {
         </Link>
       </div>
 
-        <button
+      <button
         onClick={toggleDevisMenu}
         className={
           pathname === '/dashboard/devis' ||
@@ -107,23 +107,21 @@ const Sidebar: FunctionComponent = () => {
         </Link>
         <Link
           href="/dashboard/devis/summaries"
-          className={
-            pathname === '/dashboard/devis/summaries' ? 'active' : ''
-          }
+          className={pathname === '/dashboard/devis/summaries' ? 'active' : ''}
         >
           <FileSearch2 />
           Liste des devis
         </Link>
       </div>
 
-      <Link
+      {/*<Link
         href="/dashboard/calendar"
         className={pathname === '/dashboard/calendar' ? 'active' : ''}
         onClick={() => setShowDevisMenu(false)}
       >
         <CalendarDays />
         Calendar
-      </Link>
+      </Link>*/}
 
       <Link
         href="/dashboard/customers"
@@ -133,7 +131,6 @@ const Sidebar: FunctionComponent = () => {
         <Users />
         Customers
       </Link>
-
     </section>
   )
 }
