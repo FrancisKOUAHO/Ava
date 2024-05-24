@@ -170,15 +170,15 @@ const Page = () => {
         <table className="table w-full text-black border-separate space-y-6 text-sm">
           <thead>
             <tr>
-              <th className="flex items-center gap-2 p-3 text-center">
-                <Checkbox id="default-checkbox" checked={checked} />
-                <Label
-                  htmlFor="default-checkbox"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Select All
-                </Label>
-              </th>
+              {/*<th className="flex items-center gap-2 p-3 text-center">*/}
+              {/*  <Checkbox id="default-checkbox" checked={checked} />*/}
+              {/*  <Label*/}
+              {/*    htmlFor="default-checkbox"*/}
+              {/*    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"*/}
+              {/*  >*/}
+              {/*    Select All*/}
+              {/*  </Label>*/}
+              {/*</th>*/}
               <th className="p-3 text-center">Nom</th>
               <th className="p-3 text-center">Prix</th>
               <th className="p-3 text-center">Client</th>
