@@ -39,6 +39,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare subscription_active: string | null
 
+  @column()
+  declare avatar: string
+
   @column({
     prepare: (access_token: Secret<any>) => access_token.release(),
     consume: (access_token) => new Secret(access_token),

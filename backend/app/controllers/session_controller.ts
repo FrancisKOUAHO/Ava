@@ -3,6 +3,8 @@ import User from '#models/user'
 import { signinValidator } from '#validators/user'
 import mail from '@adonisjs/mail/services/main'
 import jwt from 'jsonwebtoken'
+import app from '@adonisjs/core/services/app'
+import { v4 as uuidv4 } from 'uuid'
 
 export default class SessionController {
   async requestLoginLink({ request, response }: HttpContext) {
@@ -124,6 +126,45 @@ export default class SessionController {
     await auth.use('web').login(user)
 
     return response.ok({ message: 'Connecté avec succès.', user })
+  }
+
+  async updateProfile({ auth, request, response }: HttpContext) {
+    const userId = auth.user!.id
+
+    if (!userId) {
+      response.abort('User not found')
+      return
+    }
+    const user: User | null = await User.find(userId)
+
+    if (!user) {
+      response.abort('User not found')
+      return
+    }
+
+    const avatar = request.file('logo', {
+      size: '2mb',
+      extnames: ['jpg', 'png', 'jpeg', 'webp'],
+    })
+
+    if (!avatar) {
+      response.abort('Please upload an avatar')
+      return
+    }
+
+    const randomFileName = `${uuidv4()}.${avatar.extname}`
+
+    await avatar.move(app.makePath('public/uploads'), {
+      name: randomFileName,
+    })
+
+    user.avatar = randomFileName
+    await user.save()
+
+    return response.ok({
+      message: 'User updated successfully',
+      user,
+    })
   }
 
   async whoami({ auth, response }: HttpContext) {

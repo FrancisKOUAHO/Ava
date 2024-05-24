@@ -11,6 +11,7 @@ export default class extends BaseSchema {
       table.string('email', 254).notNullable().unique()
       table.string('password', 180).nullable()
       table.string('full_name', 180).nullable()
+      table.string('avatar', 255).nullable()
       table.string('magic_link_token', 255).nullable()
       table.string('last_reset_date', 255).nullable()
       table.string('access_token').nullable()
