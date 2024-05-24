@@ -46,7 +46,7 @@ export default class SessionController {
           <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Invitation à rejoindre une équipe</title>
+            <title>Invitation à connecter</title>
             <style>
               body { font-family: 'Arial', sans-serif; line-height: 1.6; }
               p { color: #333; }
@@ -100,23 +100,20 @@ export default class SessionController {
     const google = ally.use('google')
 
     if (google.accessDenied()) {
-      // TODO: Handle access denied exception
       return 'Access was denied'
     }
 
     if (google.stateMisMatch()) {
-      // TODO: Handle mismatch state
       return 'Request expired. Retry again'
     }
 
     if (google.hasError()) {
-      // TODO: Handle error
       return google.getError()
     }
 
     const GoogleUser = await google.user()
 
-    const user: User = await User.firstOrCreate(
+    const user: User = await User.updateOrCreate(
       { google_id: GoogleUser.id },
       {
         full_name: GoogleUser.name,

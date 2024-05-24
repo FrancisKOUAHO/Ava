@@ -36,16 +36,13 @@ const Preview: FunctionComponent<PreviewProps> = ({
 
     const pdf = new jsPDF('p', 'mm', 'a4')
 
-    const pageWidth = pdf.internal.pageSize.getWidth() - 20 // Allow for some margin
+    const pageWidth = pdf.internal.pageSize.getWidth() - 20
     const scale = pageWidth / input.scrollWidth
 
     const fullHeight = input.scrollHeight
     const options = {
       scale: scale,
-      //scrollY: -window.scrollY, // Negate the window's current scroll position
-      //scrollX: -window.scrollX,
       windowHeight: 1500,
-      //windowWidth: input.scrollWidth
     }
 
     pdf.html(input, {
@@ -53,14 +50,12 @@ const Preview: FunctionComponent<PreviewProps> = ({
       callback: function (doc) {
         const contentHeight = fullHeight * scale
         let yPos = 10
-        const pageHeight = pdf.internal.pageSize.getHeight() - 20; // margins of 10 mm top and bottom
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20
 
-        // Calculate the number of pages needed
-        const numberOfPages = Math.ceil(contentHeight / pageHeight);
+        const numberOfPages = Math.ceil(contentHeight / pageHeight)
 
-        // Add pages if more than one is needed
-        for (let i = 1; i < numberOfPages -1; i++) {
-          pdf.addPage();
+        for (let i = 1; i < numberOfPages - 1; i++) {
+          pdf.addPage()
         }
 
         doc.save('download.pdf')

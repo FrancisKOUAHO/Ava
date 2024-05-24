@@ -1,9 +1,17 @@
 'use client'
 
 import React from 'react'
+import { useSirene } from '@/app/hooks/useSirene'
 
 const Page = () => {
-  console.log('data')
+  const { data } = useSirene()
+
+  console.log(data)
+
+  if (!data) {
+    return <div>Loading...</div>
+  }
+
   return (
     <section className="py-1 text-black">
       <div className="w-full px-4 mx-auto mt-6">
@@ -31,6 +39,7 @@ const Page = () => {
                     </label>
                     <input
                       type="text"
+                      defaultValue={data[0]?.companyName}
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                     />
                   </div>
@@ -44,9 +53,9 @@ const Page = () => {
                       Prénom
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue="New York"
+                      defaultValue=""
                     />
                   </div>
                 </div>
@@ -61,7 +70,7 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue="United States"
+                      defaultValue=""
                     />
                   </div>
                 </div>
@@ -76,7 +85,7 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue="Postal Code"
+                      defaultValue=""
                     />
                   </div>
                 </div>

@@ -32,9 +32,27 @@ import ButtonUI from '@/components/atoms/button/button'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
+import api from '@/config/api'
+import { useEffect } from 'react'
 
 const TopBar = () => {
-  const { logout, user } = useAuth()
+  const { logout, setUser, user } = useAuth()
+
+  const whoami = async () => {
+    const response = await api.get('auth/whoami')
+
+    console.log(response)
+
+    if (!response) {
+      throw new Error('unknown error')
+    }
+
+    setUser(response.data)
+  }
+
+  useEffect(() => {
+    whoami()
+  }, [])
 
   return (
     <nav className="c-topbar">

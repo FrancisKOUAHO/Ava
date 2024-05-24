@@ -6,6 +6,8 @@ import { useSirene } from '@/app/hooks/useSirene'
 const Page = () => {
   const { data } = useSirene()
 
+  console.log(data)
+
   if (!data) {
     return <div>Loading...</div>
   }
@@ -52,9 +54,9 @@ const Page = () => {
                       Adresse
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue="New York"
+                      defaultValue=""
                     />
                   </div>
                 </div>
@@ -69,7 +71,7 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue="United States"
+                      defaultValue=""
                     />
                   </div>
                 </div>
@@ -84,7 +86,7 @@ const Page = () => {
                     <input
                       type="text"
                       className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue="Postal Code"
+                      defaultValue=""
                     />
                   </div>
                 </div>

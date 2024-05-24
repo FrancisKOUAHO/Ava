@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import { createContext, ReactNode, useContext, useState } from 'react'
 import api from '@/config/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -32,15 +26,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     console.log(response)
   }
 
-  const whoami = async () => {
-    const response = await api.get('auth/whoami')
-
-    if (!response) {
-      throw new Error('unknown error')
-    }
-    setUser(response.data)
-  }
-
   const logout = async () => {
     const response = await api.delete('auth/sign-out')
 
@@ -59,30 +44,21 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  useEffect(() => {
-    whoami()
-  }, [])
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [isClient])
-
   return (
     <>
-      {isClient && (
-        <AuthContext.Provider
-          value={{
-            setToken,
-            connectWithGoogle,
-            logout,
-            user,
-            token,
-            loadingToken,
-          }}
-        >
-          {children}
-        </AuthContext.Provider>
-      )}
+      <AuthContext.Provider
+        value={{
+          setUser,
+          setToken,
+          connectWithGoogle,
+          logout,
+          user,
+          token,
+          loadingToken,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
     </>
   )
 }
