@@ -1,7 +1,7 @@
 'use client'
 
 import React, { FunctionComponent, useRef } from 'react'
-import { FileText, ImagePlus } from 'lucide-react'
+import { FileText, Image, ImagePlus } from 'lucide-react'
 import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
@@ -13,17 +13,16 @@ interface PreviewProps {
   customer: CustomerProps | null
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
+  imagePreviewUrl: string | null
 }
 
 const Preview: FunctionComponent<PreviewProps> = ({
   customer,
   lineItems,
   subTotal,
+  imagePreviewUrl,
 }) => {
   const { data: compagny } = useSirene()
-
-  console.log('lineItems', lineItems)
-  console.log('subTotal', subTotal)
 
   if (!compagny || !customer || !subTotal) return null
 
@@ -66,7 +65,7 @@ const Preview: FunctionComponent<PreviewProps> = ({
   }
 
   return (
-    <div className="w-2/4 bg-white px-6 py-6 rounded-xl">
+    <div className="w-2/4 bg-white px-3 py-3 rounded-xl h-[88vh] overflow-auto">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
@@ -76,14 +75,19 @@ const Preview: FunctionComponent<PreviewProps> = ({
         </div>
       </div>
 
-      <div
-        className="bg-[#f2f5fd] rounded-xl my-8 p-2 h-[70vh] overflow-auto"
-        ref={pdfRef}
-      >
-        <div className="bg-white px-6 py-2 rounded-xl">
-          <div className="flex justify-center p-4">
+      <div className="bg-[#f2f5fd] rounded-xl my-3 p-2" ref={pdfRef}>
+        <div className="rounded-xl">
+          <div className="flex justify-center items-center">
             <div className="flex w-1/3">
-              <ImagePlus className="text-blue-700 w-10 h-10" />
+              {imagePreviewUrl ? (
+                <img
+                  src={imagePreviewUrl}
+                  alt="Preview"
+                  className="w-18 h-18"
+                />
+              ) : (
+                <ImagePlus className="text-blue-700 w-10 h-10" />
+              )}
             </div>
             <div className="w-full">
               <div className="flex flex-col w-full mb-6">

@@ -6,14 +6,12 @@ import {
   CircleCheck,
   CircleX,
   Flag,
-  ImagePlus,
-  Info,
   PencilLine,
-  Send,
-  Image,
-  SquareMenu,
   Trash2,
   Plus,
+  ImagePlus,
+  Image,
+  Info,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -106,6 +104,9 @@ const Page = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
+  const [fileName, setFileName] = useState<string>('')
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
   const [isEditableSubtotal, setIsEditableSubtotal] = useState<boolean>(false)
@@ -167,6 +168,24 @@ const Page = () => {
     }
 
     return errors
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null // More safe checking if files exist
+    if (file) {
+      setFileName(file.name)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImagePreviewUrl(reader.result)
+        }
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setImagePreviewUrl(null)
+      setFileName('')
+    }
   }
 
   const { data: customersData } = useFetchData('billing/customer', 'customer')
@@ -409,7 +428,6 @@ const Page = () => {
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
       is_invoice: 1,
-
     }
 
     if (!formValid) {
@@ -473,7 +491,7 @@ const Page = () => {
       notes: values.notes,
       terms: values.terms,
       status: 'brouillon',
-      is_invoice:1,
+      is_invoice: 1,
     }
 
     const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
@@ -602,513 +620,628 @@ const Page = () => {
   return (
     <section className="px-6 py-6">
       <div className="flex text-black">
+        <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
+          <div className="w-3/4">
+            <header className="flex justify-between items-center gap-12">
+              <div className="flex justify-center items-center">
+                <h3 className="text-black text-lg font-semibold">
+                  Créer une Facture
+                </h3>
+              </div>
+            </header>
 
-      <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-        <div className="w-3/4">
-          <header className="flex justify-between items-center gap-12">
-            <div className="flex justify-center items-center">
-              <h3 className="text-black text-lg font-semibold">
-                Créer une Facture
-              </h3>
-            </div>
-            {/*<div className="text-black">*/}
-            {/*  <a href="/" className="flex justify-center items-center gap-2">*/}
-            {/*    <SquareMenu />*/}
-            {/*    Liste de facture*/}
-            {/*  </a>*/}
-            {/*</div>*/}
-          </header>
-
-          <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
-            <div className="flex flex-col items-center">
-              {/*<div className="flex justify-between items-center w-full mb-6">*/}
-              {/*  <p className="flex justify-center items-center gap-2">*/}
-              {/*    <Image className="text-blue-700" />*/}
-              {/*    Add Logo*/}
-              {/*  </p>*/}
-              {/*  <Info />*/}
-              {/*</div>*/}
-
-              {/*<div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">*/}
-              {/*  <input*/}
-              {/*    type="file"*/}
-              {/*    name="logo"*/}
-              {/*    multiple*/}
-              {/*    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"*/}
-              {/*  />*/}
-              {/*  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">*/}
-              {/*    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />*/}
-              {/*    <h4>*/}
-              {/*      Glissez une image directement{' '}*/}
-              {/*      <span className="text-blue-700">brower</span>*/}
-              {/*    </h4>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-
-              {customersData && customersData.length >= 1 && (
-                <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 pl-3 text-left font-normal text-muted-foreground"
-                      >
-                        {customer && customer.firstName.length > 1
-                          ? `${customer.firstName ?? 'Sélectionner une entreprise'} ${customer.lastName ?? ''}`
-                          : 'Sélectionner une entreprise'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-
-                    <PopoverContent className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Rechercher client..." />
-                        <CommandEmpty>Aucun client trouvé.</CommandEmpty>
-                        <CommandGroup>
-                          <CommandList>
-                            {customersData.map(
-                              (listOfCustomerNames: CustomerData) => (
-                                <CommandItem
-                                  key={listOfCustomerNames.id}
-                                  value={listOfCustomerNames.id}
-                                  onSelect={() =>
-                                    handleSelectCustomer(listOfCustomerNames.id)
-                                  }
-                                >
-                                  <Check
-                                    className={cn(
-                                      'mr-2 h-4 w-4',
-                                      customer?.id === listOfCustomerNames.id
-                                        ? 'opacity-100'
-                                        : 'opacity-0',
-                                    )}
-                                  />
-                                  {listOfCustomerNames.firstName}
-                                </CommandItem>
-                              ),
-                            )}
-                          </CommandList>
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
-
-              <div className="bg-[#e7effc] rounded-xl w-full">
-                <div className="flex justify-between items-center p-6">
-                  <p className="flex justify-center items-center gap-2">
-                    <Flag className="text-blue-700" />
-                    Détails entreprise
-                  </p>
-                  {completed ? (
-                    <CircleCheck className="text-green-500" />
-                  ) : (
-                    <CircleX className="text-red-500" />
-                  )}
-                </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="sirenNumber" className="mb-2">
-                        Numero de Siren
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="sirenNumber"
-                        name="sirenNumber"
-                        value={customer ? customer.sirenNumber : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('sirenNumber', e.target.value)
-                        }
-                        placeholder="987654321"
-                      />
-                    </div>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="firstName" className="mb-2">
-                        E-mail
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="email"
-                        name="email"
-                        value={customer ? customer.email : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('email', e.target.value)
-                        }
-                        placeholder="Jean@mail.fr"
-                      />
-                    </div>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="firstName" className="mb-2">
-                        Prénom
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="first_name"
-                        name="first_name"
-                        value={customer ? customer.firstName : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('firstName', e.target.value)
-                        }
-                        placeholder="Jean"
-                      />
-                    </div>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="lastName" className="mb-2">
-                        Nom
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="last_name"
-                        name="last_name"
-                        value={customer ? customer.lastName : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('lastName', e.target.value)
-                        }
-                        placeholder="Dupont"
-                      />
-                    </div>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="company" className="mb-2">
-                        Société
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="company"
-                        name="company"
-                        value={customer ? customer.company : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('company', e.target.value)
-                        }
-                        placeholder="Super Corp"
-                      />
-                    </div>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="currency" className="mb-2">
-                        Devise
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="currency"
-                        name="currency"
-                        value={customer ? customer.currency : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('currency', e.target.value)
-                        }
-                        placeholder="EUR"
-                      />
-                    </div>
-                    {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                    {/*  <Label htmlFor="vatNumber" className="mb-2">*/}
-                    {/*    Numéro de TVA*/}
-                    {/*  </Label>*/}
-                    {/*  <Input*/}
-                    {/*      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                    {/*      type="text"*/}
-                    {/*      id="vatNumber"*/}
-                    {/*      name="vatNumber"*/}
-                    {/*      value={customer ? customer.vatNumber  : ''}*/}
-                    {/*      onChange={(e) => handleCustomerChange({...customer, vatNumber: e.target.value})}*/}
-
-                    {/*      placeholder="987"*/}
-                    {/*  />*/}
-                    {/*</div>*/}
-
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="address" className="mb-2">
-                        Addresse principale
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="address"
-                        name="address"
-                        value={customer ? customer.address : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('address', e.target.value)
-                        }
-                        placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"
-                      />
-                    </div>
-
-                    {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                    {/*  <Label htmlFor="address2" className="mb-2">*/}
-                    {/*    Addresse 2*/}
-                    {/*  </Label>*/}
-                    {/*  <Input*/}
-                    {/*    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                    {/*    type="text"*/}
-                    {/*    id="address2"*/}
-                    {/*    name="address2"*/}
-
-                    {/*    placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"*/}
-                    {/*  />*/}
-                    {/*</div>*/}
-
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="city" className="mb-2">
-                        Ville <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        name="city"
-                        id="city"
-                        value={customer ? customer.city : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('city', e.target.value)
-                        }
-                        placeholder="Vancouver"
-                      />
-                    </div>
-
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="zip" className="mb-2">
-                        Code Postal <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        name="zip"
-                        id="zip"
-                        value={customer ? customer.zip : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('zip', e.target.value)
-                        }
-                        placeholder="V6B 1V9"
-                      />
-                    </div>
-
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="state" className="mb-2">
-                        Pays <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="text"
-                        id="state"
-                        name="state"
-                        value={customer ? customer.state : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('state', e.target.value)
-                        }
-                        placeholder="Canada"
-                      />
-                    </div>
-
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                      <Label htmlFor="phone" className="mb-2">
-                        Phone <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={customer ? customer.phone || '' : ''}
-                        onChange={(e) =>
-                          handleCustomerChange('phone', e.target.value)
-                        }
-                        placeholder="+1 604-682-2344"
-                      />
-                    </div>
-
-                    <ButtonUi
-                      label="Mettre à jour entreprise"
-                      type="button"
-                      onClick={() => changeCustomer()}
-                      size="small"
+            <div className="bg-[#f2f5fd] p-2 mt-2 rounded-xl overflow-auto h-[82vh]">
+              <div className="flex flex-col items-center">
+                <div className="flex justify-between items-center w-full mb-1">
+                  {imagePreviewUrl ? (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="max-w-full max-h-full w-16 h-16"
                     />
+                  ) : (
+                    <p className="flex justify-center items-center gap-2">
+                      <Image className="text-blue-700" />
+                      Add Logo
+                    </p>
+                  )}
+                  <Info />
+                </div>
+
+                <div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">
+                  {imagePreviewUrl && (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="max-w-full max-h-full w-16 h-16"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    onChange={handleFileChange}
+                    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"
+                  />
+                  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
+                    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
+                    <h4>
+                      Glissez une image directement{' '}
+                      <span className="text-blue-700">brower</span>
+                    </h4>
                   </div>
                 </div>
-              </div>
 
-              <div className="rounded-xl my-6 w-full">
-                <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                  <thead className="border-b-2 border-gray-300 mb-4">
-                    <tr>
-                      <th className="flex items-center gap-2 p-3 text-center">
-                        Produit
-                      </th>
-                      <th className="p-3 text-center">Prix</th>
-                      <th className="p-3 text-center">Quantité</th>
-                      <th className="p-3 text-center">Unité</th>
-                      <th className="p-3 text-center">TVA</th>
-                      <th className="p-3 text-center">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lineItems.map((lineItem, index) => (
-                      <tr key={index} className="bg-[#e7effc] rounded-xl">
-                        <td className="flex items-center gap-2 p-3 text-center">
-                          {!isEditable[index] ? (
-                            <button
-                              className="flex items-center gap-2 w-full"
-                              onClick={() => makeEditable(index)}
-                            >
-                              Entrer un produit à facturer
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="name"
-                              />
-                            </button>
-                          ) : (
-                            <Input
-                              className={getInputClass(lineItem.name ?? '')}
-                              type="text"
-                              id={`name-${index}`}
-                              name={`name-${index}`}
-                              placeholder="Nom produit"
-                              disabled={!isEditable[index]}
-                              onChange={(e) =>
-                                handleItemChange(index, 'name', e.target.value)
-                              }
-                              value={lineItem.name || ''}
-                              readOnly={!isEditable[index]}
-                            />
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          {!isEditable[index] ? (
-                            <button
-                              className="flex justify-center items-center gap-2 w-full"
-                              onClick={() => makeEditable(index)}
-                            >
-                              €{lineItem.price}
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
-                              />
-                            </button>
-                          ) : (
-                            <Input
-                              className={getInputClass(
-                                lineItem.price?.toString() ?? '',
-                              )}
-                              type="number"
-                              id={`price-${index}`}
-                              name={`price-${index}`}
-                              placeholder="100"
-                              disabled={!isEditable[index]}
-                              onChange={(e) =>
-                                handleItemChange(index, 'price', e.target.value)
-                              }
-                              value={lineItem.price || ''}
-                              readOnly={!isEditable[index]}
-                            />
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          {!isEditable[index] ? (
-                            <button
-                              className="flex justify-center items-center gap-2 w-full"
-                              onClick={() => makeEditable(index)}
-                            >
-                              {lineItem.quantity}
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
-                              />
-                            </button>
-                          ) : (
-                            <Input
-                              className={getInputClass(
-                                lineItem.quantity?.toString() ?? '',
-                              )}
-                              type="number"
-                              id={`quantity-${index}`}
-                              name={`quantity-${index}`}
-                              placeholder="1"
-                              disabled={!isEditable[index]}
-                              onChange={(e) =>
-                                handleItemChange(
-                                  index,
-                                  'quantity',
-                                  e.target.value,
-                                )
-                              }
-                              value={lineItem.quantity || ''}
-                              readOnly={!isEditable[index]}
-                            />
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          {!isEditable[index] ? (
-                            <button
-                              className="flex justify-center items-center gap-2 w-full"
-                              onClick={() => makeEditable(index)}
-                            >
-                              {lineItem.unity}
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
-                              />
-                            </button>
-                          ) : (
-                            <select
-                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                              id="unity"
-                              name={`unity-${index}`}
-                              value={lineItem.unity}
-                              onChange={(e) =>
-                                handleItemChange(index, 'unity', e.target.value)
-                              }
-                            >
-                              <option value="Journalier">Journalier</option>
-                              <option value="Horraire">Horraire</option>
-                              <option value="Hebdomadaire">Hebdomadaire</option>
-                              <option value="Mensuel">Mensuel</option>
-                              <option value="Annuel">Annuel</option>
-                              <option value="Total">Total</option>
-                            </select>
-                          )}
-                        </td>
+                {customersData && customersData.length >= 1 && (
+                  <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={open}
+                          className="w-full inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 pl-3 text-left font-normal text-muted-foreground"
+                        >
+                          {customer && customer.firstName.length > 1
+                            ? `${customer.firstName ?? 'Sélectionner une entreprise'} ${customer.lastName ?? ''}`
+                            : 'Sélectionner une entreprise'}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
 
-                        <td className="p-3 text-center">
-                          {!isEditable[index] ? (
-                            <button
-                              className="flex justify-center items-center gap-2 w-full"
-                              onClick={() => makeEditable(index)}
-                            >
-                              {lineItem.unity}
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Rechercher client..." />
+                          <CommandEmpty>Aucun client trouvé.</CommandEmpty>
+                          <CommandGroup>
+                            <CommandList>
+                              {customersData.map(
+                                (listOfCustomerNames: CustomerData) => (
+                                  <CommandItem
+                                    key={listOfCustomerNames.id}
+                                    value={listOfCustomerNames.id}
+                                    onSelect={() =>
+                                      handleSelectCustomer(
+                                        listOfCustomerNames.id,
+                                      )
+                                    }
+                                  >
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4',
+                                        customer?.id === listOfCustomerNames.id
+                                          ? 'opacity-100'
+                                          : 'opacity-0',
+                                      )}
+                                    />
+                                    {listOfCustomerNames.firstName}
+                                  </CommandItem>
+                                ),
+                              )}
+                            </CommandList>
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
+                <div className="bg-[#e7effc] rounded-xl w-full">
+                  <div className="flex justify-between items-center p-6">
+                    <p className="flex justify-center items-center gap-2">
+                      <Flag className="text-blue-700" />
+                      Détails entreprise
+                    </p>
+                    {completed ? (
+                      <CircleCheck className="text-green-500" />
+                    ) : (
+                      <CircleX className="text-red-500" />
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="sirenNumber" className="mb-2">
+                          Numero de Siren
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="sirenNumber"
+                          name="sirenNumber"
+                          value={customer ? customer.sirenNumber : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('sirenNumber', e.target.value)
+                          }
+                          placeholder="987654321"
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="firstName" className="mb-2">
+                          E-mail
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="email"
+                          name="email"
+                          value={customer ? customer.email : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('email', e.target.value)
+                          }
+                          placeholder="Jean@mail.fr"
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="firstName" className="mb-2">
+                          Prénom
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="first_name"
+                          name="first_name"
+                          value={customer ? customer.firstName : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('firstName', e.target.value)
+                          }
+                          placeholder="Jean"
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="lastName" className="mb-2">
+                          Nom
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="last_name"
+                          name="last_name"
+                          value={customer ? customer.lastName : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('lastName', e.target.value)
+                          }
+                          placeholder="Dupont"
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="company" className="mb-2">
+                          Société
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="company"
+                          name="company"
+                          value={customer ? customer.company : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('company', e.target.value)
+                          }
+                          placeholder="Super Corp"
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="currency" className="mb-2">
+                          Devise
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="currency"
+                          name="currency"
+                          value={customer ? customer.currency : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('currency', e.target.value)
+                          }
+                          placeholder="EUR"
+                        />
+                      </div>
+                      {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
+                      {/*  <Label htmlFor="vatNumber" className="mb-2">*/}
+                      {/*    Numéro de TVA*/}
+                      {/*  </Label>*/}
+                      {/*  <Input*/}
+                      {/*      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
+                      {/*      type="text"*/}
+                      {/*      id="vatNumber"*/}
+                      {/*      name="vatNumber"*/}
+                      {/*      value={customer ? customer.vatNumber  : ''}*/}
+                      {/*      onChange={(e) => handleCustomerChange({...customer, vatNumber: e.target.value})}*/}
+
+                      {/*      placeholder="987"*/}
+                      {/*  />*/}
+                      {/*</div>*/}
+
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="address" className="mb-2">
+                          Addresse principale
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="address"
+                          name="address"
+                          value={customer ? customer.address : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('address', e.target.value)
+                          }
+                          placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"
+                        />
+                      </div>
+
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="city" className="mb-2">
+                          Ville <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          name="city"
+                          id="city"
+                          value={customer ? customer.city : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('city', e.target.value)
+                          }
+                          placeholder="Vancouver"
+                        />
+                      </div>
+
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="zip" className="mb-2">
+                          Code Postal <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          name="zip"
+                          id="zip"
+                          value={customer ? customer.zip : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('zip', e.target.value)
+                          }
+                          placeholder="V6B 1V9"
+                        />
+                      </div>
+
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="state" className="mb-2">
+                          Pays <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="state"
+                          name="state"
+                          value={customer ? customer.state : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('state', e.target.value)
+                          }
+                          placeholder="Canada"
+                        />
+                      </div>
+
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="phone" className="mb-2">
+                          Phone <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="tel"
+                          id="phone"
+                          name="phone"
+                          value={customer ? customer.phone || '' : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('phone', e.target.value)
+                          }
+                          placeholder="+1 604-682-2344"
+                        />
+                      </div>
+
+                      <ButtonUi
+                        label="Mettre à jour entreprise"
+                        type="button"
+                        onClick={() => changeCustomer()}
+                        size="small"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl my-6 w-full">
+                  <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
+                    <thead className="border-b-2 border-gray-300 mb-4">
+                      <tr>
+                        <th className="flex items-center gap-2 p-3 text-center">
+                          Produit
+                        </th>
+                        <th className="p-3 text-center">Prix</th>
+                        <th className="p-3 text-center">Quantité</th>
+                        <th className="p-3 text-center">Unité</th>
+                        <th className="p-3 text-center">TVA</th>
+                        <th className="p-3 text-center">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lineItems.map((lineItem, index) => (
+                        <tr key={index} className="bg-[#e7effc] rounded-xl">
+                          <td className="flex items-center gap-2 p-3 text-center">
+                            {!isEditable[index] ? (
+                              <button
+                                className="flex items-center gap-2 w-full"
+                                onClick={() => makeEditable(index)}
+                              >
+                                Entrer un produit à facturer
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="name"
+                                />
+                              </button>
+                            ) : (
+                              <Input
+                                className={getInputClass(lineItem.name ?? '')}
+                                type="text"
+                                id={`name-${index}`}
+                                name={`name-${index}`}
+                                placeholder="Nom produit"
+                                disabled={!isEditable[index]}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    index,
+                                    'name',
+                                    e.target.value,
+                                  )
+                                }
+                                value={lineItem.name || ''}
+                                readOnly={!isEditable[index]}
                               />
-                            </button>
-                          ) : (
-                            <Input
-                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                              type="text"
-                              id="tva"
-                              name={`tva-${index}`}
-                              placeholder="Tva"
-                              disabled={!isEditable[index]}
-                              onChange={(e) =>
-                                handleItemChange(index, 'tva', e.target.value)
-                              }
-                              value={lineItem.tva}
-                              readOnly={!isEditable[index]}
-                            />
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          <div className="flex justify-center items-center">
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
                             {!isEditable[index] ? (
                               <button
                                 className="flex justify-center items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                €{lineItem.lineTotalTva}
+                                €{lineItem.price}
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="item"
+                                />
+                              </button>
+                            ) : (
+                              <Input
+                                className={getInputClass(
+                                  lineItem.price?.toString() ?? '',
+                                )}
+                                type="number"
+                                id={`price-${index}`}
+                                name={`price-${index}`}
+                                placeholder="100"
+                                disabled={!isEditable[index]}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    index,
+                                    'price',
+                                    e.target.value,
+                                  )
+                                }
+                                value={lineItem.price || ''}
+                                readOnly={!isEditable[index]}
+                              />
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            {!isEditable[index] ? (
+                              <button
+                                className="flex justify-center items-center gap-2 w-full"
+                                onClick={() => makeEditable(index)}
+                              >
+                                {lineItem.quantity}
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="item"
+                                />
+                              </button>
+                            ) : (
+                              <Input
+                                className={getInputClass(
+                                  lineItem.quantity?.toString() ?? '',
+                                )}
+                                type="number"
+                                id={`quantity-${index}`}
+                                name={`quantity-${index}`}
+                                placeholder="1"
+                                disabled={!isEditable[index]}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    index,
+                                    'quantity',
+                                    e.target.value,
+                                  )
+                                }
+                                value={lineItem.quantity || ''}
+                                readOnly={!isEditable[index]}
+                              />
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            {!isEditable[index] ? (
+                              <button
+                                className="flex justify-center items-center gap-2 w-full"
+                                onClick={() => makeEditable(index)}
+                              >
+                                {lineItem.unity}
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="item"
+                                />
+                              </button>
+                            ) : (
+                              <select
+                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                                id="unity"
+                                name={`unity-${index}`}
+                                value={lineItem.unity}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    index,
+                                    'unity',
+                                    e.target.value,
+                                  )
+                                }
+                              >
+                                <option value="Journalier">Journalier</option>
+                                <option value="Horraire">Horraire</option>
+                                <option value="Hebdomadaire">
+                                  Hebdomadaire
+                                </option>
+                                <option value="Mensuel">Mensuel</option>
+                                <option value="Annuel">Annuel</option>
+                                <option value="Total">Total</option>
+                              </select>
+                            )}
+                          </td>
+
+                          <td className="p-3 text-center">
+                            {!isEditable[index] ? (
+                              <button
+                                className="flex justify-center items-center gap-2 w-full"
+                                onClick={() => makeEditable(index)}
+                              >
+                                {lineItem.unity}
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="item"
+                                />
+                              </button>
+                            ) : (
+                              <Input
+                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                                type="text"
+                                id="tva"
+                                name={`tva-${index}`}
+                                placeholder="Tva"
+                                disabled={!isEditable[index]}
+                                onChange={(e) =>
+                                  handleItemChange(index, 'tva', e.target.value)
+                                }
+                                value={lineItem.tva}
+                                readOnly={!isEditable[index]}
+                              />
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="flex justify-center items-center">
+                              {!isEditable[index] ? (
+                                <button
+                                  className="flex justify-center items-center gap-2 w-full"
+                                  onClick={() => makeEditable(index)}
+                                >
+                                  €{lineItem.lineTotalTva}
+                                  <PencilLine
+                                    className="w-4 h-4 hover:text-blue-700"
+                                    id="item"
+                                  />
+                                </button>
+                              ) : (
+                                <Input
+                                  className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                                  type="number"
+                                  id="lineTotalTva"
+                                  name={`lineTotalTva-${index}`}
+                                  placeholder="100"
+                                  readOnly
+                                  value={
+                                    lineItem.lineTotalTva
+                                      ? lineItem.lineTotalTva.toFixed(2)
+                                      : '0.00'
+                                  }
+                                />
+                              )}
+
+                              {isEditable[index] ? (
+                                <button
+                                  className="flex justify-center items-center gap-2 w-full"
+                                  onClick={() => removeLineItem(index)}
+                                >
+                                  <Trash2 className="w-4 h-4 hover:text-blue-700" />
+                                </button>
+                              ) : null}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="flex justify-center items-center my-6 gap-2 text-sm">
+                    <button
+                      className="bg-blue-600 py-1 px-2 text-white"
+                      onClick={addLineItem}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <button
+                      className="text-blue-700 text-sm"
+                      onClick={addLineItem}
+                    >
+                      Ajouter un item
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col w-full mb-6">
+                  <div className="flex justify-start items-center w-full gap-3 mb-2">
+                    <p className="text-sm">Appliquer une réduction</p>
+                    <hr className="w-full text-blue-700" />
+                  </div>
+                  <div>
+                    <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
+                      <thead className="border-b-2 border-gray-300 mb-4">
+                        <tr>
+                          <th className="p-3 text-center">Nom</th>
+                          <th className="p-3 text-center">
+                            Montant de Réduction
+                          </th>
+                          <th className="p-3 text-center">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-[#e7effc] rounded-xl">
+                          <td className="flex items-center gap-2 p-3 text-center">
+                            {!isEditableSubtotal ? (
+                              <button
+                                className="flex items-center gap-2 w-full"
+                                onClick={makeEditableSubtotal}
+                              >
+                                Réduction
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="item"
+                                />
+                              </button>
+                            ) : (
+                              <Input
+                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={subTotal?.name}
+                                onChange={(e) =>
+                                  handleSubTotalChange('name', e.target.value)
+                                }
+                                placeholder="Réduction"
+                                readOnly={!isEditableSubtotal}
+                                disabled={!isEditableSubtotal}
+                              />
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            {!isEditableSubtotal ? (
+                              <button
+                                className="flex justify-center items-center gap-2 w-full"
+                                onClick={makeEditableSubtotal}
+                              >
+                                5%
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="item"
@@ -1118,329 +1251,227 @@ const Page = () => {
                               <Input
                                 className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                                 type="number"
-                                id="lineTotalTva"
-                                name={`lineTotalTva-${index}`}
-                                placeholder="100"
-                                readOnly
-                                value={
-                                  lineItem.lineTotalTva
-                                    ? lineItem.lineTotalTva.toFixed(2)
-                                    : '0.00'
+                                name="discount"
+                                id="discount"
+                                value={subTotal.discount ?? 0}
+                                onChange={(e) =>
+                                  handleSubTotalChange(
+                                    'discount',
+                                    e.target.value,
+                                  )
                                 }
+                                placeholder="100"
+                                readOnly={!isEditableSubtotal}
+                                disabled={!isEditableSubtotal}
                               />
                             )}
-
-                            {isEditable[index] ? (
+                          </td>
+                          <td className="p-3 text-center">
+                            {!isEditableSubtotal ? (
                               <button
                                 className="flex justify-center items-center gap-2 w-full"
-                                onClick={() => removeLineItem(index)}
+                                onClick={makeEditableSubtotal}
                               >
-                                <Trash2 className="w-4 h-4 hover:text-blue-700" />
+                                €100
+                                <PencilLine
+                                  className="w-4 h-4 hover:text-blue-700"
+                                  id="item"
+                                />
                               </button>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex justify-center items-center my-6 gap-2 text-sm">
-                  <button
-                    className="bg-blue-600 py-1 px-2 text-white"
-                    onClick={addLineItem}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                  <button
-                    className="text-blue-700 text-sm"
-                    onClick={addLineItem}
-                  >
-                    Ajouter un item
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex flex-col w-full mb-6">
-                <div className="flex justify-start items-center w-full gap-3 mb-2">
-                  <p className="text-sm">Appliquer une réduction</p>
-                  <hr className="w-full text-blue-700" />
-                </div>
-                <div>
-                  <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                    <thead className="border-b-2 border-gray-300 mb-4">
-                      <tr>
-                        <th className="p-3 text-center">Nom</th>
-                        <th className="p-3 text-center">
-                          Montant de Réduction
-                        </th>
-                        <th className="p-3 text-center">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="bg-[#e7effc] rounded-xl">
-                        <td className="flex items-center gap-2 p-3 text-center">
-                          {!isEditableSubtotal ? (
-                            <button
-                              className="flex items-center gap-2 w-full"
-                              onClick={makeEditableSubtotal}
-                            >
-                              Réduction
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
+                            ) : (
+                              <Input
+                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                                type="number"
+                                name="discountTotal"
+                                id="discountTotal"
+                                disabled={!isEditableSubtotal}
+                                readOnly
+                                placeholder="1"
+                                value={(
+                                  getTotalInvoices() - (subTotal.discount ?? 0)
+                                ).toFixed(2)}
                               />
-                            </button>
-                          ) : (
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="flex flex-col w-full mb-6">
+                  <div className="flex justify-start items-center w-full gap-3 mb-2">
+                    <p className="text-sm">Total</p>
+                    <hr className="w-full text-blue-700" />
+                  </div>
+                  <div>
+                    <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
+                      <thead className="border-b-2 border-gray-300 mb-4">
+                        <tr>
+                          <th className="p-3 text-center">Total HT</th>
+                          <th className="p-3 text-center">
+                            Total sans réduction
+                          </th>
+                          <th className="p-3 text-center">
+                            Total avec réduction
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-[#e7effc] rounded-xl">
+                          <td className="flex items-center gap-2 p-3 text-center">
                             <Input
                               className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                               type="text"
-                              id="name"
-                              name="name"
-                              value={subTotal?.name}
-                              onChange={(e) =>
-                                handleSubTotalChange('name', e.target.value)
-                              }
-                              placeholder="Réduction"
-                              readOnly={!isEditableSubtotal}
-                              disabled={!isEditableSubtotal}
-                            />
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          {!isEditableSubtotal ? (
-                            <button
-                              className="flex justify-center items-center gap-2 w-full"
-                              onClick={makeEditableSubtotal}
-                            >
-                              5%
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
-                              />
-                            </button>
-                          ) : (
-                            <Input
-                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                              type="number"
-                              name="discount"
-                              id="discount"
-                              value={subTotal.discount ?? 0}
-                              onChange={(e) =>
-                                handleSubTotalChange('discount', e.target.value)
-                              }
+                              name="total"
+                              id="total"
                               placeholder="100"
-                              readOnly={!isEditableSubtotal}
-                              disabled={!isEditableSubtotal}
+                              value={(
+                                getTotalInvoices(false) -
+                                (subTotal.discount ?? 0)
+                              ).toFixed(2)}
+                              readOnly
                             />
-                          )}
-                        </td>
-                        <td className="p-3 text-center">
-                          {!isEditableSubtotal ? (
-                            <button
-                              className="flex justify-center items-center gap-2 w-full"
-                              onClick={makeEditableSubtotal}
-                            >
-                              €100
-                              <PencilLine
-                                className="w-4 h-4 hover:text-blue-700"
-                                id="item"
-                              />
-                            </button>
-                          ) : (
+                          </td>
+                          <td className="p-3 text-center">
                             <Input
                               className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                               type="number"
-                              name="discountTotal"
-                              id="discountTotal"
-                              disabled={!isEditableSubtotal}
+                              id="totalTva"
+                              name="totalTva"
+                              value={getTotalInvoices().toFixed(2)}
                               readOnly
-                              placeholder="1"
+                              placeholder="100"
+                            />
+                          </td>
+                          <td className="p-3 text-center">
+                            <Input
+                              className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                              type="number"
+                              id="totalTva"
+                              name="totalTva"
                               value={(
                                 getTotalInvoices() - (subTotal.discount ?? 0)
                               ).toFixed(2)}
+                              readOnly
+                              placeholder="100"
                             />
-                          )}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col w-full mb-6">
-                <div className="flex justify-start items-center w-full gap-3 mb-2">
-                  <p className="text-sm">Total</p>
-                  <hr className="w-full text-blue-700" />
-                </div>
-                <div>
-                  <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                    <thead className="border-b-2 border-gray-300 mb-4">
-                      <tr>
-                        <th className="p-3 text-center">Total HT</th>
-                        <th className="p-3 text-center">
-                          Total sans réduction
-                        </th>
-                        <th className="p-3 text-center">
-                          Total avec réduction
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="bg-[#e7effc] rounded-xl">
-                        <td className="flex items-center gap-2 p-3 text-center">
-                          <Input
-                            className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                            type="text"
-                            name="total"
-                            id="total"
-                            placeholder="100"
-                            value={(
-                              getTotalInvoices(false) - (subTotal.discount ?? 0)
-                            ).toFixed(2)}
-                            readOnly
-                          />
-                        </td>
-                        <td className="p-3 text-center">
-                          <Input
-                            className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                            type="number"
-                            id="totalTva"
-                            name="totalTva"
-                            value={getTotalInvoices().toFixed(2)}
-                            readOnly
-                            placeholder="100"
-                          />
-                        </td>
-                        <td className="p-3 text-center">
-                          <Input
-                            className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                            type="number"
-                            id="totalTva"
-                            name="totalTva"
-                            value={(
+                <div className="flex flex-col w-full mb-6">
+                  <div>
+                    <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
+                      <tbody>
+                        <tr>
+                          <td className="font-black text-black">
+                            <h5>Total à régler</h5>
+                          </td>
+                          <td className="p-3 text-center font-black text-black">
+                            {(
                               getTotalInvoices() - (subTotal.discount ?? 0)
                             ).toFixed(2)}
-                            readOnly
-                            placeholder="100"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                            €
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex flex-col w-full mb-6">
-                <div>
-                  <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                    <tbody>
-                      <tr>
-                        <td className="font-black text-black">
-                          <h5>Total à régler</h5>
-                        </td>
-                        <td className="p-3 text-center font-black text-black">
-                          {(
-                            getTotalInvoices() - (subTotal.discount ?? 0)
-                          ).toFixed(2)}
-                          €
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="w-full my-">
-                <div className="flex justify-between items-center w-full gap-3 mb-2">
-                  <p className="font-black text-sm">notes</p>
-                </div>
-                <div className="grid w-full items-center gap-1.5 my-2">
-                  {!editablenotes ? (
-                    <button
-                      className="w-full text-sm font-normal"
-                      onClick={makeEditablenotes}
-                    >
-                      Les factures devront être réglées en Euros (€) dès
-                      réception, et au plus tard dans un délai de X jours (délai
-                      inférieur ou égal à 45 jours fin de mois ou 60 jours) à
-                      partir de la date de leur émission
-                      <PencilLine
-                        className="w-4 h-4 hover:text-blue-700"
+                <div className="w-full my-">
+                  <div className="flex justify-between items-center w-full gap-3 mb-2">
+                    <p className="font-black text-sm">notes</p>
+                  </div>
+                  <div className="grid w-full items-center gap-1.5 my-2">
+                    {!editablenotes ? (
+                      <button
+                        className="w-full text-sm font-normal"
+                        onClick={makeEditablenotes}
+                      >
+                        Les factures devront être réglées en Euros (€) dès
+                        réception, et au plus tard dans un délai de X jours
+                        (délai inférieur ou égal à 45 jours fin de mois ou 60
+                        jours) à partir de la date de leur émission
+                        <PencilLine
+                          className="w-4 h-4 hover:text-blue-700"
+                          id="notes"
+                        />
+                      </button>
+                    ) : (
+                      <textarea
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                         id="notes"
+                        name="notes"
+                        placeholder="notes"
+                        onChange={(e) => setnotes(e.target.value)}
                       />
-                    </button>
-                  ) : (
-                    <textarea
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                      id="notes"
-                      name="notes"
-                      placeholder="notes"
-                      onChange={(e) => setnotes(e.target.value)}
-                    />
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="w-full">
-                <div className="flex justify-between items-center w-full gap-3 mb-2">
-                  <p className="font-black text-sm">Termes</p>
-                </div>
-                <div className="grid w-full items-center gap-1.5 my-2">
-                  {!editableTerms ? (
-                    <button
-                      className="w-full text-sm font-normal"
-                      onClick={makeEditableTerms}
-                    >
-                      Les factures devront être réglées en Euros (€) dès
-                      réception, et au plus tard dans un délai de X jours (délai
-                      inférieur ou égal à 45 jours fin de mois ou 60 jours) à
-                      partir de la date de leur émission
-                      <PencilLine
-                        className="w-4 h-4 hover:text-blue-700"
+                <div className="w-full">
+                  <div className="flex justify-between items-center w-full gap-3 mb-2">
+                    <p className="font-black text-sm">Termes</p>
+                  </div>
+                  <div className="grid w-full items-center gap-1.5 my-2">
+                    {!editableTerms ? (
+                      <button
+                        className="w-full text-sm font-normal"
+                        onClick={makeEditableTerms}
+                      >
+                        Les factures devront être réglées en Euros (€) dès
+                        réception, et au plus tard dans un délai de X jours
+                        (délai inférieur ou égal à 45 jours fin de mois ou 60
+                        jours) à partir de la date de leur émission
+                        <PencilLine
+                          className="w-4 h-4 hover:text-blue-700"
+                          id="terms"
+                        />
+                      </button>
+                    ) : (
+                      <textarea
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                         id="terms"
+                        name="terms"
+                        placeholder="Terms"
+                        onChange={(e) => setTerms(e.target.value)}
                       />
-                    </button>
-                  ) : (
-                    <textarea
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                      id="terms"
-                      name="terms"
-                      placeholder="Terms"
-                      onChange={(e) => setTerms(e.target.value)}
-                    />
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex justify-end items-center gap-2 w-full my-8">
-                <ButtonUi
-                  label="Enregistrer en tant que brouillon"
-                  type="button"
-                  onClick={() => {
-                    handleSubmit(true)
-                  }}
-                />
-                <ButtonUi
-                  label="Envoyer la facture"
-                  type="button"
-                  onClick={() => {
-                    handleSubmit(false)
-                  }}
-                />
+                <div className="flex justify-end items-center gap-2 w-full my-8">
+                  <ButtonUi
+                    label="Enregistrer en tant que brouillon"
+                    type="button"
+                    onClick={() => {
+                      handleSubmit(true)
+                    }}
+                  />
+                  <ButtonUi
+                    label="Envoyer la facture"
+                    type="button"
+                    onClick={() => {
+                      handleSubmit(false)
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-
-      </form>
-      <Preview
+        </form>
+        <Preview
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
-      />
+          imagePreviewUrl={imagePreviewUrl}
+        />
       </div>
-
     </section>
   )
 }
