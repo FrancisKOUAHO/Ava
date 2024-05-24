@@ -48,11 +48,10 @@ const TopBar = () => {
         <div className="c-topbar__container__left">
           <Link href="/dashboard/invoices/add">
             <ButtonUI
-                label="Créer une facture"
-                icon={<FilePenLine className="w-5 h-5" />}
+              label="Créer une facture"
+              icon={<FilePenLine className="w-5 h-5" />}
             />
           </Link>
-
         </div>
       </div>
 
@@ -61,8 +60,6 @@ const TopBar = () => {
           <div className="c-topbar__container__right__item">
             <div className="c-profile-avatar">
               <div className="flex justify-center items-center text-black gap-6">
-                <CommandK />
-
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline">
@@ -83,14 +80,6 @@ const TopBar = () => {
                           <span>Profile</span>
                         </DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        <span>Billing</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                      </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
@@ -104,20 +93,6 @@ const TopBar = () => {
                           <span>Mon entreprise</span>
                         </DropdownMenuItem>
                       </Link>
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          <span>Invite users</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent>
-                            <DropdownMenuItem disabled>
-                              <Mail className="mr-2 h-4 w-4" />
-                              <span>Email</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem disabled>
