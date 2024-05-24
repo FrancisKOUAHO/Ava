@@ -588,8 +588,32 @@ const Page = () => {
     checkIfCustomerIsFull()
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null // More safe checking if files exist
+  const mutation = useMutation({
+    mutationFn: async (upload: any) =>
+      api.post(
+        `upload-logo`,
+        {
+          avatar: upload,
+        },
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      ),
+    onError: (e: any) => {
+      throw new Error(e)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Logo téléchargé avec succès')
+    },
+  })
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files ? event.target.files[0] : null
     if (file) {
       setFileName(file.name)
 
@@ -600,6 +624,7 @@ const Page = () => {
         }
       }
       reader.readAsDataURL(file)
+      await mutation.mutateAsync(file)
     } else {
       setImagePreviewUrl(null)
       setFileName('')
@@ -831,22 +856,6 @@ const Page = () => {
                           placeholder="EUR"
                         />
                       </div>
-                      {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                      {/*  <Label htmlFor="vatNumber" className="mb-2">*/}
-                      {/*    Numéro de TVA*/}
-                      {/*  </Label>*/}
-                      {/*  <Input*/}
-                      {/*      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                      {/*      type="text"*/}
-                      {/*      id="vatNumber"*/}
-                      {/*      name="vatNumber"*/}
-                      {/*      value={customer ? customer.vatNumber  : ''}*/}
-                      {/*      onChange={(e) => handleCustomerChange({...customer, vatNumber: e.target.value})}*/}
-
-                      {/*      placeholder="987"*/}
-                      {/*  />*/}
-                      {/*</div>*/}
-
                       <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label htmlFor="address" className="mb-2">
                           Addresse principale
