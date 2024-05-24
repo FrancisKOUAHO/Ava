@@ -6,9 +6,7 @@ import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
-import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 
 interface PreviewProps {
@@ -61,13 +59,15 @@ const Preview: FunctionComponent<PreviewProps> = ({
       html2canvas: options,
       callback: function (doc) {
         // Auto-add pages if content exceeds one page
-        const contentHeight = fullHeight * scale;
-        let yPos = 10;
-        while (contentHeight > yPos + 10) {
-          yPos += pdf.internal.pageSize.getHeight() - 20; // margin considered
-          if (contentHeight > yPos) {
-            pdf.addPage();
-          }
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20; // Subtract top and bottom margin
+        const contentHeight = input.scrollHeight * scale;
+
+        // Calculate the number of pages needed
+        const numberOfPages = Math.ceil(contentHeight / pageHeight);
+
+        // Add pages if more than one is needed
+        for (let i = 1; i < numberOfPages -1; i++) {
+          pdf.addPage();
         }
         doc.save('download.pdf');
       },

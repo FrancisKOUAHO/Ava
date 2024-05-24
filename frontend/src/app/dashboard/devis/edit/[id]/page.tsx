@@ -648,6 +648,8 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   return (
     <section className="px-6 py-6">
+      <div className="flex text-black">
+
       <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
         <div className="w-3/4">
           <header className="flex justify-between items-center gap-12">
@@ -1461,8 +1463,14 @@ const Page = ({ params }: { params: { id: string } }) => {
           </div>
         </div>
 
-        <Preview customer={null} lineItems={null} subTotal={null} />
+        {/*<Preview customer={null} lineItems={null} subTotal={null} />*/}
       </form>
+        <Preview
+            customer={customer}
+            lineItems={lineItems}
+            subTotal={subTotal}
+        />
+      </div>
     </section>
   )
 }
