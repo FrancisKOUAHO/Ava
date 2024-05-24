@@ -75,7 +75,7 @@ const Preview: FunctionComponent<PreviewProps> = ({
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl my-3 p-2" ref={pdfRef}>
+      <div className="bg-[#f2f5fd] rounded-xl my-3 p-2 h-full" ref={pdfRef}>
         <div className="rounded-xl">
           <div className="flex justify-center items-center">
             <div className="flex w-1/3">

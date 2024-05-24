@@ -106,7 +106,6 @@ const Page = () => {
 
   const [fileName, setFileName] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
-
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
   const [isEditableSubtotal, setIsEditableSubtotal] = useState<boolean>(false)
@@ -168,24 +167,6 @@ const Page = () => {
     }
 
     return errors
-  }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null // More safe checking if files exist
-    if (file) {
-      setFileName(file.name)
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImagePreviewUrl(reader.result)
-        }
-      }
-      reader.readAsDataURL(file)
-    } else {
-      setImagePreviewUrl(null)
-      setFileName('')
-    }
   }
 
   const { data: customersData } = useFetchData('billing/customer', 'customer')
@@ -607,8 +588,22 @@ const Page = () => {
     checkIfCustomerIsFull()
   }
 
-  const handleTest = () => {
-    console.log(formValid)
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null // More safe checking if files exist
+    if (file) {
+      setFileName(file.name)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImagePreviewUrl(reader.result)
+        }
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setImagePreviewUrl(null)
+      setFileName('')
+    }
   }
 
   useEffect(() => {
