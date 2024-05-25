@@ -6,8 +6,8 @@ import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
+import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 interface PreviewProps {
   customer: CustomerProps | null
@@ -28,45 +28,41 @@ const Preview: FunctionComponent<PreviewProps> = ({
 
   const pdfRef = useRef<HTMLDivElement>(null)
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     try {
       const input = pdfRef.current
       if (!input) return
 
-      const MARGIN = 20
-      const ORIENTATION = 'p'
-      const FORMAT = 'a4'
-      const pdf = new jsPDF(ORIENTATION, 'mm', FORMAT)
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
 
-      const pageWidth = pdf.internal.pageSize.getWidth() - MARGIN
-      const scale = pageWidth / input.scrollWidth
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+        width: input.scrollWidth,
+        height: input.scrollHeight,
+      })
 
-      const fullHeight = input.scrollHeight
-      const options = {
-        scale: scale,
-        windowHeight: fullHeight,
+      const imgData = canvas.toDataURL('image/png')
+      const imgProps = pdf.getImageProperties(imgData)
+      const imgWidth = pageWidth
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width
+
+      let heightLeft = imgHeight
+      let position = 0
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
       }
 
-      pdf.html(input, {
-        html2canvas: options,
-        callback: function (doc) {
-          const contentHeight = fullHeight * scale
-          const yPos = 10
-          const pageHeight = pdf.internal.pageSize.getHeight() - MARGIN
-
-          // Calculate the number of pages needed
-          const numberOfPages = Math.ceil(contentHeight / pageHeight)
-
-          // Add pages if more than one is needed
-          for (let i = 1; i < numberOfPages - 1; i++) {
-            pdf.addPage()
-          }
-
-          doc.save('download.pdf')
-        },
-        x: 10,
-        y: 10,
-      })
+      pdf.save('download.pdf')
     } catch (error) {
       console.error('Error generating PDF: ', error)
     }
