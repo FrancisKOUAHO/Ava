@@ -28,6 +28,10 @@ const Home = () => {
           router.push('/')
         }
       })
+      .catch((err: any) => {
+        setIsLoaded(false)
+        console.error(err)
+      })
   }
 
   const handleGoogleConnect = () => {
@@ -50,7 +54,6 @@ const Home = () => {
       {isClient && (
         <div className="c-login">
           <div>
-            {/* <img src="/images/" alt="logo" /> */}
             <h4>Bienvenue !</h4>
             <p>Connectez-vous pour accéder à votre compte.</p>
 
