@@ -641,7 +641,7 @@ const Page = () => {
     <section className="px-6 py-6">
       <div className="flex text-black">
         <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-          <div className="w-3/4">
+          <div className="w-4/4">
             <header className="flex justify-between items-center gap-12">
               <div className="flex justify-center items-center">
                 <h3 className="text-black text-lg font-semibold">
