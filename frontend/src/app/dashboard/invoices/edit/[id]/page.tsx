@@ -104,7 +104,6 @@ interface SubTotal {
 const Page = ({ params }: { params: { id: string } }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [fileName, setFileName] = useState<string>('')
@@ -203,11 +202,15 @@ const Page = ({ params }: { params: { id: string } }) => {
   }, [lineItems])
 
   useEffect(() => {
+    console.log('invoiceDetails 00')
+
     console.log(invoiceData)
   }, [invoiceData])
 
   const validateInvoiceData = (invoiceData: InvoiceData) => {
     const errors = []
+    console.log('invoiceData')
+    console.log(invoiceData)
     if (!invoiceData.client_id) {
       errors.push('Client ID is required.')
     }
@@ -253,6 +256,43 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   const getInputClass = (value: string) => {
     return `mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white ${!value ? 'border-red-500' : ''}`
+  }
+
+  const downloadPDF = () => {
+    const input = pdfRef.current
+
+    if (!input) return
+
+    const pdf = new jsPDF('p', 'mm', 'a4')
+
+    const pageWidth = pdf.internal.pageSize.getWidth() - 20
+    const scale = pageWidth / input.scrollWidth
+
+    const fullHeight = input.scrollHeight
+    const options = {
+      scale: scale,
+      windowHeight: 1500,
+    }
+
+    pdf.html(input, {
+      html2canvas: options,
+      callback: function (doc) {
+        const contentHeight = fullHeight * scale
+        let yPos = 10
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20
+
+        const numberOfPages = Math.ceil(contentHeight / pageHeight)
+
+        for (let i = 1; i < numberOfPages - 1; i++) {
+          pdf.addPage()
+        }
+
+        doc.save('download.pdf')
+        console.log('pdf', doc)
+      },
+      x: 10,
+      y: 10,
+    })
   }
 
   const handleSubTotalChange = (
@@ -1508,6 +1548,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
           pdfRef={pdfRef}
+          downloadPdf={downloadPDF}
         />
       </div>
     </section>

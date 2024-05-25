@@ -1,12 +1,13 @@
 'use client'
 
-import React, { FunctionComponent } from 'react'
-import { FileText, ImagePlus } from 'lucide-react'
+import React, { FunctionComponent, useRef } from 'react'
+import { FileText, Image, ImagePlus } from 'lucide-react'
 import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
-import { downloadPDF } from '@/lib/download-pdf'
+import jsPDF from 'jspdf'
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 interface PreviewProps {
   customer: CustomerProps | null
@@ -14,6 +15,7 @@ interface PreviewProps {
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
   pdfRef: React.RefObject<HTMLDivElement>
+  downloadPdf: () => void
 }
 
 const Preview: FunctionComponent<PreviewProps> = ({
@@ -22,25 +24,26 @@ const Preview: FunctionComponent<PreviewProps> = ({
   subTotal,
   imagePreviewUrl,
   pdfRef,
+  downloadPdf,
 }) => {
   const { data: compagny } = useSirene()
 
   if (!compagny || !customer || !subTotal) return null
 
   return (
-    <div className="w-3/4 px-2 rounded-xl">
+    <div className="w-2/4 bg-white px-3 py-3 rounded-xl h-[88vh] overflow-auto">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
-          <button onClick={() => downloadPDF(pdfRef)}>
+          <button onClick={downloadPdf}>
             <FileText className="text-black hover:text-blue-700 w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl my-2 p-2" ref={pdfRef}>
-        <div className="bg-white px-6 py-2 rounded-xl">
-          <div className="flex justify-center p-4">
+      <div className="bg-[#f2f5fd] rounded-xl my-3 p-2 h-full" ref={pdfRef}>
+        <div className="rounded-xl">
+          <div className="flex justify-center items-center">
             <div className="flex w-1/3">
               {imagePreviewUrl ? (
                 <img
