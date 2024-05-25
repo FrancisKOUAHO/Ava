@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState, useEffect } from 'react'
+import { FormEvent, useState, useEffect, useRef } from 'react'
 
 import {
   CircleCheck,
@@ -9,9 +9,7 @@ import {
   ImagePlus,
   Info,
   PencilLine,
-  Send,
   Image,
-  SquareMenu,
   Trash2,
   Plus,
 } from 'lucide-react'
@@ -43,6 +41,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useFetchData } from '@/app/hooks/useFetch'
+import jsPDF from 'jspdf'
 
 interface LineItem {
   name?: string
@@ -116,6 +115,8 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
+  const pdfRef = useRef<HTMLDivElement>(null)
+
   const [customer, setCustomer] = useState<CustomerData | null>({
     user_id: '',
     userId: '',
@@ -157,7 +158,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     'invoice-item',
   )
 
-  // Effect for loading initial data
   useEffect(() => {
     if (invoiceDetails) {
       setInvoiceData(invoiceDetails)
@@ -182,7 +182,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     }
   }, [invoiceDetails, customersData, invoiceItemDetails])
 
-  // Effect for auto-selecting first customer
   useEffect(() => {
     if (
       customersData &&
@@ -191,9 +190,8 @@ const Page = ({ params }: { params: { id: string } }) => {
     ) {
       handleSelectCustomer(customersData[0].id)
     }
-  }, [customersData]) // Removed `customer` from dependencies to avoid re-triggering when customer is set
+  }, [customersData])
 
-  // Effect for validating line items
   useEffect(() => {
     const allValid = lineItems.every(
       (item) => item.name && item.price && item.quantity,
@@ -258,6 +256,43 @@ const Page = ({ params }: { params: { id: string } }) => {
 
   const getInputClass = (value: string) => {
     return `mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white ${!value ? 'border-red-500' : ''}`
+  }
+
+  const downloadPDF = () => {
+    const input = pdfRef.current
+
+    if (!input) return
+
+    const pdf = new jsPDF('p', 'mm', 'a4')
+
+    const pageWidth = pdf.internal.pageSize.getWidth() - 20
+    const scale = pageWidth / input.scrollWidth
+
+    const fullHeight = input.scrollHeight
+    const options = {
+      scale: scale,
+      windowHeight: 1500,
+    }
+
+    pdf.html(input, {
+      html2canvas: options,
+      callback: function (doc) {
+        const contentHeight = fullHeight * scale
+        let yPos = 10
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20
+
+        const numberOfPages = Math.ceil(contentHeight / pageHeight)
+
+        for (let i = 1; i < numberOfPages - 1; i++) {
+          pdf.addPage()
+        }
+
+        doc.save('download.pdf')
+        console.log('pdf', doc)
+      },
+      x: 10,
+      y: 10,
+    })
   }
 
   const handleSubTotalChange = (
@@ -455,7 +490,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     },
   })
 
-  const handleSubmit = (isDraft: boolean = true) => {
+  const handleSubmit = async (isDraft: boolean = true) => {
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
@@ -1512,6 +1547,8 @@ const Page = ({ params }: { params: { id: string } }) => {
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          pdfRef={pdfRef}
+          downloadPdf={downloadPDF}
         />
       </div>
     </section>

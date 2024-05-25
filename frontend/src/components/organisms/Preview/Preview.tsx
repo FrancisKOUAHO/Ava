@@ -14,6 +14,8 @@ interface PreviewProps {
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
+  pdfRef: React.RefObject<HTMLDivElement>
+  downloadPdf: () => void
 }
 
 const Preview: FunctionComponent<PreviewProps> = ({
@@ -21,55 +23,19 @@ const Preview: FunctionComponent<PreviewProps> = ({
   lineItems,
   subTotal,
   imagePreviewUrl,
+  pdfRef,
+  downloadPdf,
 }) => {
   const { data: compagny } = useSirene()
 
   if (!compagny || !customer || !subTotal) return null
-
-  const pdfRef = useRef<HTMLDivElement>(null)
-
-  const downloadPDF = () => {
-    const input = pdfRef.current
-
-    if (!input) return
-
-    const pdf = new jsPDF('p', 'mm', 'a4')
-
-    const pageWidth = pdf.internal.pageSize.getWidth() - 20
-    const scale = pageWidth / input.scrollWidth
-
-    const fullHeight = input.scrollHeight
-    const options = {
-      scale: scale,
-      windowHeight: 1500,
-    }
-
-    pdf.html(input, {
-      html2canvas: options,
-      callback: function (doc) {
-        const contentHeight = fullHeight * scale
-        let yPos = 10
-        const pageHeight = pdf.internal.pageSize.getHeight() - 20
-
-        const numberOfPages = Math.ceil(contentHeight / pageHeight)
-
-        for (let i = 1; i < numberOfPages - 1; i++) {
-          pdf.addPage()
-        }
-
-        doc.save('download.pdf')
-      },
-      x: 10,
-      y: 10,
-    })
-  }
 
   return (
     <div className="w-2/4 bg-white px-3 py-3 rounded-xl h-[88vh] overflow-auto">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
-          <button onClick={downloadPDF}>
+          <button onClick={downloadPdf}>
             <FileText className="text-black hover:text-blue-700 w-5 h-5" />
           </button>
         </div>
