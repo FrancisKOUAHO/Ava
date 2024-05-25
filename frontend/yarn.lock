@@ -5351,6 +5351,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"es6-promise@npm:^4.2.5":
+  version: 4.2.8
+  resolution: "es6-promise@npm:4.2.8"
+  checksum: 10c0/2373d9c5e9a93bdd9f9ed32ff5cb6dd3dd785368d1c21e9bbbfd07d16345b3774ae260f2bd24c8f836a6903f432b4151e7816a7fa8891ccb4e1a55a028ec42c3
+  languageName: node
+  linkType: hard
+
 "escalade@npm:^3.1.1":
   version: 3.1.2
   resolution: "escalade@npm:3.1.2"
@@ -5944,6 +5951,8 @@ __metadata:
     eslint-plugin-testing-library: "npm:^6.2.2"
     framer-motion: "npm:^11.1.7"
     get-user-locale: "npm:^2.3.2"
+    html2pdf: "npm:^0.0.11"
+    html2pdf.js: "npm:^0.10.1"
     lucide-react: "npm:^0.372.0"
     next: "npm:14.2.2"
     next-themes: "npm:^0.3.0"
@@ -6279,13 +6288,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"html2canvas@npm:*, html2canvas@npm:^1.0.0-rc.5":
+"html2canvas@npm:*, html2canvas@npm:^1.0.0, html2canvas@npm:^1.0.0-rc.5":
   version: 1.4.1
   resolution: "html2canvas@npm:1.4.1"
   dependencies:
     css-line-break: "npm:^2.1.0"
     text-segmentation: "npm:^1.0.3"
   checksum: 10c0/6de86f75762b00948edf2ea559f16da0a1ec3facc4a8a7d3f35fcec59bb0c5970463478988ae3d9082152e0173690d46ebf4082e7ac803dd4817bae1d355c0db
+  languageName: node
+  linkType: hard
+
+"html2pdf.js@npm:^0.10.1":
+  version: 0.10.1
+  resolution: "html2pdf.js@npm:0.10.1"
+  dependencies:
+    es6-promise: "npm:^4.2.5"
+    html2canvas: "npm:^1.0.0"
+    jspdf: "npm:^2.3.1"
+  checksum: 10c0/3d6d0991c097bef507824770f083eb257117c26008a9d07d9210a80b2e6828abf5489d4a11cf27da23567cb3517fece60f24b8545fc24681e77cf456258f9161
+  languageName: node
+  linkType: hard
+
+"html2pdf@npm:^0.0.11":
+  version: 0.0.11
+  resolution: "html2pdf@npm:0.0.11"
+  checksum: 10c0/6f7832f90e918e72ea84e51305fea91f0067ecdfadc706e3aee72410fc267a30c8b83c2f5bf79e1ef86303248d070833d9c99fa53fa454219784fbb286fab38b
   languageName: node
   linkType: hard
 
@@ -6797,7 +6824,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jspdf@npm:*":
+"jspdf@npm:*, jspdf@npm:^2.3.1":
   version: 2.5.1
   resolution: "jspdf@npm:2.5.1"
   dependencies:
