@@ -63,7 +63,6 @@ const Page = () => {
   const [invoiceIdToDelete, setInvoiceIdToDelete] = useState<string | null>(
     null,
   )
-  const [isUpdating, setIsUpdating] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -108,7 +107,6 @@ const Page = () => {
           const response = await api.delete(
             `billing/invoice/${invoiceIdToDelete}`,
           )
-          //return convertKeysToSnakeCase(response.data)
         } catch (error: unknown) {
           throw new Error('Failed to delete client: ' + error)
         }
@@ -125,18 +123,15 @@ const Page = () => {
     try {
       const response = await api.put(`billing/invoice/${id}`, { status })
       if (response.status === 200) {
-        // Update the state with the new status
         setInvoices((invoices) =>
           invoices.map((invoice) => {
             if (invoice.id === id) {
-              // Ensure that the type of `status` is compatible with `InvoiceStatus`
               return { ...invoice, status }
             }
             return invoice
           }),
         )
       } else {
-        // Handle possible errors
         console.error('Failed to update the invoice status:', response)
       }
     } catch (error) {
@@ -184,15 +179,6 @@ const Page = () => {
         <table className="table w-full text-black border-separate space-y-6 text-sm">
           <thead>
             <tr>
-              {/*<th className="flex items-center gap-2 p-3 text-center">*/}
-              {/*  <Checkbox id="default-checkbox" checked={checked} />*/}
-              {/*  <Label*/}
-              {/*    htmlFor="default-checkbox"*/}
-              {/*    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"*/}
-              {/*  >*/}
-              {/*    Select All*/}
-              {/*  </Label>*/}
-              {/*</th>*/}
               <th className="p-3 text-center">Nom</th>
               <th className="p-3 text-center">Prix</th>
               <th className="p-3 text-center">Client</th>
@@ -260,7 +246,6 @@ const Page = () => {
                           >
                             <Edit className="mr-2 h-4 w-4" />
                             <span>Modifier</span>{' '}
-                            {/* Wrapped text in a span for better control */}
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -275,33 +260,21 @@ const Page = () => {
                           onClick={() => updateStatus(invoice.id, 'brouillon')}
                         >
                           <span>Brouillon</span>{' '}
-                          {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => updateStatus(invoice.id, 'payé')}
                         >
                           <span>Payé</span>{' '}
-                          {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => updateStatus(invoice.id, 'caduque')}
                         >
                           <span>Caduque</span>{' '}
-                          {/* Wrapped text in a span for better control */}
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
-
-                {/*<td className="p-3 text-center">*/}
-                {/*  <a*/}
-                {/*    href={`/invoices/${invoice?.id}`}*/}
-                {/*    className="text-indigo-600 hover:text-indigo-900"*/}
-                {/*  >*/}
-                {/*    View*/}
-                {/*  </a>*/}
-                {/*</td>*/}
               </tr>
             ))}
           </tbody>
