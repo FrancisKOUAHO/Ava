@@ -1,7 +1,7 @@
 'use client'
 
 import React, { FunctionComponent, useRef } from 'react'
-import { FileText, Image, ImagePlus } from 'lucide-react'
+import { FileText, ImagePlus } from 'lucide-react'
 import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
@@ -14,8 +14,6 @@ interface PreviewProps {
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
-  pdfRef: React.RefObject<HTMLDivElement>
-  downloadPdf: () => void
 }
 
 const Preview: FunctionComponent<PreviewProps> = ({
@@ -23,27 +21,71 @@ const Preview: FunctionComponent<PreviewProps> = ({
   lineItems,
   subTotal,
   imagePreviewUrl,
-  pdfRef,
-  downloadPdf,
 }) => {
   const { data: compagny } = useSirene()
 
   if (!compagny || !customer || !subTotal) return null
 
+  const pdfRef = useRef<HTMLDivElement>(null)
+
+  const downloadPDF = () => {
+    const input = pdfRef.current
+
+    if (!input) return
+
+    const pdf = new jsPDF('p', 'mm', 'a4')
+
+    const pageWidth = pdf.internal.pageSize.getWidth() - 20 // Allow for some margin
+    const scale = pageWidth / input.scrollWidth
+
+    const fullHeight = input.scrollHeight
+    const options = {
+      scale: scale,
+      //scrollY: -window.scrollY, // Negate the window's current scroll position
+      //scrollX: -window.scrollX,
+      windowHeight: 1500,
+      //windowWidth: input.scrollWidth
+    }
+
+    pdf.html(input, {
+      html2canvas: options,
+      callback: function (doc) {
+        const contentHeight = fullHeight * scale
+        let yPos = 10
+        const pageHeight = pdf.internal.pageSize.getHeight() - 20 // margins of 10 mm top and bottom
+
+        // Calculate the number of pages needed
+        const numberOfPages = Math.ceil(contentHeight / pageHeight)
+
+        // Add pages if more than one is needed
+        for (let i = 1; i < numberOfPages - 1; i++) {
+          pdf.addPage()
+        }
+
+        doc.save('download.pdf')
+      },
+      x: 10,
+      y: 10,
+    })
+  }
+
   return (
-    <div className="w-2/4 bg-white px-3 py-3 rounded-xl h-[88vh] overflow-auto">
+    <div className="w-2/4 bg-white px-6 py-6 rounded-xl">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
-          <button onClick={downloadPdf}>
+          <button onClick={downloadPDF}>
             <FileText className="text-black hover:text-blue-700 w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl my-3 p-2 h-full" ref={pdfRef}>
-        <div className="rounded-xl">
-          <div className="flex justify-center items-center">
+      <div
+        className="bg-[#f2f5fd] rounded-xl my-8 p-2 h-[70vh] overflow-auto"
+        ref={pdfRef}
+      >
+        <div className="bg-white px-6 py-2 rounded-xl">
+          <div className="flex justify-center p-4">
             <div className="flex w-1/3">
               {imagePreviewUrl ? (
                 <img
