@@ -5,6 +5,7 @@ import mail from '@adonisjs/mail/services/main'
 import jwt from 'jsonwebtoken'
 import app from '@adonisjs/core/services/app'
 import { v4 as uuidv4 } from 'uuid'
+import env from '#start/env'
 
 export default class SessionController {
   async requestLoginLink({ request, response }: HttpContext) {
@@ -59,7 +60,7 @@ export default class SessionController {
               <h1>Bienvenue chez Plumera!</h1>
               <p>
                 Veuillez cliquer sur le lien ci-dessous pour vous connecter:
-                <a href="https://app.plumera.fr/verify/?magic_link_token=${user.magic_link_token}" style="color: #0652DD;">Cliquez ici pour vous connecter</a>
+                <a href="${env.get('HOST_FRONTEND')}/verify/?magic_link_token=${user.magic_link_token}" style="color: #0652DD;">Cliquez ici pour vous connecter</a>
               </p>
             </div>
           </body>
