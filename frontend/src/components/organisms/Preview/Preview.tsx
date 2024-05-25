@@ -29,48 +29,51 @@ const Preview: FunctionComponent<PreviewProps> = ({
   const pdfRef = useRef<HTMLDivElement>(null)
 
   const downloadPDF = () => {
-    const input = pdfRef.current
+    try {
+      const input = pdfRef.current
+      if (!input) return
 
-    if (!input) return
+      const MARGIN = 20
+      const ORIENTATION = 'p'
+      const FORMAT = 'a4'
+      const pdf = new jsPDF(ORIENTATION, 'mm', FORMAT)
 
-    const pdf = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = pdf.internal.pageSize.getWidth() - MARGIN
+      const scale = pageWidth / input.scrollWidth
 
-    const pageWidth = pdf.internal.pageSize.getWidth() - 20 // Allow for some margin
-    const scale = pageWidth / input.scrollWidth
+      const fullHeight = input.scrollHeight
+      const options = {
+        scale: scale,
+        windowHeight: fullHeight,
+      }
 
-    const fullHeight = input.scrollHeight
-    const options = {
-      scale: scale,
-      //scrollY: -window.scrollY, // Negate the window's current scroll position
-      //scrollX: -window.scrollX,
-      windowHeight: 1500,
-      //windowWidth: input.scrollWidth
+      pdf.html(input, {
+        html2canvas: options,
+        callback: function (doc) {
+          const contentHeight = fullHeight * scale
+          const yPos = 10
+          const pageHeight = pdf.internal.pageSize.getHeight() - MARGIN
+
+          // Calculate the number of pages needed
+          const numberOfPages = Math.ceil(contentHeight / pageHeight)
+
+          // Add pages if more than one is needed
+          for (let i = 1; i < numberOfPages - 1; i++) {
+            pdf.addPage()
+          }
+
+          doc.save('download.pdf')
+        },
+        x: 10,
+        y: 10,
+      })
+    } catch (error) {
+      console.error('Error generating PDF: ', error)
     }
-
-    pdf.html(input, {
-      html2canvas: options,
-      callback: function (doc) {
-        const contentHeight = fullHeight * scale
-        let yPos = 10
-        const pageHeight = pdf.internal.pageSize.getHeight() - 20 // margins of 10 mm top and bottom
-
-        // Calculate the number of pages needed
-        const numberOfPages = Math.ceil(contentHeight / pageHeight)
-
-        // Add pages if more than one is needed
-        for (let i = 1; i < numberOfPages - 1; i++) {
-          pdf.addPage()
-        }
-
-        doc.save('download.pdf')
-      },
-      x: 10,
-      y: 10,
-    })
   }
 
   return (
-    <div className="w-3/4 bg-white px-6 py-6 rounded-xl">
+    <div className="w-3/4 px-2 rounded-xl">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
@@ -80,10 +83,7 @@ const Preview: FunctionComponent<PreviewProps> = ({
         </div>
       </div>
 
-      <div
-        className="bg-[#f2f5fd] rounded-xl my-8 p-2 h-[70vh] overflow-auto"
-        ref={pdfRef}
-      >
+      <div className="bg-[#f2f5fd] rounded-xl my-2 p-2" ref={pdfRef}>
         <div className="bg-white px-6 py-2 rounded-xl">
           <div className="flex justify-center p-4">
             <div className="flex w-1/3">
