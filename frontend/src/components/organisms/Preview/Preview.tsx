@@ -70,7 +70,7 @@ const Preview: FunctionComponent<PreviewProps> = ({
   }
 
   return (
-    <div className="w-2/4 bg-white  p-2 rounded-xl h-[86vh] overflow-auto">
+    <div className="w-3/4 bg-white  p-2 rounded-xl h-[86vh] overflow-auto">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
@@ -80,8 +80,8 @@ const Preview: FunctionComponent<PreviewProps> = ({
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl mt-3 p-2" ref={pdfRef}>
-        <div className="px-6 py-2 rounded-xl">
+      <div className="bg-[#f2f5fd] rounded-xl mt-3 p-2 h-full" ref={pdfRef}>
+        <div className="px-1.4  py-2 rounded-xl">
           <div className="flex justify-center p-4">
             <div className="flex w-1/3">
               {imagePreviewUrl ? (
