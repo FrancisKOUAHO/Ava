@@ -639,10 +639,10 @@ const Page = () => {
   }, [customer])
 
   return (
-    <section className="px-6 py-6">
+    <section className="px-6 py-6 h-[90vh] overflow-auto">
       <div className="flex text-black">
         <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-          <div className="w-3/4">
+          <div className="w-4/4">
             <header className="flex justify-between items-center gap-12">
               <div className="flex justify-center items-center">
                 <h3 className="text-black text-lg font-semibold">
@@ -657,7 +657,7 @@ const Page = () => {
               </div>
             </header>
 
-            <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
+            <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl">
               <div className="flex flex-col items-center">
                 <div className="flex justify-between items-center w-full mb-1">
                   {imagePreviewUrl ? (

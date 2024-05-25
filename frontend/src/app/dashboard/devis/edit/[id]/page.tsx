@@ -610,6 +610,49 @@ const Page = ({ params }: { params: { id: string } }) => {
     return pTotal - (pTotal * pdiscount) / 100
   }
 
+  const mutation = useMutation({
+    mutationFn: async (upload: any) =>
+      api.post(
+        `upload-logo`,
+        {
+          logo: upload,
+        },
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      ),
+    onError: (e: any) => {
+      throw new Error(e)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Logo téléchargé avec succès')
+    },
+  })
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files ? event.target.files[0] : null
+    if (file) {
+      setFileName(file.name)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImagePreviewUrl(reader.result)
+        }
+      }
+      reader.readAsDataURL(file)
+      await mutation.mutateAsync(file)
+    } else {
+      setImagePreviewUrl(null)
+      setFileName('')
+    }
+  }
+
   const handleCustomerChange = (field: keyof CustomerData, value: string) => {
     const updatedCustomer = { ...customer, [field]: value }
     const validatedCustomer: CustomerData = {
@@ -648,10 +691,10 @@ const Page = ({ params }: { params: { id: string } }) => {
   }, [customer])
 
   return (
-    <section className="px-6 py-6">
+    <section className="px-6 py-6 h-[90vh] overflow-auto">
       <div className="flex text-black">
         <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-          <div className="w-3/4">
+          <div className="w-4/4">
             <header className="flex justify-between items-center gap-12">
               <div className="flex justify-center items-center">
                 <h3 className="text-black text-lg font-semibold">
@@ -668,29 +711,45 @@ const Page = ({ params }: { params: { id: string } }) => {
 
             <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
               <div className="flex flex-col items-center">
-                {/*<div className="flex justify-between items-center w-full mb-6">*/}
-                {/*  <p className="flex justify-center items-center gap-2">*/}
-                {/*    <Image className="text-blue-700" />*/}
-                {/*    Add Logo*/}
-                {/*  </p>*/}
-                {/*  <Info />*/}
-                {/*</div>*/}
+                <div className="flex justify-between items-center w-full mb-1">
+                  {imagePreviewUrl ? (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="max-w-full max-h-full w-16 h-16"
+                    />
+                  ) : (
+                    <p className="flex justify-center items-center gap-2">
+                      <Image className="text-blue-700" />
+                      Add Logo
+                    </p>
+                  )}
+                  <Info />
+                </div>
 
-                {/*<div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">*/}
-                {/*  <input*/}
-                {/*    type="file"*/}
-                {/*    name="logo"*/}
-                {/*    multiple*/}
-                {/*    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"*/}
-                {/*  />*/}
-                {/*  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">*/}
-                {/*    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />*/}
-                {/*    <h4>*/}
-                {/*      Glissez une image directement{' '}*/}
-                {/*      <span className="text-blue-700">brower</span>*/}
-                {/*    </h4>*/}
-                {/*  </div>*/}
-                {/*</div>*/}
+                <div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">
+                  {imagePreviewUrl && (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="max-w-full max-h-full w-16 h-16"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    onChange={handleFileChange}
+                    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"
+                  />
+                  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
+                    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
+                    <h4>
+                      Glissez une image directement{' '}
+                      <span className="text-blue-700">brower</span>
+                    </h4>
+                  </div>
+                </div>
 
                 {customersData && customersData.length >= 1 && (
                   <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
