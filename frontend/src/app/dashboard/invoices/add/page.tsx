@@ -593,7 +593,7 @@ const Page = () => {
       api.post(
         `upload-logo`,
         {
-          avatar: upload,
+          logo: upload,
         },
         {
           headers: {

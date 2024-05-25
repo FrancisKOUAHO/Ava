@@ -155,6 +155,8 @@ export default class SessionController {
 
     const randomFileName = `${uuidv4()}.${avatar.extname}`
 
+    console.log('randomFileName', randomFileName)
+
     await avatar.move(app.makePath('public/uploads'), {
       name: randomFileName,
     })
