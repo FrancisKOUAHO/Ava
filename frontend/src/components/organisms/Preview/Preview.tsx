@@ -1,19 +1,19 @@
 'use client'
 
-import React, { FunctionComponent, useRef } from 'react'
+import React, { FunctionComponent } from 'react'
 import { FileText, ImagePlus } from 'lucide-react'
 import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import { downloadPDF } from '@/lib/download-pdf'
 
 interface PreviewProps {
   customer: CustomerProps | null
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
+  pdfRef: React.RefObject<HTMLDivElement>
 }
 
 const Preview: FunctionComponent<PreviewProps> = ({
@@ -21,59 +21,18 @@ const Preview: FunctionComponent<PreviewProps> = ({
   lineItems,
   subTotal,
   imagePreviewUrl,
+  pdfRef,
 }) => {
   const { data: compagny } = useSirene()
 
   if (!compagny || !customer || !subTotal) return null
-
-  const pdfRef = useRef<HTMLDivElement>(null)
-
-  const downloadPDF = async () => {
-    try {
-      const input = pdfRef.current
-      if (!input) return
-
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const pageHeight = pdf.internal.pageSize.getHeight()
-
-      const canvas = await html2canvas(input, {
-        scale: 2,
-        useCORS: true,
-        width: input.scrollWidth,
-        height: input.scrollHeight,
-      })
-
-      const imgData = canvas.toDataURL('image/png')
-      const imgProps = pdf.getImageProperties(imgData)
-      const imgWidth = pageWidth
-      const imgHeight = (imgProps.height * imgWidth) / imgProps.width
-
-      let heightLeft = imgHeight
-      let position = 0
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-      }
-
-      pdf.save('download.pdf')
-    } catch (error) {
-      console.error('Error generating PDF: ', error)
-    }
-  }
 
   return (
     <div className="w-3/4 px-2 rounded-xl">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
-          <button onClick={downloadPDF}>
+          <button onClick={() => downloadPDF(pdfRef)}>
             <FileText className="text-black hover:text-blue-700 w-5 h-5" />
           </button>
         </div>
