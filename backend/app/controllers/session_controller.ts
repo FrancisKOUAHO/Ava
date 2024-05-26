@@ -115,18 +115,30 @@ export default class SessionController {
     }
 
     const GoogleUser = await google.user()
+    const magic_link_token = jwt.sign(
+      {
+        id: GoogleUser.id,
+        email: GoogleUser.email,
+      },
+      `${process.env.SECRET_KEY_JWT}`,
+      { expiresIn: '1h' }
+    )
 
     const user: User = await User.updateOrCreate(
       { google_id: GoogleUser.id },
       {
         full_name: GoogleUser.name,
         email: GoogleUser.email,
+        magic_link_token: magic_link_token,
+        magic_link_token_expires_at: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString(),
       }
     )
 
     await auth.use('web').login(user)
 
-    return response.ok({ message: 'Connecté avec succès.', user })
+    return response.redirect(
+      `${env.get('HOST_FRONTEND')}/verify/?magic_link_token=${user.magic_link_token}`
+    )
   }
 
   async updateProfile({ auth, request, response }: HttpContext) {
