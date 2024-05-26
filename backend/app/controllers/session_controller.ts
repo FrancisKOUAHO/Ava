@@ -42,8 +42,7 @@ export default class SessionController {
 
   async sendLoginEmail(user: User) {
     await mail.use('resend').sendLater((message) => {
-      message.from('contact@plumera.fr').to(user.email).subject('Invitation à rejoindre une équipe')
-        .html(`
+      message.from('contact@plumera.fr').to(user.email).subject('Invitation à connecter').html(`
         <!DOCTYPE html>
         <html lang="fr">
           <head>
