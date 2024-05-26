@@ -42,7 +42,8 @@ export default class SessionController {
 
   async sendLoginEmail(user: User) {
     await mail.use('resend').sendLater((message) => {
-      message.from('contact@plumera.fr').to(user.email).subject('Invitation à connecter').html(`
+      message.from('contact@plumera.fr').to(user.email).subject('Invitation à connecter')
+        .html(`
         <!DOCTYPE html>
         <html lang="fr">
           <head>
@@ -123,27 +124,15 @@ export default class SessionController {
       { expiresIn: '1h' }
     )
 
-    // Vérifiez si un utilisateur avec l'email donné existe déjà
-    let user: User | null = await User.findBy('email', GoogleUser.email)
-
-    if (user) {
-      // Si l'utilisateur existe, mettez à jour ses détails
-      user.full_name = GoogleUser.name
-      user.magic_link_token = magic_link_token
-      user.magic_link_token_expires_at = new Date(
-        new Date().getTime() + 60 * 60 * 1000
-      ).toISOString()
-      await user.save()
-    } else {
-      // Si l'utilisateur n'existe pas, créez un nouvel utilisateur
-      user = await User.create({
-        google_id: GoogleUser.id,
+    const user: User = await User.updateOrCreate(
+      { google_id: GoogleUser.id },
+      {
         full_name: GoogleUser.name,
         email: GoogleUser.email,
         magic_link_token: magic_link_token,
         magic_link_token_expires_at: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString(),
-      })
-    }
+      }
+    )
 
     await auth.use('web').login(user)
 

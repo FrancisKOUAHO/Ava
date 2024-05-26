@@ -241,7 +241,7 @@ const Page = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Link
-                            href={`/dashboard/invoices/edit/${invoice.id}`}
+                            href={`/dashboard/devis/edit/${invoice.id}`}
                             className="flex items-center" // Add these classes
                           >
                             <Edit className="mr-2 h-4 w-4" />

@@ -55,6 +55,8 @@ router
             router.post('update-or-insert-invoice-item', [InvoiceItemsController, 'upsert'])
             router.get('invoice-data', [InvoicesController, 'getAllInvoiceData'])
             router.get('devis-data', [InvoicesController, 'getAllDevisData'])
+              router.post('sendPdf', [InvoicesController, 'sendPdfEmail'])
+
             router.get('connect-to-google', [SessionController, 'connectToGoogle'])
 
             router.resource('invoice', InvoicesController).apiOnly()
