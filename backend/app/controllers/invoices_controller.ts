@@ -2,6 +2,15 @@ import { HttpContext } from '@adonisjs/core/http'
 import Invoice from '#models/invoice'
 import { createInvoiceValidator, updateInvoiceValidator } from '#validators/invoice'
 import db from '@adonisjs/lucid/services/db'
+import User from "#models/user";
+import mail from "@adonisjs/mail/services/main";
+//import Application from '@adonisjs/core/application'; // Ajout de cette ligne
+import app from '@adonisjs/core/services/app'
+
+import fs from 'fs/promises';  // Use the promise-based version of the fs module
+import { Buffer } from 'buffer';
+
+import env from "#start/env";
 
 export default class InvoicesController {
   /**
@@ -23,7 +32,7 @@ export default class InvoicesController {
    */
   async store({ request, response }: HttpContext) {
     const data = request.all()
-
+    console.log(data)
     const validation = await createInvoiceValidator.validate(data)
 
     if (!validation) {
@@ -31,9 +40,81 @@ export default class InvoicesController {
     }
 
     const invoice: Invoice = await Invoice.create(data)
-
     return response.created(invoice)
   }
+
+  async sendPdfEmail({ request, response }: HttpContext) {
+    const responseInvoiceJson = request.input('responseInvoice');
+    let data;
+    try {
+      data = JSON.parse(responseInvoiceJson);
+    } catch (error) {
+      console.error('Erreur de parsing JSON:', error);
+      return response.status(400).send('Invalid JSON data');
+    }
+
+    const user = await User.find(data.userId);
+   // const pdfBuffer = request.input('file');
+    const pdfFile = request.file('file', {
+      size: '20mb',
+      extnames: ['pdf'],
+    });
+    console.log('pdfFile 0');
+    console.log('pdfFile', pdfFile);
+
+    // console.log('pdfBuffer 0');
+    // // Suppose that pdfFile is sent as a base64 encoded string
+    // console.log('pdfBuffer', pdfBuffer);
+    // const pdfBlob = Buffer.from(pdfBuffer, 'base64'); // Convert base64 string to a buffer
+    // console.log('pdfBlob', pdfBlob);
+
+    const filePath = pdfFile.tmpPath; // This should be the path after moving the file
+    const fileBuffer = await fs.readFile(filePath);
+    console.log('fileBuffer', fileBuffer);
+    const subject = data.isInvoice == 1 ? 'Facture' : 'Devis';
+    await mail.use('resend').send((message) => {
+      message
+          .from('contact@plumera.fr')
+          .to(user.email)
+          .subject(subject)
+          .html(`
+        <!DOCTYPE html>
+        <html lang="fr">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${subject}</title>
+            <style>
+              body { font-family: 'Arial', sans-serif; line-height: 1.6; }
+              p { color: #333; }
+            </style>
+          </head>
+          <body>
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
+              <h1>Bonjour,</h1>
+              <p>
+                Ci-joint votre ${subject} en pièce jointe.
+              </p>
+            </div>
+          </body>
+        </html>
+      `)
+        .attachData(fileBuffer, {
+        encoding: 'base64',
+          filename: pdfFile.clientName,
+          contentType: 'application/pdf',
+
+        })
+
+      // .attach(pdfFile.tmpPath, {
+          //   filename: pdfFile.clientName,
+          //   contentType: 'application/pdf'
+          // });
+    });
+
+    return response.status(200).json({ message: 'Email sent successfully' });
+  }
+
 
   /**
    * Show individual record

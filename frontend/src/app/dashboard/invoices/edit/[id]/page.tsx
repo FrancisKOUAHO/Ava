@@ -115,7 +115,6 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
-  const pdfRef = useRef<HTMLDivElement>(null)
 
   const [customer, setCustomer] = useState<CustomerData | null>({
     user_id: '',
@@ -137,6 +136,8 @@ const Page = ({ params }: { params: { id: string } }) => {
     siren_number: '',
     sirenNumber: '',
   })
+  const previewRef = useRef(null);
+
   const [notes, setnotes] = useState<string>('')
   const [terms, setTerms] = useState<string>('')
   const [totalInvoices, setTotalInvoices] = useState<number>(0)
@@ -258,42 +259,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     return `mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white ${!value ? 'border-red-500' : ''}`
   }
 
-  const downloadPDF = () => {
-    const input = pdfRef.current
-
-    if (!input) return
-
-    const pdf = new jsPDF('p', 'mm', 'a4')
-
-    const pageWidth = pdf.internal.pageSize.getWidth() - 20
-    const scale = pageWidth / input.scrollWidth
-
-    const fullHeight = input.scrollHeight
-    const options = {
-      scale: scale,
-      windowHeight: 1500,
-    }
-
-    pdf.html(input, {
-      html2canvas: options,
-      callback: function (doc) {
-        const contentHeight = fullHeight * scale
-        let yPos = 10
-        const pageHeight = pdf.internal.pageSize.getHeight() - 20
-
-        const numberOfPages = Math.ceil(contentHeight / pageHeight)
-
-        for (let i = 1; i < numberOfPages - 1; i++) {
-          pdf.addPage()
-        }
-
-        doc.save('download.pdf')
-        console.log('pdf', doc)
-      },
-      x: 10,
-      y: 10,
-    })
-  }
 
   const handleSubTotalChange = (
     field: keyof SubTotal,
@@ -471,6 +436,9 @@ const Page = ({ params }: { params: { id: string } }) => {
       alert('Failed to send invoice.')
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
+      if (response.data && response.data.id) {
+        callChildFunction(response.data)// Assuming 'user' is available in the scope
+      }
       queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
@@ -617,6 +585,39 @@ const Page = ({ params }: { params: { id: string } }) => {
       total: getSubTotal(totalInvoices),
     }))
   }
+
+  const callChildFunction = async (responseInvoice) => {
+    console.log('callChildFunction');
+
+    if (previewRef.current) {
+      console.log('callChildFunction 2');
+
+      try {
+        // Assuming downloadPDF() returns a Promise that resolves to a Blob
+        const pdfBlob = await previewRef.current.downloadPDF();
+        console.log('pdfBlob:', pdfBlob);
+        // Preparing FormData to send both the file and data
+        const formData = new FormData();
+        formData.append("file", pdfBlob, "invoice.pdf");
+
+        // Convert responseInvoice object to JSON string and add to formData
+        // Since FormData expects key-value pairs, and you cannot directly append an object
+        formData.append("responseInvoice", JSON.stringify(responseInvoice));
+
+        // Send formData with the PDF and responseInvoice data
+        const response = await api.post('billing/sendPdf', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        console.log('Réponse du serveur:', response);
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi du PDF et des données:', error);
+      }
+    }
+  };
+
 
   const changeCustomer = () => {
     if (customer) {
@@ -1127,7 +1128,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                 type="number"
                                 id={`quantity-${index}`}
                                 name={`quantity-${index}`}
-                                placeholder="1"
+                                placeholder="0"
                                 disabled={!isEditable[index]}
                                 onChange={(e) =>
                                   handleItemChange(
@@ -1543,13 +1544,13 @@ const Page = ({ params }: { params: { id: string } }) => {
           </div>
         </form>
         <Preview
+            ref={previewRef}
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
-          pdfRef={pdfRef}
-          downloadPdf={downloadPDF}
         />
+
       </div>
     </section>
   )

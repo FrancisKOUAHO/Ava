@@ -1,49 +1,103 @@
 'use client'
 
-import React, { FunctionComponent, useRef } from 'react'
-import { FileText, Image, ImagePlus } from 'lucide-react'
+import React, { FunctionComponent, useRef, useImperativeHandle, forwardRef } from 'react'
+import { FileText, ImagePlus } from 'lucide-react'
 import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
+import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 interface PreviewProps {
   customer: CustomerProps | null
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
-  pdfRef: React.RefObject<HTMLDivElement>
-  downloadPdf: () => void
 }
 
-const Preview: FunctionComponent<PreviewProps> = ({
+const Preview = forwardRef<HTMLDivElement, PreviewProps>(({
   customer,
   lineItems,
   subTotal,
   imagePreviewUrl,
-  pdfRef,
-  downloadPdf,
-}) => {
+}, ref) => {
   const { data: compagny } = useSirene()
 
   if (!compagny || !customer || !subTotal) return null
 
+  const pdfRef = useRef<HTMLDivElement>(null)
+
+  const  downloadPDF = async (isDownloading = false) => {
+    let pdfBlob;
+
+    try {
+      const input = pdfRef.current
+      if (!input) return
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+        width: input.scrollWidth,
+        height: input.scrollHeight,
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const imgProps = pdf.getImageProperties(imgData)
+      const imgWidth = pageWidth
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width
+
+      let heightLeft = imgHeight
+      let position = 0
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+      if(isDownloading){
+        pdf.save('download.pdf')
+      }
+      pdfBlob = pdf.output('blob');
+    } catch (error) {
+      console.error('Error generating PDF: ', error)
+    }
+    return  pdfBlob;
+  }
+  // const internalFunction = () => {
+  //   console.log("This function is called from the Parent!");
+  // };
+  // useImperativeHandle(ref, () => ({
+  //   internalFunction: () => {
+  //     console.log("This function is called from the Parent!");
+  //   }
+  // }));
+
+  useImperativeHandle(ref, () => ({
+    downloadPDF,
+  }));
+
   return (
-    <div className="w-2/4 bg-white px-3 py-3 rounded-xl h-[88vh] overflow-auto">
+    <div className="w-3/4 px-2 rounded-xl">
       <div className="flex justify-between">
         <h3 className="text-black text-lg font-semibold">Preview</h3>
         <div className="flex justify-center items-center gap-2">
-          <button onClick={downloadPdf}>
+          <button onClick={() => this.processClick()}>
             <FileText className="text-black hover:text-blue-700 w-5 h-5" />
           </button>
         </div>
       </div>
 
-      <div className="bg-[#f2f5fd] rounded-xl my-3 p-2 h-full" ref={pdfRef}>
-        <div className="rounded-xl">
-          <div className="flex justify-center items-center">
+      <div className="bg-[#f2f5fd] rounded-xl my-2 p-2" ref={pdfRef}>
+        <div className="bg-white px-6 py-2 rounded-xl">
+          <div className="flex justify-center p-4">
             <div className="flex w-1/3">
               {imagePreviewUrl ? (
                 <img
@@ -304,6 +358,6 @@ const Preview: FunctionComponent<PreviewProps> = ({
       </div>
     </div>
   )
-}
+})
 
 export default Preview
