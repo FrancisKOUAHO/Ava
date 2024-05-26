@@ -104,6 +104,7 @@ interface SubTotal {
 const Page = ({ params }: { params: { id: string } }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [fileName, setFileName] = useState<string>('')
@@ -1506,6 +1507,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          pdfRef={pdfRef}
         />
       </div>
     </section>

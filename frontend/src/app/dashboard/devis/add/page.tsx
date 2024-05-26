@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState, useEffect } from 'react'
+import { FormEvent, useState, useEffect, useRef } from 'react'
 
 import {
   CircleCheck,
@@ -104,6 +104,8 @@ interface SubTotal {
 const Page = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  const pdfRef = useRef<HTMLDivElement>(null)
 
   const [fileName, setFileName] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
@@ -1482,6 +1484,7 @@ const Page = () => {
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          pdfRef={pdfRef}
         />
       </div>
     </section>
