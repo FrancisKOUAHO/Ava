@@ -104,6 +104,8 @@ const Page = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
+  const pdfRef = React.useRef<HTMLDivElement>(null)
+
   const [fileName, setFileName] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [lineItems, setLineItems] = useState<LineItem[]>([])
@@ -140,6 +142,7 @@ const Page = () => {
     discount: 0,
     total: 0,
   })
+
   const [formValid, setFormValid] = useState(false)
 
   useEffect(() => {
@@ -1474,6 +1477,7 @@ const Page = () => {
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          pdfRef={pdfRef}
         />
       </div>
     </section>
