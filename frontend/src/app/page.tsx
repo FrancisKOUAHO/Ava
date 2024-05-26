@@ -35,8 +35,7 @@ const Home = () => {
   }
 
   const handleGoogleConnect = () => {
-    window.location.href =
-      'https://api.plumera.fr/api/v1/auth/connect-to-google'
+    window.location.href = `${process.env.NEXT_PUBLIC_CALL_BACK_URL_GOOGLE}`
   }
 
   const handleSubmit = (event: any): void => {
