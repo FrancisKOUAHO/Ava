@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState, useEffect } from 'react'
+import { FormEvent, useState, useEffect, useRef } from 'react'
 
 import {
   CircleCheck,
@@ -105,6 +105,9 @@ interface SubTotal {
 const Page = ({ params }: { params: { id: string } }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  const pdfRef = useRef<HTMLDivElement>(null)
+
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [fileName, setFileName] = useState<string>('')
@@ -1547,6 +1550,7 @@ const Page = ({ params }: { params: { id: string } }) => {
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          pdfRef={pdfRef}
         />
       </div>
     </section>
