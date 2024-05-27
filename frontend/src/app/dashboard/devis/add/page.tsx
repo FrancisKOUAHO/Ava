@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState, useEffect,useRef  } from 'react'
+import { FormEvent, useState, useEffect, useRef } from 'react'
 
 import {
   CircleCheck,
@@ -101,9 +101,15 @@ interface SubTotal {
   total?: number
 }
 
+interface PreviewRef {
+  downloadPDF: () => Promise<Blob>
+}
+
 const Page = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+
+  const pdfRef = useRef<HTMLDivElement>(null)
 
   const [fileName, setFileName] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
@@ -142,7 +148,7 @@ const Page = () => {
     total: 0,
   })
   const [formValid, setFormValid] = useState(false)
-  const previewRef = useRef(null);
+  const previewRef = useRef(null)
 
   useEffect(() => {
     if (lineItems.length > 0) {
@@ -381,7 +387,7 @@ const Page = () => {
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
       if (response.data && response.data.id) {
-         callChildFunction(response.data)// Assuming 'user' is available in the scope
+        callChildFunction(response.data) // Assuming 'user' is available in the scope
       }
       queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
@@ -637,38 +643,33 @@ const Page = () => {
     }
   }
 
-  const callChildFunction = async (responseInvoice) => {
-    console.log('callChildFunction');
+  const callChildFunction = async (responseInvoice: InvoiceData) => {
+    console.log('callChildFunction')
 
-    if (previewRef.current) {
-      console.log('callChildFunction 2');
+    if (previewRef.current as unknown as PreviewRef) {
+      console.log('callChildFunction 2')
 
       try {
-        // Assuming downloadPDF() returns a Promise that resolves to a Blob
-        const pdfBlob = await previewRef.current.downloadPDF();
-        console.log('pdfBlob:', pdfBlob);
-        // Preparing FormData to send both the file and data
-        const formData = new FormData();
-        formData.append("file", pdfBlob, "invoice.pdf");
+        const pdfBlob = await (
+          previewRef.current as unknown as PreviewRef
+        ).downloadPDF()
+        console.log('pdfBlob:', pdfBlob)
+        const formData = new FormData()
+        formData.append('file', pdfBlob, 'invoice.pdf')
+        formData.append('responseInvoice', JSON.stringify(responseInvoice))
 
-        // Convert responseInvoice object to JSON string and add to formData
-        // Since FormData expects key-value pairs, and you cannot directly append an object
-        formData.append("responseInvoice", JSON.stringify(responseInvoice));
-
-        // Send formData with the PDF and responseInvoice data
         const response = await api.post('billing/sendPdf', formData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+            'Content-Type': 'multipart/form-data',
+          },
+        })
 
-        console.log('Réponse du serveur:', response);
+        console.log('Server response:', response)
       } catch (error) {
-        console.error('Erreur lors de l\'envoi du PDF et des données:', error);
+        console.error('Error sending PDF and data:', error)
       }
     }
-  };
-
+  }
 
   useEffect(() => {
     if (customer) {
@@ -1510,26 +1511,17 @@ const Page = () => {
                       handleSubmit(false)
                     }}
                   />
-                  {/*<ButtonUi*/}
-                  {/*  label="test pdf"*/}
-                  {/*  type="button"*/}
-                  {/*  onClick={() => {*/}
-                  {/*    callChildFunction()*/}
-                  {/*  }}*/}
-                  {/*/>*/}
                 </div>
               </div>
             </div>
           </div>
         </form>
         <Preview
-
           ref={previewRef}
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
-
         />
       </div>
     </section>
