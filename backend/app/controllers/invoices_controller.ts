@@ -2,24 +2,17 @@ import { HttpContext } from '@adonisjs/core/http'
 import Invoice from '#models/invoice'
 import { createInvoiceValidator, updateInvoiceValidator } from '#validators/invoice'
 import db from '@adonisjs/lucid/services/db'
-import User from "#models/user";
-import mail from "@adonisjs/mail/services/main";
-//import Application from '@adonisjs/core/application'; // Ajout de cette ligne
-import app from '@adonisjs/core/services/app'
-
-import fs from 'fs/promises';  // Use the promise-based version of the fs module
-import { Buffer } from 'buffer';
-
-import env from "#start/env";
+import mail from '@adonisjs/mail/services/main'
+import fs from 'fs/promises'
 
 export default class InvoicesController {
   /**
    * Display a list of resource
    */
   async index({ request, response }: HttpContext) {
-    const is_invoice = request.input('is_invoice', false); // Defaults to fetching invoices
-    const documents = await Invoice.query().where('is_invoice', is_invoice);
-    return response.ok(documents);
+    const is_invoice = request.input('is_invoice', false) // Defaults to fetching invoices
+    const documents = await Invoice.query().where('is_invoice', is_invoice)
+    return response.ok(documents)
   }
 
   /**
@@ -44,40 +37,40 @@ export default class InvoicesController {
   }
 
   async sendPdfEmail({ request, response }: HttpContext) {
-    const responseInvoiceJson = request.input('responseInvoice');
-    let data;
+    const responseInvoiceJson = request.input('responseInvoice')
+    let data
     try {
-      data = JSON.parse(responseInvoiceJson);
+      data = JSON.parse(responseInvoiceJson)
     } catch (error) {
-      console.error('Erreur de parsing JSON:', error);
-      return response.status(400).send('Invalid JSON data');
+      console.error('Erreur de parsing JSON:', error)
+      return response.status(400).send('Invalid JSON data')
     }
 
-    const user = await User.find(data.userId);
-   // const pdfBuffer = request.input('file');
     const pdfFile = request.file('file', {
       size: '20mb',
       extnames: ['pdf'],
-    });
-    console.log('pdfFile 0');
-    console.log('pdfFile', pdfFile);
+    })
 
-    // console.log('pdfBuffer 0');
-    // // Suppose that pdfFile is sent as a base64 encoded string
-    // console.log('pdfBuffer', pdfBuffer);
-    // const pdfBlob = Buffer.from(pdfBuffer, 'base64'); // Convert base64 string to a buffer
-    // console.log('pdfBlob', pdfBlob);
+    if (!pdfFile) {
+      return response.status(400).send('File not provided')
+    }
 
-    const filePath = pdfFile.tmpPath; // This should be the path after moving the file
-    const fileBuffer = await fs.readFile(filePath);
-    console.log('fileBuffer', fileBuffer);
-    const subject = data.isInvoice == 1 ? 'Facture' : 'Devis';
+    const filePath = pdfFile.tmpPath
+
+    if (!filePath) {
+      return response.status(400).send('File path not found')
+    }
+
+    const fileBuffer = await fs.readFile(filePath)
+
+    const subject = data.isInvoice == 1 ? 'Facture' : 'Devis'
     await mail.use('resend').send((message) => {
       message
-          .from('contact@plumera.fr')
-          .to(user.email)
-          .subject(subject)
-          .html(`
+        .from('contact@plumera.fr')
+        .to(data.client.email)
+        .subject(subject)
+        .html(
+          `
         <!DOCTYPE html>
         <html lang="fr">
           <head>
@@ -98,23 +91,17 @@ export default class InvoicesController {
             </div>
           </body>
         </html>
-      `)
+      `
+        )
         .attachData(fileBuffer, {
-        encoding: 'base64',
+          encoding: 'base64',
           filename: pdfFile.clientName,
           contentType: 'application/pdf',
-
         })
+    })
 
-      // .attach(pdfFile.tmpPath, {
-          //   filename: pdfFile.clientName,
-          //   contentType: 'application/pdf'
-          // });
-    });
-
-    return response.status(200).json({ message: 'Email sent successfully' });
+    return response.status(200).json({ message: 'Email sent successfully' })
   }
-
 
   /**
    * Show individual record
@@ -182,47 +169,47 @@ export default class InvoicesController {
     return response.noContent()
   }
 
-  public async getAllInvoiceData({  response }: HttpContext) {
+  public async getAllInvoiceData({ response }: HttpContext) {
     try {
       const invoices = await Invoice.query()
-          .where('is_invoice', 1) // Dynamically filter based on the input
-          .preload('client', (query) => {
-            query.select('id', 'first_name', 'last_name') // Select specific fields from the client
-          })
-          .select(
-              'invoices.*',
-              db.rawQuery(
-                  `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
-              )
+        .where('is_invoice', 1) // Dynamically filter based on the input
+        .preload('client', (query) => {
+          query.select('id', 'first_name', 'last_name')
+        })
+        .select(
+          'invoices.*',
+          db.rawQuery(
+            `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
           )
-          .orderBy('invoices.created_at', 'desc')
+        )
+        .orderBy('invoices.created_at', 'desc')
 
-      return response.ok(invoices);
+      return response.ok(invoices)
     } catch (error) {
-      console.error('Failed to fetch documents', error);
-      return response.status(500).send('Failed to fetch documents');
+      console.error('Failed to fetch documents', error)
+      return response.status(500).send('Failed to fetch documents')
     }
   }
+
   public async getAllDevisData({ response }: HttpContext) {
     try {
       const invoices = await Invoice.query()
-          .where('is_invoice', 0) // Dynamically filter based on the input
-          .preload('client', (query) => {
-            query.select('id', 'first_name', 'last_name') // Select specific fields from the client
-          })
-          .select(
-              'invoices.*',
-              db.rawQuery(
-                  `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
-              )
+        .where('is_invoice', 0)
+        .preload('client', (query) => {
+          query.select('id', 'first_name', 'last_name')
+        })
+        .select(
+          'invoices.*',
+          db.rawQuery(
+            `(SELECT SUM(price * quantity) FROM invoice_items WHERE invoice_items.invoice_id = invoices.id) as total`
           )
-          .orderBy('invoices.created_at', 'desc')
+        )
+        .orderBy('invoices.created_at', 'desc')
 
-      return response.ok(invoices);
+      return response.ok(invoices)
     } catch (error) {
-      console.error('Failed to fetch documents', error);
-      return response.status(500).send('Failed to fetch documents');
+      console.error('Failed to fetch documents', error)
+      return response.status(500).send('Failed to fetch documents')
     }
   }
-
 }
