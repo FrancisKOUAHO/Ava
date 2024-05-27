@@ -95,44 +95,70 @@ export default class ScrappersController {
 
   async getSireneInfo({ request, response }: HttpContext) {
     const siren_number = request.input('siren_number')
-
+    let firstName:string;
+    let lastNname:string;
+    let city:string;
+    let zip:string;
+    let country:string;
+    console.log('SIREN number:', siren_number)
     try {
       const token = await this.authenticate()
       if (!token) {
         return response.internalServerError('Failed to authenticate with SIRENE API')
       }
-
+      console.log('Token:', token)
       const url = `https://registre-national-entreprises.inpi.fr/api/companies/${siren_number}`
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       }
 
+
       const clientResponse = await axios.get(url, { headers })
+      console.log('Client response:', clientResponse)
       if (clientResponse.data && clientResponse.data.formality) {
         const data = clientResponse.data
 
-        const fullTypeVoie = this.getFullTypeVoie(
-          data.formality.content.personnePhysique.adresseEntreprise.adresse.typeVoie
-        )
+        const typePersonne:any =  data.formality.content.personnePhysique ? data.formality.content.personnePhysique : data.formality.content.personneMorale;
+
+
+        if(data.formality.content.personnePhysique){
+          firstName = typePersonne.identite.entrepreneur.descriptionPersonne.nom;
+           lastNname = typePersonne.identite.entrepreneur.descriptionPersonne.prenoms[0];
+        }else{
+          if(typePersonne.beneficiairesEffectifs.length > 1){
+            firstName = typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.nom;
+            lastNname = typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.prenoms[0];
+          }else{
+            firstName = typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.nom;
+            lastNname = typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.prenoms[0];
+          }
+
+        }
+
+        const companyName:string =  typePersonne.etablissementPrincipal.descriptionEtablissement.nomCommercial?? typePersonne.identite.entreprise.denomination;
+
+        city = typePersonne.adresseEntreprise.adresse.commune??'';
+        zip = typePersonne.adresseEntreprise.adresse.codePostal??'';
+        country = typePersonne.adresseEntreprise.adresse.pays??'';
+
+
+        const fullTypeVoie = typePersonne.adresseEntreprise.adresse.numVoie + this.getFullTypeVoie(
+          typePersonne.adresseEntreprise.adresse.typeVoie
+        ) + typePersonne.adresseEntreprise.adresse.voie ?? ''
+
         const clientData = {
-          first_name:
-            data.formality.content.personnePhysique.identite.entrepreneur.descriptionPersonne.prenoms.join(
-              ' '
-            ),
-          last_name:
-            data.formality.content.personnePhysique.identite.entrepreneur.descriptionPersonne.nom,
+          first_name:firstName,
+          last_name:lastNname,
           email: '',
           sirenNumber: siren_number,
           phone: '',
-          address: `${data.formality.content.personnePhysique.adresseEntreprise.adresse.numVoie} ${fullTypeVoie} ${data.formality.content.personnePhysique.adresseEntreprise.adresse.voie}`,
-          city: data.formality.content.personnePhysique.adresseEntreprise.adresse.commune,
+          address: fullTypeVoie,
+          city: city,
           state: '',
-          zip: data.formality.content.personnePhysique.adresseEntreprise.adresse.codePostal,
-          country: data.formality.content.personnePhysique.adresseEntreprise.adresse.pays,
-          company:
-            data.formality.content.personnePhysique.etablissementPrincipal.descriptionEtablissement
-              .nomCommercial,
+          zip: zip,
+          country: country,
+          company:companyName,
           vat_number: '',
           currency: 'EUR',
           language: 'FR',
@@ -154,6 +180,8 @@ export default class ScrappersController {
     }
 
     try {
+      console.log('auth', )
+
       const response = await axios.post(
         'https://registre-national-entreprises.inpi.fr/api/sso/login',
         {
