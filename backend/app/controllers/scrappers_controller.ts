@@ -2,6 +2,7 @@ import { HttpContext } from '@adonisjs/core/http'
 import axios from 'axios'
 import PublicBusinessData from '#models/public_business_data'
 import env from '#start/env'
+import { Logger } from '@adonisjs/core/logger'
 
 interface TypeVoieDictionary {
   [key: string]: string
@@ -95,61 +96,64 @@ export default class ScrappersController {
 
   async getSireneInfo({ request, response }: HttpContext) {
     const siren_number = request.input('siren_number')
-    let firstName:string;
-    let lastNname:string;
-    let city:string;
-    let zip:string;
-    let country:string;
-    console.log('SIREN number:', siren_number)
+    let firstName: string
+    let lastNname: string
+    let city: string
+    let zip: string
+    let country: string
+
     try {
       const token = await this.authenticate()
       if (!token) {
         return response.internalServerError('Failed to authenticate with SIRENE API')
       }
-      console.log('Token:', token)
+
       const url = `https://registre-national-entreprises.inpi.fr/api/companies/${siren_number}`
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       }
 
-
       const clientResponse = await axios.get(url, { headers })
-      console.log('Client response:', clientResponse)
+
       if (clientResponse.data && clientResponse.data.formality) {
         const data = clientResponse.data
 
-        const typePersonne:any =  data.formality.content.personnePhysique ? data.formality.content.personnePhysique : data.formality.content.personneMorale;
+        const typePersonne: any = data.formality.content.personnePhysique
+          ? data.formality.content.personnePhysique
+          : data.formality.content.personneMorale
 
-
-        if(data.formality.content.personnePhysique){
-          firstName = typePersonne.identite.entrepreneur.descriptionPersonne.nom;
-           lastNname = typePersonne.identite.entrepreneur.descriptionPersonne.prenoms[0];
-        }else{
-          if(typePersonne.beneficiairesEffectifs.length > 1){
-            firstName = typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.nom;
-            lastNname = typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.prenoms[0];
-          }else{
-            firstName = typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.nom;
-            lastNname = typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.prenoms[0];
+        if (data.formality.content.personnePhysique) {
+          firstName = typePersonne.identite.entrepreneur.descriptionPersonne.nom
+          lastNname = typePersonne.identite.entrepreneur.descriptionPersonne.prenoms[0]
+        } else {
+          if (typePersonne.beneficiairesEffectifs.length > 1) {
+            firstName = typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.nom
+            lastNname =
+              typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.prenoms[0]
+          } else {
+            firstName = typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.nom
+            lastNname =
+              typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.prenoms[0]
           }
-
         }
 
-        const companyName:string =  typePersonne.etablissementPrincipal.descriptionEtablissement.nomCommercial?? typePersonne.identite.entreprise.denomination;
+        const companyName: string =
+          typePersonne.etablissementPrincipal.descriptionEtablissement.nomCommercial ??
+          typePersonne.identite.entreprise.denomination
 
-        city = typePersonne.adresseEntreprise.adresse.commune??'';
-        zip = typePersonne.adresseEntreprise.adresse.codePostal??'';
-        country = typePersonne.adresseEntreprise.adresse.pays??'';
+        city = typePersonne.adresseEntreprise.adresse.commune ?? ''
+        zip = typePersonne.adresseEntreprise.adresse.codePostal ?? ''
+        country = typePersonne.adresseEntreprise.adresse.pays ?? ''
 
-
-        const fullTypeVoie = typePersonne.adresseEntreprise.adresse.numVoie + this.getFullTypeVoie(
-          typePersonne.adresseEntreprise.adresse.typeVoie
-        ) + typePersonne.adresseEntreprise.adresse.voie ?? ''
+        const fullTypeVoie =
+          typePersonne.adresseEntreprise.adresse.numVoie +
+            this.getFullTypeVoie(typePersonne.adresseEntreprise.adresse.typeVoie) +
+            typePersonne.adresseEntreprise.adresse.voie ?? ''
 
         const clientData = {
-          first_name:firstName,
-          last_name:lastNname,
+          first_name: firstName,
+          last_name: lastNname,
           email: '',
           sirenNumber: siren_number,
           phone: '',
@@ -158,7 +162,7 @@ export default class ScrappersController {
           state: '',
           zip: zip,
           country: country,
-          company:companyName,
+          company: companyName,
           vat_number: '',
           currency: 'EUR',
           language: 'FR',
@@ -167,7 +171,6 @@ export default class ScrappersController {
       }
       return response.notFound('No data found for the provided SIREN number.')
     } catch (error) {
-      console.error('Error fetching data for SIREN:', siren_number, error)
       return this.handleErrorResponse(error, response)
     }
   }
@@ -180,7 +183,7 @@ export default class ScrappersController {
     }
 
     try {
-      console.log('auth', )
+      console.log('auth')
 
       const response = await axios.post(
         'https://registre-national-entreprises.inpi.fr/api/sso/login',
@@ -202,7 +205,6 @@ export default class ScrappersController {
 
       return token
     } catch (error) {
-      console.error("Échec de l'authentification:", error)
       throw new Error('Authentication failed')
     }
   }
