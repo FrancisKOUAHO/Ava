@@ -8,9 +8,6 @@ export default class PublicBusinessData extends BaseModel {
   declare id: string
 
   @column()
-  declare business_name: string
-
-  @column()
   declare siren_number: string
 
   @column()
@@ -33,6 +30,39 @@ export default class PublicBusinessData extends BaseModel {
 
   @column()
   declare activity_code: string
+
+  @column()
+  declare first_name: string
+
+  @column()
+  declare last_name: string
+
+  @column()
+  declare email: string
+
+  @column()
+  declare phone: string
+
+  @column()
+  declare city: string
+
+  @column()
+  declare state: string
+
+  @column()
+  declare zip: string
+
+  @column()
+  declare company: string
+
+  @column()
+  declare vat_number: string
+
+  @column()
+  declare currency: string
+
+  @column()
+  declare language: string
 
   @column()
   declare legal_status: string

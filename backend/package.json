@@ -84,5 +84,6 @@
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/app"
   },
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "packageManager": "yarn@4.1.2"
 }

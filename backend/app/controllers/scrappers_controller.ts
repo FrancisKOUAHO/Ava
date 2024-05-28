@@ -62,35 +62,89 @@ export default class ScrappersController {
 
   async sirene({ request, response, auth }: HttpContext) {
     const user = auth.user!
-    const data = request.only(['siren_number'])
 
-    const client = await axios.get(
-      `https://api.insee.fr/entreprises/sirene/V3.11/siren/${data.siren_number}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SIRENE_API_KEY}`,
-        },
+    const siren_number = request.input('siren_number')
+    let firstName: string
+    let lastNname: string
+    let city: string
+    let zip: string
+    let country: string
+
+    try {
+      const token = await this.authenticate()
+      if (!token) {
+        return response.internalServerError('Failed to authenticate with SIRENE API')
       }
-    )
 
-    if (!client) {
-      return response.notFound()
+      const url = `https://registre-national-entreprises.inpi.fr/api/companies/${siren_number}`
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+
+      const clientResponse = await axios.get(url, { headers })
+
+      if (clientResponse.data && clientResponse.data.formality) {
+        const data = clientResponse.data
+
+        const typePersonne: any = data.formality.content.personnePhysique
+          ? data.formality.content.personnePhysique
+          : data.formality.content.personneMorale
+
+        if (data.formality.content.personnePhysique) {
+          firstName = typePersonne.identite.entrepreneur.descriptionPersonne.nom
+          lastNname = typePersonne.identite.entrepreneur.descriptionPersonne.prenoms[0]
+        } else {
+          if (typePersonne.beneficiairesEffectifs.length > 1) {
+            firstName = typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.nom
+            lastNname =
+              typePersonne.beneficiairesEffectifs[0].beneficiaire.descriptionPersonne.prenoms[0]
+          } else {
+            firstName = typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.nom
+            lastNname =
+              typePersonne.beneficiairesEffectifs.beneficiaire.descriptionPersonne.prenoms[0]
+          }
+        }
+
+        const companyName: string =
+          typePersonne.etablissementPrincipal.descriptionEtablissement.nomCommercial ??
+          typePersonne.identite.entreprise.denomination
+
+        city = typePersonne.adresseEntreprise.adresse.commune ?? ''
+        zip = typePersonne.adresseEntreprise.adresse.codePostal ?? ''
+        country = typePersonne.adresseEntreprise.adresse.pays ?? ''
+
+        const fullTypeVoie =
+          typePersonne.adresseEntreprise.adresse.numVoie +
+            this.getFullTypeVoie(typePersonne.adresseEntreprise.adresse.typeVoie) +
+            typePersonne.adresseEntreprise.adresse.voie ?? ''
+
+        const publicBusinessData = await PublicBusinessData.create({
+          user_id: user.id,
+          first_name: firstName,
+          last_name: lastNname,
+          email: '',
+          siren_number: siren_number,
+          phone: '',
+          address: fullTypeVoie,
+          city: city,
+          state: '',
+          zip: zip,
+          country: country,
+          company: companyName,
+          legal_structure: '',
+          legal_status: '',
+          vat_number: '',
+          currency: 'EUR',
+          language: 'FR',
+        })
+
+        return response.ok(publicBusinessData)
+      }
+      return response.notFound('No data found for the provided SIREN number.')
+    } catch (error) {
+      return this.handleErrorResponse(error, response)
     }
-
-    const publicBusinessData = await PublicBusinessData.create({
-      user_id: user.id,
-      siren_number: client.data.uniteLegale.siren,
-      company_name: client.data.uniteLegale.prenomUsuelUniteLegale,
-      legal_structure: client.data.uniteLegale.categorieEntreprise,
-      legal_status: client.data.uniteLegale.statutDiffusionUniteLegale,
-    })
-
-    if (!publicBusinessData) {
-      return response.badRequest()
-    }
-
-    return response.created('client')
   }
 
   async getSireneInfo({ request, response }: HttpContext) {
@@ -182,8 +236,6 @@ export default class ScrappersController {
     }
 
     try {
-      console.log('auth')
-
       const response = await axios.post(
         'https://registre-national-entreprises.inpi.fr/api/sso/login',
         {
