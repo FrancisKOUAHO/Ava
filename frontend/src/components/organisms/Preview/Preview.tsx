@@ -76,7 +76,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
         <div className="flex justify-between">
           <h3 className="text-black text-lg font-semibold">Preview</h3>
           <div className="flex justify-center items-center gap-2">
-            <button onClick={() => downloadPDF()}>
+            <button onClick={() => downloadPDF(true)}>
               <FileText className="text-black hover:text-blue-700 w-5 h-5" />
             </button>
           </div>
