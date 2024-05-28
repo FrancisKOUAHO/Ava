@@ -440,7 +440,7 @@ const Page = ({ params }: { params: { id: string } }) => {
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
       if (response.data && response.data.id) {
-        callChildFunction(response.data) // Assuming 'user' is available in the scope
+        //callChildFunction(response.data) // Assuming 'user' is available in the scope
       }
       queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
