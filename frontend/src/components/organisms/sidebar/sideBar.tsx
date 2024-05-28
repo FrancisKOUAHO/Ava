@@ -76,43 +76,6 @@ const Sidebar: FunctionComponent = () => {
           Liste des factures
         </Link>
       </div>
-
-      <button
-        onClick={toggleDevisMenu}
-        className={
-          pathname === '/dashboard/devis' ||
-          pathname === '/dashboard/devis/add' ||
-          pathname === '/dashboard/devis/download'
-            ? 'active'
-            : ''
-        }
-      >
-        <TextQuote />
-        Devis
-      </button>
-      <div
-        className={
-          !showDevisMenu
-            ? 'c-sidebar__sub-menu c-sidebar__sub-menu--hide'
-            : 'c-sidebar__sub-menu c-sidebar__sub-menu--link active'
-        }
-      >
-        <Link
-          href="/dashboard/devis/add"
-          className={pathname === '/dashboard/devis/add' ? 'active' : ''}
-        >
-          <FilePlus />
-          Créer une devis
-        </Link>
-        <Link
-          href="/dashboard/devis/summaries"
-          className={pathname === '/dashboard/devis/summaries' ? 'active' : ''}
-        >
-          <FileSearch2 />
-          Liste des devis
-        </Link>
-      </div>
-
       {/*<Link
         href="/dashboard/calendar"
         className={pathname === '/dashboard/calendar' ? 'active' : ''}
