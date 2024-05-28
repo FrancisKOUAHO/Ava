@@ -28,6 +28,8 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     const downloadPDF = async (isDownloading = false) => {
       let pdfBlob
 
+      console.log('Downloading PDF')
+
       try {
         const input = pdfRef.current
         if (!input) return
