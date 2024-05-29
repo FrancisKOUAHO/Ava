@@ -27,13 +27,14 @@
 <body>
 <div data-collapse="medium" data-animation="default" data-duration="400" data-no-scroll="1" data-easing="ease"
      data-easing2="ease" role="banner" class="navbar w-nav">
-  <div class="container-2 w-container"><a href="https://plumera.fr" aria-current="page" class="logo-block w-nav-brand w--current"><img
+  <div class="container-2 w-container"><a href="https://plumera.fr" aria-current="page"
+                                          class="logo-block w-nav-brand w--current"><img
     src="logo/logoPlumera.png" alt="logo plumera"
     class="logo" /></a>
     <nav role="navigation" class="nav-menu w-nav-menu">
       <div data-delay="0" data-hover="false">
         <div class="nav-link dropdown-toggle light w-dropdown-toggle">
-          <a  class="text-block" href="https://app.plumera.fr" style="text-decoration: none">
+          <a class="text-block" href="https://app.plumera.fr" style="text-decoration: none">
             essayer gratuitement
           </a>
         </div>
@@ -176,6 +177,33 @@
         type="text/javascript" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
         crossorigin="anonymous"></script>
 <script src="index.js" type="text/javascript"></script>
-<script defer data-domain="plumera.fr" src="https://plausible-analytics-production-3969.up.railway.app/js/script.js"></script>
+<script defer data-domain="plumera.fr"
+        src="https://plausible-analytics-production-3969.up.railway.app/js/script.js"></script>
+<script>
+  !function(f, b, e, v, n, t, s) {
+    if (f.fbq) return
+    n = f.fbq = function() {
+      n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+    }
+    if (!f._fbq) f._fbq = n
+    n.push = n
+    n.loaded = !0
+    n.version = '2.0'
+    n.queue = []
+    t = b.createElement(e)
+    t.async = !0
+    t.src = v
+    s = b.getElementsByTagName(e)[0]
+    s.parentNode.insertBefore(t, s)
+  }
+  (window, document, 'script',
+    'https://connect.facebook.net/en_US/fbevents.js')
+  fbq('init', '1541959706676239')
+  fbq('track', 'PageView')
+</script>
+<noscript><img height="1" width="1" style="display:none"
+               src="https://www.facebook.com/tr?id=1541959706676239&ev=PageView&noscript=1"
+/></noscript>
 </body>
 </html>
