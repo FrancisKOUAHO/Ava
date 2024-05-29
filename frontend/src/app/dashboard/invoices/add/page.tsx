@@ -1494,7 +1494,7 @@ const Page = () => {
                     }}
                   />
                   <ButtonUi
-                    label="Envoyer la facture"
+                    label="Télécharger la facture"
                     type="button"
                     onClick={() => {
                       handleSubmit(false)

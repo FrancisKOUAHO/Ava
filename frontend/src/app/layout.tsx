@@ -1,12 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { NextUIProvider } from '@nextui-org/react'
 
 import '../styles/_main.scss'
 import { Toaster } from '@/components/ui/sonner'
+
+declare global {
+  interface Window {
+    fbq: any
+  }
+}
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const [queryClient] = useState(
@@ -22,26 +28,41 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       }),
   )
 
+  useEffect(() => {
+    ;(function (f: any, b: any, e: any, v: any, n: any, t: any, s: any) {
+      if (f.fbq) return
+      n = f.fbq = function () {
+        n.callMethod
+          ? n.callMethod.apply(n, arguments)
+          : n.queue.push(arguments)
+      }
+      if (!f._fbq) f._fbq = n
+      n.push = n
+      n.loaded = true
+      n.version = '2.0'
+      n.queue = []
+      t = b.createElement(e)
+      t.async = true
+      t.src = v
+      s = b.getElementsByTagName(e)[0]
+      s.parentNode.insertBefore(t, s)
+    })(
+      window,
+      document,
+      'script',
+      'https://connect.facebook.net/en_US/fbevents.js',
+      null,
+      null,
+      null,
+    )
+
+    window.fbq('init', '1541959706676239')
+    window.fbq('track', 'PageView')
+  }, [])
+
   return (
     <html lang="en">
       <head>
-          <!-- Meta Pixel Code -->
-          <script>
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-                  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-                  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-                  n.queue=[];t=b.createElement(e);t.async=!0;
-                  t.src=v;s=b.getElementsByTagName(e)[0];
-                  s.parentNode.insertBefore(t,s)}(window, document,'script',
-              'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '1541959706676239');
-              fbq('track', 'PageView');
-          </script>
-          <noscript><img height="1" width="1" style="display:none"
-                         src="https://www.facebook.com/tr?id=1541959706676239&ev=PageView&noscript=1"
-          /></noscript>
-          <!-- End Meta Pixel Code -->
         <meta charSet="UTF-8" />
         <title>Plumera | Dashboard</title>
         <meta
@@ -73,6 +94,14 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         data-domain="app.plumera.fr"
         src="https://plausible-analytics-production-3969.up.railway.app/js/script.js"
       ></script>
+      <noscript>
+        <img
+          height="1"
+          width="1"
+          style={{ display: 'none' }}
+          src="https://www.facebook.com/tr?id=1541959706676239&ev=PageView&noscript=1"
+        />
+      </noscript>
     </html>
   )
 }
