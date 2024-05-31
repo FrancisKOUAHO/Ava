@@ -90,7 +90,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                   <h1 className="text-xl font-bold text-[#493fff]">Facture</h1>
                   <p className="text-xs text-black/70">
                     N° F-2024-001
-                    <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded ml-10">
+                    <span className="bg-[#493fff] text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded ml-10">
                       Brouillon
                     </span>
                   </p>
@@ -158,28 +158,36 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                 <thead className="border-b-2 border-gray-300 mb-4 text-black">
                   <tr className="bg-[#493fff] rounded-xl text-white">
-                    <th className="text-center">#</th>
-                    <th className="text-center">Désgination et description</th>
-                    <th className="text-center">Qty</th>
-                    <th className="text-center">Rate</th>
-                    <th className="text-center">Total</th>
+                    <th className="text-center text-xs">#</th>
+                    <th className="text-center text-xs">
+                      Désgination et description
+                    </th>
+                    <th className="text-center text-xs">Unité</th>
+                    <th className="text-center text-xs">Quantité</th>
+                    <th className="text-center text-xs">Prix unitaire</th>
+                    <th className="text-center text-xs">Montant HT</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lineItems &&
                     lineItems.map((lineItem: LineItem, index: number) => (
                       <tr key={index}>
-                        <td className="text-black p-3 text-center">{index}</td>
-                        <td className="text-black p-3 text-center">
+                        <td className="text-black p-3 text-center text-xs">
+                          {index + 1}
+                        </td>
+                        <td className="text-black p-3 text-center text-xs">
                           {lineItem.name}
                         </td>
-                        <td className="text-black p-3 text-center">
+                        <td className="text-black p-3 text-center text-xs">
+                          {lineItem.unit}
+                        </td>
+                        <td className="text-black p-3 text-center text-xs">
                           {lineItem.quantity}
                         </td>
-                        <td className="text-black p-3 text-center">
+                        <td className="text-black p-3 text-center text-xs">
                           {lineItem.tva}
                         </td>
-                        <td className="text-black p-3 text-center">
+                        <td className="text-black p-3 text-center text-xs">
                           {lineItem.lineTotal}
                         </td>
                       </tr>
@@ -188,47 +196,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </table>
             </div>
 
-            <div className="w-full flex flex-col my-8">
-              <div className="flex justify-start items-center w-full gap-3 mb-2">
-                <p className="text-sm">Appliquer une réduction</p>
-                <hr className="w-full text-blue-700" />
-              </div>
-              <div>
-                <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                  <tbody>
-                    <tr className="bg-[#493fff] rounded-xl text-white">
-                      <td className="flex items-center gap-2 p-3 text-center">
-                        Discount
-                      </td>
-                      <td className="p-3 text-center">€100</td>
-                      <td className="p-3 text-center">€100</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="flex flex-col w-full mb-6">
-              <div className="flex justify-start items-center w-full gap-3 mb-2">
-                <p className="text-sm">Total</p>
-                <hr className="w-full text-blue-700" />
-              </div>
-              <div>
-                <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                  <tbody>
-                    <tr className="bg-[#493fff] rounded-xl text-white">
-                      <td className="flex items-center gap-2 p-3 text-center">
-                        Discount
-                      </td>
-                      <td className="p-3 text-center">€100</td>
-                      <td className="p-3 text-center">€100</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="flex justify-between space-y-0.5">
+            <div className="flex justify-between space-y-0.5 mt-16">
               <div className="w-full font-normal text-[11px]">
                 <div className="my-1">
                   <p className="font-normal text-[11px]">Délai de paiement</p>
