@@ -58,7 +58,7 @@ const TopBar = () => {
     <nav className="c-topbar">
       <div className="c-topbar__logo">
         <h2 className="text-black text-xl">
-          Hi {(user && user.full_name) || (user && user.email)}
+          Bonjour {(user && user.full_name) || (user && user.email)}
         </h2>
       </div>
 
@@ -89,13 +89,13 @@ const TopBar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <Link href="/dashboard/account">
                         <DropdownMenuItem>
                           <User className="mr-2 h-4 w-4" />
-                          <span>Profile</span>
+                          <span>Profil</span>
                         </DropdownMenuItem>
                       </Link>
                     </DropdownMenuGroup>
@@ -103,7 +103,7 @@ const TopBar = () => {
                     <DropdownMenuGroup>
                       <DropdownMenuItem disabled>
                         <Users className="mr-2 h-4 w-4" />
-                        <span>Team</span>
+                        <span>Equipe</span>
                       </DropdownMenuItem>
                       <Link href="/dashboard/compagny">
                         <DropdownMenuItem>
@@ -124,7 +124,7 @@ const TopBar = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => logout()}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <span>Déconnexion</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

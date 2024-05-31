@@ -217,15 +217,15 @@ const Page = ({ params }: { params: { id: string } }) => {
     console.log('invoiceData')
     console.log(invoiceData)
     if (!invoiceData.client_id) {
-      errors.push('Client ID is required.')
+      errors.push('Client ID est requis')
     }
 
     if (!invoiceData.notes) {
-      errors.push('notes is required.')
+      errors.push('notes est requis')
     }
 
     if (!invoiceData.terms) {
-      errors.push('Terms of service must be accepted.')
+      errors.push('Termes est requis')
     }
 
     return errors
@@ -1260,7 +1260,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                       className="text-blue-700 text-sm"
                       onClick={addLineItem}
                     >
-                      Ajouter un item
+                      Ajouter un produit
                     </button>
                   </div>
                 </div>
@@ -1514,7 +1514,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                         id="terms"
                         name="terms"
                         value={invoiceData?.terms}
-                        placeholder="Terms"
+                        placeholder="Termes"
                         onChange={(e) => setTerms(e.target.value)}
                       />
                     )}

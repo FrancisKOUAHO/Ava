@@ -37,7 +37,7 @@ const Sidebar: FunctionComponent = () => {
         onClick={() => setShowInvoiceMenu(false)}
       >
         <Home />
-        Dashboard
+        Accueil
       </Link>
       <button
         onClick={toggleInvoiceMenu}
@@ -91,7 +91,7 @@ const Sidebar: FunctionComponent = () => {
         onClick={() => sethide(false)}
       >
         <Users />
-        Customers
+        Clients
       </Link>
     </section>
   )
