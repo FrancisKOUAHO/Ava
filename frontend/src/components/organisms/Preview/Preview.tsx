@@ -249,10 +249,18 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </div>
 
               <div className="flex flex-col">
-                <div className="w-[300px] bg-[#e7effc] text-black gap-4 text-sm">
+                <div className="w-[300px] bg-[#e7effc] text-black gap-4 text-sm p-2">
                   <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm">Total HT</p>
+                    </div>
                     <div className="text-sm">
-                      <p>Total HT</p>
+                      {subTotal && subTotal.total} €
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-sm">Remise générale</p>
                     </div>
                     <div className="text-sm">
                       {subTotal && subTotal.total} €
@@ -260,15 +268,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="text-sm">
-                      <h5>Remise générale</h5>
-                    </div>
-                    <div className="text-sm">
-                      {subTotal && subTotal.total} €
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm">
-                      <h5>Total HT final</h5>
+                      <p className="text-sm">Total HT final</p>
                     </div>
                     <div className="text-sm">
                       {subTotal && subTotal.total} €
