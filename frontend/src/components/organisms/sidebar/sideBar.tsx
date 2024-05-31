@@ -3,7 +3,13 @@
 import { FunctionComponent, useState } from 'react'
 
 import Link from 'next/link'
-import { Calculator, FileBarChart2, LayoutDashboard, Users } from 'lucide-react'
+import {
+  BarChartBig,
+  Calculator,
+  FileBarChart2,
+  LayoutDashboard,
+  Users,
+} from 'lucide-react'
 
 import { usePathname } from 'next/navigation'
 
@@ -29,7 +35,7 @@ const Sidebar: FunctionComponent = () => {
         className={pathname === '/dashboard' ? 'active' : ''}
         onClick={() => setShowInvoiceMenu(false)}
       >
-        <FileBarChart2 className={pathname === '/dashboard' ? 'active' : ''} />
+        <BarChartBig className={pathname === '/dashboard' ? 'active' : ''} />
         Analyse
       </Link>
 
