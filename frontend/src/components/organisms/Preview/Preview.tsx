@@ -72,7 +72,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     }
 
     return (
-      <div className="w-3/4 px-2 rounded-xl">
+      <div className="w-2/4 px-2 rounded-xl">
         <div className="flex justify-between">
           <h3 className="text-black text-lg font-semibold">Preview</h3>
           <div className="flex justify-center items-center gap-2">
@@ -83,11 +83,11 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
         </div>
 
         <div className="my-2" ref={pdfRef}>
-          <div className="bg-white px-6 py-2 rounded-xl">
+          <div className="bg-white px-5 py-2 rounded-xl">
             <div className="flex justify-between">
               <div className="flex flex-col">
                 <div>
-                  <h1 className="text-xl font-bold text-black">Facture</h1>
+                  <h1 className="text-xl font-bold text-[#493fff]">Facture</h1>
                   <p className="text-xs text-black/70">
                     N° F-2024-001
                     <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded ml-10">
@@ -154,10 +154,10 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </div>
             </div>
 
-            <div className="rounded-xl my-6 w-full">
+            <div className="rounded-xl my-2 w-full">
               <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                 <thead className="border-b-2 border-gray-300 mb-4 text-black">
-                  <tr className="bg-[#e7effc] rounded-xl">
+                  <tr className="bg-[#493fff] rounded-xl text-white">
                     <th className="text-center">#</th>
                     <th className="text-center">Désgination et description</th>
                     <th className="text-center">Qty</th>
@@ -188,7 +188,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </table>
             </div>
 
-            <div className="flex flex-col w-full mb-6">
+            <div className="w-full flex flex-col my-8">
               <div className="flex justify-start items-center w-full gap-3 mb-2">
                 <p className="text-sm">Appliquer une réduction</p>
                 <hr className="w-full text-blue-700" />
@@ -196,7 +196,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               <div>
                 <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                   <tbody>
-                    <tr className="bg-[#e7effc] rounded-xl">
+                    <tr className="bg-[#493fff] rounded-xl text-white">
                       <td className="flex items-center gap-2 p-3 text-center">
                         Discount
                       </td>
@@ -216,7 +216,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               <div>
                 <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                   <tbody>
-                    <tr className="bg-[#e7effc] rounded-xl">
+                    <tr className="bg-[#493fff] rounded-xl text-white">
                       <td className="flex items-center gap-2 p-3 text-center">
                         Discount
                       </td>
@@ -228,49 +228,96 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </div>
             </div>
 
-            <div className="flex flex-col w-full mb-6">
-              <div>
-                <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                  <tbody>
-                    <tr>
-                      <td className="font-black text-black">
-                        <h5>Total à régler</h5>
-                      </td>
-                      <td className="p-3 text-center font-black text-black">
-                        {subTotal && subTotal.total}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <div className="flex justify-between space-y-0.5">
+              <div className="w-full font-normal text-[11px]">
+                <div className="my-1">
+                  <p className="font-normal text-[11px]">Délai de paiement</p>
+                  <span className="font-normal text-[11px]">30 jours</span>
+                </div>
 
-            <div className="w-full my-">
-              <div className="flex justify-between items-center w-full gap-3 mb-2">
-                <p className=" font-black text-sm">Notes</p>
+                <div className="my-1">
+                  <p className="font-normal text-[11px]">Pénalités de retard</p>
+                  <span className="font-normal text-[11px]">
+                    3 fois le taux légal
+                  </span>
+                </div>
+
+                <div className="my-1">
+                  <p className="font-normal text-[11px]">Escompte</p>
+                  <span className="font-normal text-[11px]">Aucun</span>
+                </div>
               </div>
-              <div className="grid w-full items-center gap-1.5 my-2">
-                <p className="font-normal text-sm">
-                  Les factures devront être réglées en Euros (€) dès réception,
-                  et au plus tard dans un délai de X jours (délai inférieur ou
-                  égal à 45 jours fin de mois ou 60 jours) à partir de la date
-                  de leur émission
+
+              <div className="flex flex-col">
+                <div className="w-[300px] bg-[#e7effc] text-black gap-4 text-sm">
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm">
+                      <p>Total HT</p>
+                    </div>
+                    <div className="text-sm">
+                      {subTotal && subTotal.total} €
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm">
+                      <h5>Remise générale</h5>
+                    </div>
+                    <div className="text-sm">
+                      {subTotal && subTotal.total} €
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm">
+                      <h5>Total HT final</h5>
+                    </div>
+                    <div className="text-sm">
+                      {subTotal && subTotal.total} €
+                    </div>
+                  </div>
+                </div>
+
+                <p className="mt-1 text-gray-500 text-[10px]">
+                  TVA non applicable, art 293 B du CGI
                 </p>
               </div>
             </div>
 
-            <div className="w-full">
-              <div className="flex justify-between items-center w-full gap-3 mb-2">
-                <p className=" font-black text-sm">Terms</p>
-              </div>
-              <div className="grid w-full items-center gap-1.5 my-2">
-                <p className="font-normal text-sm">
-                  Les factures devront être réglées en Euros (€) dès réception,
-                  et au plus tard dans un délai de X jours (délai inférieur ou
-                  égal à 45 jours fin de mois ou 60 jours) à partir de la date
-                  de leur émission
-                </p>
-              </div>
+            <div className="w-full gap-1.5 my-4">
+              <h6 className="mb-2 font-black text-black">
+                Réleve d'identité Bancaire
+              </h6>
+              <p className="font-normal text-[12px]">
+                Banque:
+                <span className="uppercase"> Societe general</span>
+              </p>
+
+              <p className="font-normal text-[12px]">
+                IBAN:
+                <span className="uppercase"> Societe general</span>
+              </p>
+
+              <p className="font-normal text-[12px]">
+                BIC:
+                <span className="uppercase"> Societe general</span>
+              </p>
+            </div>
+
+            <div className="grid w-full items-center gap-1.5 my-2">
+              <p className="font-normal text-[9px]">
+                Les factures devront être réglées en Euros (€) dès réception, et
+                au plus tard dans un délai de X jours (délai inférieur ou égal à
+                45 jours fin de mois ou 60 jours) à partir de la date de leur
+                émission
+              </p>
+            </div>
+
+            <div className="grid w-full items-center gap-1.5 my-2">
+              <p className="font-normal text-[9px]">
+                Les factures devront être réglées en Euros (€) dès réception, et
+                au plus tard dans un délai de X jours (délai inférieur ou égal à
+                45 jours fin de mois ou 60 jours) à partir de la date de leur
+                émission
+              </p>
             </div>
           </div>
         </div>
