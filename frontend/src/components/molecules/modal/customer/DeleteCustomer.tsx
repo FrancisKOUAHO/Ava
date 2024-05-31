@@ -25,16 +25,16 @@ function DeleteCustomer({ isOpen, onClose, onConfirm }: DeleteCustomerProps) {
                     <div className="flex min-h-full items-center justify-center p-4 text-center">
                         <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                             <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                                Confirm Deletion
+                                Confirmation de la Suppression
                             </Dialog.Title>
                             <div className="mt-2">
                                 <p className="text-sm text-gray-500">
-                                    Are you sure you want to delete this item? This action is irreversible.
+                                    Etes-vous sûr de vouloir supprimer ce client? Cette action est irréversible.
                                 </p>
                             </div>
                             <div className="mt-4 flex justify-end">
-                                <Button variant="ghost" onClick={onClose}>Cancel</Button>
-                                <Button variant="destructive" className="ml-2" onClick={handleDelete}>Confirm</Button>
+                                <Button variant="ghost" onClick={onClose}>Annuler</Button>
+                                <Button variant="destructive" className="ml-2" onClick={handleDelete}>Confirmer</Button>
                             </div>
                         </Dialog.Panel>
                     </div>

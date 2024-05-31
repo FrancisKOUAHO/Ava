@@ -81,7 +81,7 @@ const Page = () => {
                       className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                       htmlFor="grid-password"
                     >
-                      Postal Code
+                      Code Postal
                     </label>
                     <input
                       type="text"
@@ -135,7 +135,7 @@ const Page = () => {
                       className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                       htmlFor="grid-password"
                     >
-                      Legal structure
+                      Structure juridique
                     </label>
                     <input
                       type="email"
@@ -151,7 +151,7 @@ const Page = () => {
                       className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
                       htmlFor="grid-password"
                     >
-                      Legal status
+                      Statut juridique
                     </label>
                     <input
                       type="email"
