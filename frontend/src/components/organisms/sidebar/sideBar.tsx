@@ -4,11 +4,10 @@ import { FunctionComponent, useState } from 'react'
 
 import Link from 'next/link'
 import {
-  FilePlus,
+  Calculator,
+  FileBarChart2,
   Files,
-  FileSearch2,
-  Home,
-  TextQuote,
+  LayoutDashboard,
   Users,
 } from 'lucide-react'
 
@@ -36,9 +35,10 @@ const Sidebar: FunctionComponent = () => {
         className={pathname === '/dashboard' ? 'active' : ''}
         onClick={() => setShowInvoiceMenu(false)}
       >
-        <Home />
-        Accueil
+        <FileBarChart2 className={pathname === '/dashboard' ? 'active' : ''} />
+        Analyse
       </Link>
+
       <button
         onClick={toggleInvoiceMenu}
         className={
@@ -49,7 +49,15 @@ const Sidebar: FunctionComponent = () => {
             : ''
         }
       >
-        <Files />
+        <Files
+          className={
+            pathname === '/dashboard/invoices' ||
+            pathname === '/dashboard/invoices/add' ||
+            pathname === '/dashboard/invoices/download'
+              ? 'active'
+              : ''
+          }
+        />
         Factures
       </button>
       <div
@@ -63,27 +71,29 @@ const Sidebar: FunctionComponent = () => {
           href="/dashboard/invoices/add"
           className={pathname === '/dashboard/invoices/add' ? 'active' : ''}
         >
-          <FilePlus />
-          Créer une facture
+          Documents
         </Link>
-        <Link
-          href="/dashboard/invoices/summaries"
-          className={
-            pathname === '/dashboard/invoices/summaries' ? 'active' : ''
-          }
-        >
-          <FileSearch2 />
-          Liste des factures
-        </Link>
+        <Link href="#">Articles</Link>
+        <Link href="#">Factures récurrentes</Link>
+        <Link href="#">Paiements en ligne</Link>
+        <Link href="#">Signatures électroniques</Link>
+        <Link href="#">Relances automatiques</Link>
       </div>
-      {/*<Link
-        href="/dashboard/calendar"
-        className={pathname === '/dashboard/calendar' ? 'active' : ''}
-        onClick={() => setShowDevisMenu(false)}
+
+      <button onClick={toggleInvoiceMenu} disabled>
+        <LayoutDashboard />
+        Productivité
+      </button>
+      <div
+        className={
+          'c-sidebar__sub-menu c-sidebar__sub-menu--hide c-sidebar__sub-menu c-sidebar__sub-menu--link'
+        }
       >
-        <CalendarDays />
-        Calendar
-      </Link>*/}
+        <Link href="#">Transactions</Link>
+        <Link href="#">Livres comptables</Link>
+        <Link href="#">Déclarations d'impôts</Link>
+        <Link href="#">Déclarations Urssaf</Link>
+      </div>
 
       <Link
         href="/dashboard/customers"
@@ -91,8 +101,23 @@ const Sidebar: FunctionComponent = () => {
         onClick={() => sethide(false)}
       >
         <Users />
-        Clients
+        Contacts
       </Link>
+
+      <button onClick={toggleInvoiceMenu} disabled>
+        <Calculator />
+        Comptabilité
+      </button>
+      <div
+        className={
+          'c-sidebar__sub-menu c-sidebar__sub-menu--hide c-sidebar__sub-menu c-sidebar__sub-menu--link'
+        }
+      >
+        <Link href="#">Transactions</Link>
+        <Link href="#">Livres comptables</Link>
+        <Link href="#">Déclarations d'impôts</Link>
+        <Link href="#">Déclarations Urssaf</Link>
+      </div>
     </section>
   )
 }
