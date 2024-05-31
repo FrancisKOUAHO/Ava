@@ -3,13 +3,7 @@
 import { FunctionComponent, useState } from 'react'
 
 import Link from 'next/link'
-import {
-  Calculator,
-  FileBarChart2,
-  Files,
-  LayoutDashboard,
-  Users,
-} from 'lucide-react'
+import { Calculator, FileBarChart2, LayoutDashboard, Users } from 'lucide-react'
 
 import { usePathname } from 'next/navigation'
 
@@ -49,7 +43,7 @@ const Sidebar: FunctionComponent = () => {
             : ''
         }
       >
-        <Files
+        <FileBarChart2
           className={
             pathname === '/dashboard/invoices' ||
             pathname === '/dashboard/invoices/add' ||
