@@ -686,7 +686,7 @@ const Page = () => {
               </div>
             </header>
 
-            <div className="bg-[#f2f5fd] p-2 mt-2 rounded-xl">
+            <div>
               <div className="flex flex-col items-center">
                 <div className="flex justify-between items-center w-full mb-1">
                   {imagePreviewUrl ? (
