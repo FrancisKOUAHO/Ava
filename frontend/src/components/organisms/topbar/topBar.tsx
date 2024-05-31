@@ -63,14 +63,7 @@ const TopBar = () => {
       </div>
 
       <div className="c-topbar__container">
-        <div className="c-topbar__container__left">
-          <Link href="/dashboard/invoices/add">
-            <ButtonUI
-              label="Créer une facture"
-              icon={<FilePenLine className="w-5 h-5" />}
-            />
-          </Link>
-        </div>
+        <div className="c-topbar__container__left"></div>
       </div>
 
       <div className="c-topbar__container">
