@@ -82,10 +82,66 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
           </div>
         </div>
 
-        <div className="bg-[#f2f5fd] rounded-xl my-2 p-2" ref={pdfRef}>
+        <div className="my-2" ref={pdfRef}>
           <div className="bg-white px-6 py-2 rounded-xl">
-            <div className="flex justify-center p-4">
-              <div className="flex w-1/3">
+            <div className="flex justify-between">
+              <div className="flex flex-col">
+                <div>
+                  <h1 className="text-xl font-bold text-black">Facture</h1>
+                  <p className="text-xs text-black/70">
+                    N° F-2024-001
+                    <span className="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded ml-10">
+                      Brouillon
+                    </span>
+                  </p>
+                </div>
+
+                <div className="my-3">
+                  <h6 className="text-sm font-bold text-black uppercase">
+                    Monsieur Francis KOUAHO
+                  </h6>
+                  <p className="text-xs text-black/70 ">Francis KOUAHO</p>
+                  <p className="text-xs text-black/70">
+                    kouahofrancis@gmail.com
+                  </p>
+                  <p className="text-xs text-black/70">+33600000000</p>
+                  <p className="text-xs text-black/70 uppercase">
+                    119 rue saint sebastien
+                  </p>
+                  <p className="text-xs text-black/70 uppercase">
+                    78300 Poissy
+                  </p>
+                  <p className="text-xs text-black/70 uppercase">
+                    N° siret: 123456789
+                  </p>
+                  <p className="text-xs text-black/70 uppercase">
+                    N° TVA: FR123456789
+                  </p>
+                </div>
+
+                <div className="mb-3">
+                  <p className="text-xs text-black/70 ">
+                    Date d'emission: <span>31/05/2024</span>
+                  </p>
+                  <p className="text-xs text-black/70 ">
+                    Date d'exigibilité: <span>30/06/2024</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center gap-12">
+                <div className="my-3">
+                  <p className="text-xs text-black/70 ">Francis KOUAHO</p>
+                  <p className="text-xs text-black/70 uppercase">
+                    119 rue saint sebastien
+                  </p>
+                  <p className="text-xs text-black/70 uppercase">
+                    78300 Poissy
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
                 {imagePreviewUrl ? (
                   <img
                     src={imagePreviewUrl}
@@ -96,161 +152,34 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                   <ImagePlus className="text-blue-700 w-10 h-10" />
                 )}
               </div>
-              <div className="w-full">
-                <div className="flex flex-col w-full mb-6">
-                  <div>
-                    <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                      <tbody>
-                        <tr>
-                          <td className="flex items-center gap-2 p-1 text-center">
-                            <div className="w-full">
-                              <p className="text-black text-sm">Company</p>
-                              <p className="text-sm text-black/70">
-                                {compagny[0]?.companyName}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="p-1 text-center">
-                            <div className="w-full">
-                              <p className="text-black text-sm">Address</p>
-                              <p className="text-sm text-black/70">
-                                1234 Main Street
-                              </p>
-                            </div>
-                          </td>
-                          <td className="flex items-center gap-2 p-1 text-center">
-                            <div className="w-full">
-                              <p className="text-black text-sm">City</p>
-                              <p className="text-sm text-black/70">New York</p>
-                            </div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="flex items-center gap-2 p-1 text-center">
-                            <div className="w-full">
-                              <p className="text-black text-sm">Country</p>
-                              <p className="text-sm text-black/70">
-                                United States
-                              </p>
-                            </div>
-                          </td>
-                          <td className="p-1 text-center">
-                            <div className="w-full">
-                              <p className="text-black text-sm">ZIP Code</p>
-                              <p className="text-sm text-black/70">12345</p>
-                            </div>
-                          </td>
-                          <td className="p-1 text-center">
-                            <div className="w-full">
-                              <p className="text-black text-sm">Phone</p>
-                              <p className="text-sm text-black/70">
-                                +1 123 456 7890
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-blue-700 rounded-sm p-2 text-white mb-2">
-              <div className="flex justify-between">
-                <p>Billed To</p>
-                <div className="flex justify-center items-center gap-2">
-                  <p>Total à régler</p>
-                  <p>{subTotal && subTotal.total} €</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full">
-              <div className="flex flex-col w-full mb-6">
-                <div>
-                  <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                    <tbody>
-                      <tr>
-                        <td className="flex items-center gap-2 p-1 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm">Client</p>
-                            <p className="text-sm text-black/70">
-                              {customer.company}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="p-1 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm">Address</p>
-                            <p className="text-sm text-black/70">
-                              {customer.address}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="flex items-center gap-2 p-1 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm">City</p>
-                            <p className="text-sm text-black/70">
-                              {customer.city}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="flex items-center gap-2 p-1 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm">Country</p>
-                            <p className="text-sm text-black/70">
-                              {customer.country}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="p-1 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm">ZIP Code</p>
-                            <p className="text-sm text-black/70">
-                              {customer.zip}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="p-1 text-center">
-                          <div className="w-full">
-                            <p className="text-black text-sm"> Numero SIREN</p>
-                            <p className="text-sm text-black/70">
-                              {customer.sirenNumber}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
             </div>
 
             <div className="rounded-xl my-6 w-full">
               <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
-                <thead className="border-b-2 border-gray-300 mb-4">
-                  <tr>
-                    <th className="flex items-center gap-2 p-3 text-center">
-                      Item
-                    </th>
-                    <th className="p-3 text-center">Qty</th>
-                    <th className="p-3 text-center">Rate</th>
-                    <th className="p-3 text-center">Total</th>
+                <thead className="border-b-2 border-gray-300 mb-4 text-black">
+                  <tr className="bg-[#e7effc] rounded-xl">
+                    <th className="text-center">#</th>
+                    <th className="text-center">Désgination et description</th>
+                    <th className="text-center">Qty</th>
+                    <th className="text-center">Rate</th>
+                    <th className="text-center">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lineItems &&
                     lineItems.map((lineItem: LineItem, index: number) => (
-                      <tr key={index} className="bg-[#e7effc] rounded-lg">
-                        <td className="flex items-center gap-2 p-3 text-center">
+                      <tr key={index}>
+                        <td className="text-black p-3 text-center">{index}</td>
+                        <td className="text-black p-3 text-center">
                           {lineItem.name}
                         </td>
-                        <td className="p-3 text-center">{lineItem.quantity}</td>
-                        <td className="p-3 text-center">{lineItem.tva}</td>
-                        <td className="p-3 text-center">
+                        <td className="text-black p-3 text-center">
+                          {lineItem.quantity}
+                        </td>
+                        <td className="text-black p-3 text-center">
+                          {lineItem.tva}
+                        </td>
+                        <td className="text-black p-3 text-center">
                           {lineItem.lineTotal}
                         </td>
                       </tr>
