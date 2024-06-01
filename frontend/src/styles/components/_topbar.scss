@@ -10,8 +10,9 @@
   background-color: $white;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  box-shadow: 0 0 10px 0 rgba($black, 0.1);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   padding: 15px 25px;
+  z-index: 1;
 
 
   .c-topbar__container {

@@ -1,3 +1,5 @@
+'use client'
+
 import { Activity, CreditCard, DollarSign, Users } from 'lucide-react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -18,9 +20,73 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import Sirene from '@/components/atoms/siret/sirene'
+import { useAuth } from '@/context/AuthContext'
+import api from '@/config/api'
+import { useEffect } from 'react'
 
 const Page = () => {
+  const { setUser, user } = useAuth()
+
+  const whoami = async () => {
+    const response = await api.get('auth/whoami')
+
+    console.log(response)
+
+    if (!response) {
+      throw new Error('unknown error')
+    }
+
+    setUser(response.data)
+  }
+
+  useEffect(() => {
+    whoami()
+  }, [])
+
   return (
+    <>
+      <div className="flex bg-white">
+        <div style={{ maxWidth: '1268px', paddingTop: '32px' }}>
+          <div>
+            <div className="flex">
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <div>
+                  <div className="" style={{ height: '60px', width: '60px' }}>
+                    <div
+                      className="v-responsive__sizer"
+                      style={{ paddingBottom: '84.264%' }}
+                    ></div>
+                    <div
+                      className=""
+                      style={{
+                        backgroundImage:
+                          'url("https://app.abby.fr/onboarding/home/hey.png"); background-position: center center',
+                      }}
+                    ></div>
+                    <div
+                      className="v-responsive__content"
+                      style={{ width: ' 197px' }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="tw-flex-grow">
+                  <div>
+                    <div className="font-black font-san text-xl">
+                      Hey{' '}
+                      {(user && user.full_name) ||
+                        (user && user.email.split('@')[0])}{' '}
+                      ☕️
+                    </div>
+                    <div className="text-sm leading-5 font-bold	 text-gray-400">
+                      Un café ? Super ! C'est le moment d'attaquer la journée.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="flex">
         <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
           <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -66,7 +132,9 @@ const Page = () => {
             </Card>
             <Card x-chunk="dashboard-01-chunk-3">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Actifs Actuellement</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Actifs Actuellement
+                </CardTitle>
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -255,22 +323,23 @@ const Page = () => {
                     <AvatarFallback>WK</AvatarFallback>
                   </Avatar>
 
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">
-                    Sofia Davis
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    sofia.davis@email.com
-                  </p>
+                  <div className="grid gap-1">
+                    <p className="text-sm font-medium leading-none">
+                      Sofia Davis
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      sofia.davis@email.com
+                    </p>
+                  </div>
+                  <div className="ml-auto font-medium">+39,00€</div>
                 </div>
-                <div className="ml-auto font-medium">+39,00€</div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+        <Sirene />
       </div>
-      <Sirene />
-    </div>
+    </>
   )
 }
 
