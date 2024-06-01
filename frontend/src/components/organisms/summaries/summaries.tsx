@@ -145,19 +145,6 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
           <tbody>
             {invoices.map((invoice: InvoiceType) => (
               <tr key={invoice.id} className="bg-[#e7effc]">
-                <td className="flex items-center gap-2 p-3 text-center">
-                  <Checkbox
-                    id={`checkbox-${invoice.id}`}
-                    checked={checked}
-                    onChange={() => setChecked(!checked)}
-                  />
-                  <Label
-                    htmlFor={`checkbox-${invoice.id}`}
-                    className="text-sm font-medium"
-                  >
-                    <FileImage className="w-8 h-8" />
-                  </Label>
-                </td>
                 <td className="p-3 text-center">
                   {invoice?.client?.firstName}
                 </td>

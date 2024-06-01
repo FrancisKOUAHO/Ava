@@ -1,6 +1,6 @@
 'use client'
 
-import { LogOut, User, Cloud, LifeBuoy, Users, Building2 } from 'lucide-react'
+import { LogOut, User, Building2, Settings } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -43,19 +43,18 @@ const TopBar = () => {
                     <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
+                      <Link href="#">
+                        <DropdownMenuItem>
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Paramètres</span>
+                        </DropdownMenuItem>
+                      </Link>
                       <Link href="/dashboard/account">
                         <DropdownMenuItem>
                           <User className="mr-2 h-4 w-4" />
                           <span>Profil</span>
                         </DropdownMenuItem>
                       </Link>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem disabled>
-                        <Users className="mr-2 h-4 w-4" />
-                        <span>Equipe</span>
-                      </DropdownMenuItem>
                       <Link href="/dashboard/compagny">
                         <DropdownMenuItem>
                           <Building2 className="mr-2 h-4 w-4" />
@@ -64,14 +63,6 @@ const TopBar = () => {
                       </Link>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem disabled>
-                      <LifeBuoy className="mr-2 h-4 w-4" />
-                      <span>Support</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem disabled>
-                      <Cloud className="mr-2 h-4 w-4" />
-                      <span>API</span>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => logout()}>
                       <LogOut className="mr-2 h-4 w-4" />
