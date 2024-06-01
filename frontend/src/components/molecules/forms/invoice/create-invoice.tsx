@@ -6,12 +6,12 @@ import {
   CircleCheck,
   CircleX,
   Flag,
-  ImagePlus,
-  Info,
   PencilLine,
-  Image,
   Trash2,
   Plus,
+  ImagePlus,
+  Image,
+  Info,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -41,7 +41,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useFetchData } from '@/app/hooks/useFetch'
-import jsPDF from 'jspdf'
 
 interface LineItem {
   name?: string
@@ -70,7 +69,7 @@ interface InvoiceData {
   total_amount: number
   status: string
   discount: number
-  is_invoice?: number
+  is_invoice: number
 }
 
 interface CustomerData {
@@ -105,10 +104,9 @@ interface PreviewRef {
   downloadPDF: () => Promise<Blob>
 }
 
-const Page = ({ params }: { params: { id: string } }) => {
+export const CreateInvoice = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [fileName, setFileName] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
@@ -119,7 +117,6 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
   const [open, setOpen] = useState(false)
-
   const [customer, setCustomer] = useState<CustomerData | null>({
     user_id: '',
     userId: '',
@@ -140,96 +137,44 @@ const Page = ({ params }: { params: { id: string } }) => {
     siren_number: '',
     sirenNumber: '',
   })
-  const previewRef = useRef(null)
-
   const [notes, setnotes] = useState<string>('')
   const [terms, setTerms] = useState<string>('')
-  const [totalInvoices, setTotalInvoices] = useState<number>(0)
-  const [totalInvoicesWithoutTva, setTotalInvoicesWithoutTva] =
-    useState<number>(0)
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
     discount: 0,
     total: 0,
   })
-  const [formValid, setFormValid] = useState(true)
-  const { data: customersData } = useFetchData('billing/customer', 'customer')
-  const { data: invoiceDetails } = useFetchData(
-    `billing/invoice/${params.id}`,
-    'invoice',
-  )
-  const { data: invoiceItemDetails } = useFetchData(
-    `billing/invoice-items/${params.id}`,
-    'invoice-item',
-  )
+  const [formValid, setFormValid] = useState(false)
+  const previewRef = useRef(null)
 
   useEffect(() => {
-    if (invoiceDetails) {
-      setInvoiceData(invoiceDetails)
-      const foundCustomer = customersData.find(
-        (cust: InvoiceData) => cust.id === invoiceDetails.customerId,
+    if (lineItems.length > 0) {
+      const allValid = lineItems.every(
+        (item: LineItem) => item.name && item.price && item.quantity,
       )
-      if (foundCustomer && foundCustomer !== customer) {
-        setCustomer(foundCustomer)
-      }
+      setFormValid(allValid)
     }
-
-    if (invoiceItemDetails && invoiceItemDetails.data.length > 0) {
-      const enhancedItems = invoiceItemDetails.data.map((item: LineItem) => ({
-        ...item,
-        price: Number(item.price),
-        quantity: Number(item.quantity),
-        lineTotal: Number(item.lineTotal),
-        lineTotalTva: Number(item.lineTotalTva),
-        tva: Number(item.tva),
-      }))
-      setLineItems(enhancedItems)
-    }
-  }, [invoiceDetails, customersData, invoiceItemDetails])
-
-  useEffect(() => {
-    if (
-      customersData &&
-      customersData.length > 0 &&
-      customer?.id !== customersData[0].id
-    ) {
-      handleSelectCustomer(customersData[0].id)
-    }
-  }, [customersData])
-
-  useEffect(() => {
-    const allValid = lineItems.every(
-      (item) => item.name && item.price && item.quantity,
-    )
-    setFormValid(allValid)
-    setTotalInvoices(getTotalInvoices())
-    setTotalInvoicesWithoutTva(getTotalInvoices(false))
   }, [lineItems])
-
-  useEffect(() => {
-    console.log('invoiceDetails 00')
-
-    console.log(invoiceData)
-  }, [invoiceData])
 
   const validateInvoiceData = (invoiceData: InvoiceData) => {
     const errors = []
-    console.log('invoiceData')
-    console.log(invoiceData)
+
     if (!invoiceData.client_id) {
-      errors.push('Client ID est requis')
+      errors.push('Client ID is required.')
     }
 
     if (!invoiceData.notes) {
-      errors.push('notes est requis')
+      errors.push('notes is required.')
     }
 
     if (!invoiceData.terms) {
-      errors.push('Termes est requis')
+      errors.push('Terms of service must be accepted.')
     }
 
     return errors
   }
+
+  const { data: customersData } = useFetchData('billing/customer', 'customer')
 
   const handleSelectCustomer = (customerId: string | undefined) => {
     const selectedCustomer: CustomerData = customersData.find(
@@ -275,7 +220,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         [field]: numericValue,
         total:
           field === 'discount'
-            ? getSubTotal(totalInvoices, numericValue)
+            ? getSubTotal(getTotalInvoices(), numericValue)
             : prevState.total,
       }
 
@@ -408,8 +353,7 @@ const Page = ({ params }: { params: { id: string } }) => {
   }
 
   const SendItemsDataMutation = useMutation<LineItem[], Error, LineItem>({
-    mutationFn: (data) =>
-      api.post('billing/update-or-insert-invoice-item', data),
+    mutationFn: (data) => api.post('billing/invoice-item-many', data),
     onError: (error: any) => {
       throw new Error(error.message)
     },
@@ -432,7 +376,7 @@ const Page = ({ params }: { params: { id: string } }) => {
         terms: data.terms,
         is_invoice: 1,
       }
-      return api.put(`billing/invoice/${params.id}`, fullData)
+      return api.post('billing/invoice', fullData)
     },
     onError: (error: any) => {
       console.error('Error:', error.message)
@@ -447,7 +391,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
           ...item,
-          invoice_id: params.id,
+          invoice_id: response.data.id,
         }))
         const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
@@ -461,14 +405,14 @@ const Page = ({ params }: { params: { id: string } }) => {
     },
   })
 
-  const handleSubmit = async (isDraft: boolean = true) => {
+  const handleSubmit = (isDraft: boolean = true) => {
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
-      notes: invoiceData?.notes ?? '',
-      terms: invoiceData?.terms ?? '',
+      notes: notes,
+      terms: terms,
       total_amount: Number(
-        (totalInvoices - (subTotal.discount ?? 0)).toFixed(2),
+        (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
       ),
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
@@ -536,8 +480,18 @@ const Page = ({ params }: { params: { id: string } }) => {
       notes: values.notes,
       terms: values.terms,
       status: 'brouillon',
-      is_invoice: 0,
+      is_invoice: 1,
     }
+
+    const lineItemsData: LineItem[] = lineItems.map((lineItem: LineItem) => ({
+      name: lineItem.name,
+      price: lineItem.price,
+      unity: lineItem.unity,
+      quantity: lineItem.quantity,
+      lineTotal: lineItem.lineTotal,
+      lineTotalTva: lineItem.lineTotalTva,
+      tva: lineItem.tva,
+    }))
 
     try {
       const response = await SendInvoiceMutation.mutateAsync(invoiceData)
@@ -585,36 +539,8 @@ const Page = ({ params }: { params: { id: string } }) => {
 
     setSubTotal((prevState: SubTotal) => ({
       ...prevState,
-      total: getSubTotal(totalInvoices),
+      total: getSubTotal(getTotalInvoices()),
     }))
-  }
-
-  const callChildFunction = async (responseInvoice: InvoiceData) => {
-    console.log('callChildFunction')
-
-    if (previewRef.current as unknown as PreviewRef) {
-      console.log('callChildFunction 2')
-
-      try {
-        const pdfBlob = await (
-          previewRef.current as unknown as PreviewRef
-        ).downloadPDF()
-        console.log('pdfBlob:', pdfBlob)
-        const formData = new FormData()
-        formData.append('file', pdfBlob, 'invoice.pdf')
-        formData.append('responseInvoice', JSON.stringify(responseInvoice))
-
-        const response = await api.post('billing/sendPdf', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-
-        console.log('Server response:', response)
-      } catch (error) {
-        console.error('Error sending PDF and data:', error)
-      }
-    }
   }
 
   const changeCustomer = () => {
@@ -628,18 +554,17 @@ const Page = ({ params }: { params: { id: string } }) => {
   }
 
   const getTotalInvoices = (withTva = true) => {
-    console.log('lineItems :', lineItems)
-    if (!Array.isArray(lineItems) || lineItems.length === 0) {
+    if (!Array.isArray(lineItems)) {
       return 0
     }
-    console.log('ic :')
 
     return lineItems.reduce((acc, lineItem) => {
-      const total = withTva ? lineItem.lineTotalTva : lineItem.lineTotal
-      console.log('total :', total)
-      return acc + (total ?? 0)
+      return (
+        acc + (withTva ? lineItem.lineTotalTva ?? 0 : lineItem.lineTotal ?? 0)
+      )
     }, 0)
   }
+
   const getSubTotal = (pTotal: number, pdiscount: number = 0): number => {
     return pTotal - (pTotal * pdiscount) / 100
   }
@@ -671,8 +596,32 @@ const Page = ({ params }: { params: { id: string } }) => {
     checkIfCustomerIsFull()
   }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files ? event.target.files[0] : null // More safe checking if files exist
+  const mutation = useMutation({
+    mutationFn: async (upload: any) =>
+      api.post(
+        `upload-logo`,
+        {
+          logo: upload,
+        },
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      ),
+    onError: (e: any) => {
+      throw new Error(e)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Logo téléchargé avec succès')
+    },
+  })
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files ? event.target.files[0] : null
     if (file) {
       setFileName(file.name)
 
@@ -683,9 +632,38 @@ const Page = ({ params }: { params: { id: string } }) => {
         }
       }
       reader.readAsDataURL(file)
+      await mutation.mutateAsync(file)
     } else {
       setImagePreviewUrl(null)
       setFileName('')
+    }
+  }
+
+  const callChildFunction = async (responseInvoice: InvoiceData) => {
+    console.log('callChildFunction')
+
+    if (previewRef.current as unknown as PreviewRef) {
+      console.log('callChildFunction 2')
+
+      try {
+        const pdfBlob = await (
+          previewRef.current as unknown as PreviewRef
+        ).downloadPDF()
+        console.log('pdfBlob:', pdfBlob)
+        const formData = new FormData()
+        formData.append('file', pdfBlob, 'invoice.pdf')
+        formData.append('responseInvoice', JSON.stringify(responseInvoice))
+
+        const response = await api.post('billing/sendPdf', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+
+        console.log('Server response:', response)
+      } catch (error) {
+        console.error('Error sending PDF and data:', error)
+      }
     }
   }
 
@@ -696,11 +674,14 @@ const Page = ({ params }: { params: { id: string } }) => {
   }, [customer])
 
   return (
-    <section className="px-6 py-6">
-      <div className="flex text-black">
-        <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-          <div className="w-3/4">
-            <header className="flex justify-between items-center gap-12">
+    <section className="px-24">
+      <div className="flex justify-between text-black">
+        <form
+          onSubmit={handleSendInvoice}
+          className="flex w-2/4 gap-12 text-black"
+        >
+          <div>
+            <header className="flex justify-between items-center gap-12 mb-6">
               <div className="flex justify-center items-center">
                 <h3 className="text-black text-lg font-semibold">
                   Créer une Facture
@@ -708,7 +689,7 @@ const Page = ({ params }: { params: { id: string } }) => {
               </div>
             </header>
 
-            <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
+            <div>
               <div className="flex flex-col items-center">
                 <div className="flex justify-between items-center w-full mb-1">
                   {imagePreviewUrl ? (
@@ -836,6 +817,22 @@ const Page = ({ params }: { params: { id: string } }) => {
                       </div>
                       <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label htmlFor="firstName" className="mb-2">
+                          E-mail
+                        </Label>
+                        <Input
+                          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
+                          type="text"
+                          id="email"
+                          name="email"
+                          value={customer ? customer.email : ''}
+                          onChange={(e) =>
+                            handleCustomerChange('email', e.target.value)
+                          }
+                          placeholder="Jean@mail.fr"
+                        />
+                      </div>
+                      <div className="grid w-full max-w-sm items-center gap-1.5">
+                        <Label htmlFor="firstName" className="mb-2">
                           Prénom
                         </Label>
                         <Input
@@ -898,22 +895,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                           placeholder="EUR"
                         />
                       </div>
-                      {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                      {/*  <Label htmlFor="vatNumber" className="mb-2">*/}
-                      {/*    Numéro de TVA*/}
-                      {/*  </Label>*/}
-                      {/*  <Input*/}
-                      {/*      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                      {/*      type="text"*/}
-                      {/*      id="vatNumber"*/}
-                      {/*      name="vatNumber"*/}
-                      {/*      value={customer ? customer.vatNumber  : ''}*/}
-                      {/*      onChange={(e) => handleCustomerChange({...customer, vatNumber: e.target.value})}*/}
-
-                      {/*      placeholder="987"*/}
-                      {/*  />*/}
-                      {/*</div>*/}
-
                       <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label htmlFor="address" className="mb-2">
                           Addresse principale
@@ -930,20 +911,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                           placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"
                         />
                       </div>
-
-                      {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                      {/*  <Label htmlFor="address2" className="mb-2">*/}
-                      {/*    Addresse 2*/}
-                      {/*  </Label>*/}
-                      {/*  <Input*/}
-                      {/*    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                      {/*    type="text"*/}
-                      {/*    id="address2"*/}
-                      {/*    name="address2"*/}
-
-                      {/*    placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"*/}
-                      {/*  />*/}
-                      {/*</div>*/}
 
                       <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label htmlFor="city" className="mb-2">
@@ -1078,7 +1045,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                 className="flex justify-center items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                {lineItem.price}€
+                                €{lineItem.price}
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="item"
@@ -1364,7 +1331,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                 readOnly
                                 placeholder="1"
                                 value={(
-                                  totalInvoices - (subTotal.discount ?? 0)
+                                  getTotalInvoices() - (subTotal.discount ?? 0)
                                 ).toFixed(2)}
                               />
                             )}
@@ -1403,7 +1370,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                               id="total"
                               placeholder="100"
                               value={(
-                                totalInvoicesWithoutTva -
+                                getTotalInvoices(false) -
                                 (subTotal.discount ?? 0)
                               ).toFixed(2)}
                               readOnly
@@ -1415,7 +1382,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                               type="number"
                               id="totalTva"
                               name="totalTva"
-                              value={totalInvoices.toFixed(2)}
+                              value={getTotalInvoices().toFixed(2)}
                               readOnly
                               placeholder="100"
                             />
@@ -1427,7 +1394,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                               id="totalTva"
                               name="totalTva"
                               value={(
-                                totalInvoices - (subTotal.discount ?? 0)
+                                getTotalInvoices() - (subTotal.discount ?? 0)
                               ).toFixed(2)}
                               readOnly
                               placeholder="100"
@@ -1448,9 +1415,9 @@ const Page = ({ params }: { params: { id: string } }) => {
                             <h5>Total à régler</h5>
                           </td>
                           <td className="p-3 text-center font-black text-black">
-                            {(totalInvoices - (subTotal.discount ?? 0)).toFixed(
-                              2,
-                            )}
+                            {(
+                              getTotalInvoices() - (subTotal.discount ?? 0)
+                            ).toFixed(2)}
                             €
                           </td>
                         </tr>
@@ -1469,9 +1436,10 @@ const Page = ({ params }: { params: { id: string } }) => {
                         className="w-full text-sm font-normal"
                         onClick={makeEditablenotes}
                       >
-                        {invoiceData?.notes ||
-                          'Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
-
+                        Les factures devront être réglées en Euros (€) dès
+                        réception, et au plus tard dans un délai de X jours
+                        (délai inférieur ou égal à 45 jours fin de mois ou 60
+                        jours) à partir de la date de leur émission
                         <PencilLine
                           className="w-4 h-4 hover:text-blue-700"
                           id="notes"
@@ -1482,8 +1450,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                         id="notes"
                         name="notes"
-                        placeholder="notes"
-                        value={invoiceData?.notes}
+                        placeholder="Notes"
                         onChange={(e) => setnotes(e.target.value)}
                       />
                     )}
@@ -1500,9 +1467,10 @@ const Page = ({ params }: { params: { id: string } }) => {
                         className="w-full text-sm font-normal"
                         onClick={makeEditableTerms}
                       >
-                        {invoiceData?.terms ||
-                          'Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
-
+                        Les factures devront être réglées en Euros (€) dès
+                        réception, et au plus tard dans un délai de X jours
+                        (délai inférieur ou égal à 45 jours fin de mois ou 60
+                        jours) à partir de la date de leur émission
                         <PencilLine
                           className="w-4 h-4 hover:text-blue-700"
                           id="terms"
@@ -1513,7 +1481,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                         id="terms"
                         name="terms"
-                        value={invoiceData?.terms}
                         placeholder="Termes"
                         onChange={(e) => setTerms(e.target.value)}
                       />
@@ -1541,6 +1508,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             </div>
           </div>
         </form>
+
         <Preview
           ref={previewRef}
           customer={customer}
@@ -1553,4 +1521,4 @@ const Page = ({ params }: { params: { id: string } }) => {
   )
 }
 
-export default Page
+export default CreateInvoice

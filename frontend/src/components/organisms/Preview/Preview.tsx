@@ -72,7 +72,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     }
 
     return (
-      <div className="w-2/4 px-2 rounded-xl">
+      <div className="px-2 rounded-xl">
         <div className="flex justify-between">
           <h3 className="text-black text-lg font-semibold">Preview</h3>
           <div className="flex justify-center items-center gap-2">
@@ -82,11 +82,15 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
           </div>
         </div>
 
-        <div className="my-2">
-          <div
-            className="bg-white px-5 my-2 py-2 rounded-xl h-[70vh]"
-            ref={pdfRef}
-          >
+        <div
+          className="my-2"
+          style={{
+            position: 'sticky',
+            top: 'calc(5rem)',
+            maxWidth: ' 550px',
+          }}
+        >
+          <div className="bg-white px-5 my-2 py-2 rounded-xl" ref={pdfRef}>
             <div className="flex justify-between">
               <div className="flex flex-col">
                 <div>
