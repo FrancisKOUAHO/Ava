@@ -43,8 +43,8 @@ const Sidebar: FunctionComponent = () => {
         onClick={toggleInvoiceMenu}
         className={
           pathname === '/dashboard/invoices' ||
-          pathname === '/dashboard/invoices/add' ||
-          pathname === '/dashboard/invoices/download'
+          pathname === '/dashboard/invoices/documents' ||
+          pathname === '/dashboard/invoices/articles'
             ? 'active'
             : ''
         }
