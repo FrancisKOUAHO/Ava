@@ -1,18 +1,6 @@
 'use client'
 
-import {
-  LogOut,
-  User,
-  Cloud,
-  CreditCard,
-  LifeBuoy,
-  Mail,
-  Settings,
-  UserPlus,
-  Users,
-  FilePenLine,
-  Building2,
-} from 'lucide-react'
+import { LogOut, User, Cloud, LifeBuoy, Users, Building2 } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -20,48 +8,18 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import CommandK from '@/components/atoms/command/CommandK'
-import ButtonUI from '@/components/atoms/button/button'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/context/AuthContext'
 import Link from 'next/link'
-import api from '@/config/api'
-import { useEffect } from 'react'
+import { useAuth } from '@/context/AuthContext'
 
 const TopBar = () => {
-  const { logout, setUser, user } = useAuth()
-
-  const whoami = async () => {
-    const response = await api.get('auth/whoami')
-
-    console.log(response)
-
-    if (!response) {
-      throw new Error('unknown error')
-    }
-
-    setUser(response.data)
-  }
-
-  useEffect(() => {
-    whoami()
-  }, [])
+  const { logout } = useAuth()
 
   return (
     <nav className="c-topbar">
-      <div className="c-topbar__logo">
-        <h2 className="text-black text-xl">
-          Bonjour {(user && user.full_name) || (user && user.email)}
-        </h2>
-      </div>
-
       <div className="c-topbar__container">
         <div className="c-topbar__container__left"></div>
       </div>
