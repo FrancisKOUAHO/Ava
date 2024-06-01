@@ -11,6 +11,7 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      position: ['sticky'],
       container: {
         center: true,
         padding: '2rem',
