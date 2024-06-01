@@ -68,8 +68,8 @@ const Sidebar: FunctionComponent = () => {
         }
       >
         <Link
-          href="/dashboard/invoices/add"
-          className={pathname === '/dashboard/invoices/add' ? 'active' : ''}
+          href="/dashboard/invoices/documents"
+          className={pathname === '/dashboard/invoices/documents' ? 'active' : ''}
         >
           Documents
         </Link>
