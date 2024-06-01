@@ -1501,6 +1501,8 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          terms={terms}
+          notes={notes}
         />
       </div>
     </section>

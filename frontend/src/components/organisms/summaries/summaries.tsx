@@ -13,18 +13,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import {
-  CirclePlus,
-  MoreHorizontal,
-  Trash,
-  Edit,
-  FileImage,
-} from 'lucide-react'
+import { MoreHorizontal, Trash, Edit, FileImage } from 'lucide-react'
 import DeleteCustomer from '@/components/molecules/modal/customer/DeleteCustomer'
-import Link from 'next/link'
 import { InvoiceType, InvoiceStatus } from '@/types/InvoiceProps'
 import Invoice from '@/components/molecules/modal/invoice/invoice'
-import CreateInvoice from '@/components/molecules/forms/invoice/create-invoice'
 import EditInvoice from '@/components/molecules/forms/invoice/edit-invoice'
 
 interface InvoiceProps {
@@ -113,7 +105,7 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
   }
 
   return (
-    <section className="px-6 py-6">
+    <section>
       <header className="flex justify-end items-center">
         <div className="relative text-gray-600">
           <input

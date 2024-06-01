@@ -15,10 +15,12 @@ interface PreviewProps {
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
   ref: React.RefObject<HTMLDivElement>
+  terms: string | null
+  notes: string | null
 }
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(
-  ({ customer, lineItems, subTotal, imagePreviewUrl, ref }) => {
+  ({ customer, lineItems, subTotal, imagePreviewUrl, ref, terms, notes }) => {
     const { data: compagny } = useSirene()
 
     if (!compagny || !customer || !subTotal) return null
@@ -278,21 +280,11 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             </div>
 
             <div className="grid w-full items-center gap-1.5 my-2">
-              <p className="font-normal text-[9px]">
-                Les factures devront être réglées en Euros (€) dès réception, et
-                au plus tard dans un délai de X jours (délai inférieur ou égal à
-                45 jours fin de mois ou 60 jours) à partir de la date de leur
-                émission
-              </p>
+              <p className="font-normal text-[9px]">{terms}</p>
             </div>
 
             <div className="grid w-full items-center gap-1.5 my-2">
-              <p className="font-normal text-[9px]">
-                Les factures devront être réglées en Euros (€) dès réception, et
-                au plus tard dans un délai de X jours (délai inférieur ou égal à
-                45 jours fin de mois ou 60 jours) à partir de la date de leur
-                émission
-              </p>
+              <p className="font-normal text-[9px]">{notes}</p>
             </div>
           </div>
         </div>

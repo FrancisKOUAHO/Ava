@@ -150,8 +150,19 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
     siren_number: '',
     sirenNumber: '',
   })
-  const [notes, setnotes] = useState<string>('')
-  const [terms, setTerms] = useState<string>('')
+  const [notes, setnotes] = useState<string>(
+    ' Les factures devront être réglées en Euros (€) dès réception, et\n' +
+      '                au plus tard dans un délai de X jours (délai inférieur ou égal à\n' +
+      '                45 jours fin de mois ou 60 jours) à partir de la date de leur\n' +
+      '                émission',
+  )
+  const [terms, setTerms] = useState<string>(
+    ' Les factures devront être réglées en Euros (€) dès réception, et\n' +
+      '                au plus tard dans un délai de X jours (délai inférieur ou égal à\n' +
+      '                45 jours fin de mois ou 60 jours) à partir de la date de leur\n' +
+      '                émission',
+  )
+
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
     discount: 0,
@@ -1423,10 +1434,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                         className="w-full text-sm font-normal"
                         onClick={makeEditablenotes}
                       >
-                        Les factures devront être réglées en Euros (€) dès
-                        réception, et au plus tard dans un délai de X jours
-                        (délai inférieur ou égal à 45 jours fin de mois ou 60
-                        jours) à partir de la date de leur émission
+                        {terms}
                         <PencilLine
                           className="w-4 h-4 hover:text-blue-700"
                           id="notes"
@@ -1454,10 +1462,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                         className="w-full text-sm font-normal"
                         onClick={makeEditableTerms}
                       >
-                        Les factures devront être réglées en Euros (€) dès
-                        réception, et au plus tard dans un délai de X jours
-                        (délai inférieur ou égal à 45 jours fin de mois ou 60
-                        jours) à partir de la date de leur émission
+                        {notes}
                         <PencilLine
                           className="w-4 h-4 hover:text-blue-700"
                           id="terms"
@@ -1504,6 +1509,8 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          terms={terms}
+          notes={notes}
         />
       </div>
     </section>
