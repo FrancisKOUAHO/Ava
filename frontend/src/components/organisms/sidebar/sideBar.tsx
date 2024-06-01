@@ -52,8 +52,8 @@ const Sidebar: FunctionComponent = () => {
         <FileBarChart2
           className={
             pathname === '/dashboard/invoices' ||
-            pathname === '/dashboard/invoices/add' ||
-            pathname === '/dashboard/invoices/download'
+            pathname === '/dashboard/invoices/documents' ||
+            pathname === '/dashboard/invoices/articles'
               ? 'active'
               : ''
           }
@@ -69,15 +69,24 @@ const Sidebar: FunctionComponent = () => {
       >
         <Link
           href="/dashboard/invoices/documents"
-          className={pathname === '/dashboard/invoices/documents' ? 'active' : ''}
+          className={
+            pathname === '/dashboard/invoices/documents' ? 'active' : ''
+          }
         >
           Documents
         </Link>
-        <Link href="#">Articles</Link>
-        <Link href="#">Factures récurrentes</Link>
+        <Link
+          href="/dashboard/invoices/articles"
+          className={
+            pathname === '/dashboard/invoices/articles' ? 'active' : ''
+          }
+        >
+          Articles
+        </Link>
+        {/*<Link href="#">Factures récurrentes</Link>
         <Link href="#">Paiements en ligne</Link>
         <Link href="#">Signatures électroniques</Link>
-        <Link href="#">Relances automatiques</Link>
+        <Link href="#">Relances automatiques</Link>*/}
       </div>
 
       <button onClick={toggleInvoiceMenu} disabled>
