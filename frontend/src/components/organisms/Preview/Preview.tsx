@@ -8,6 +8,7 @@ import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import { downloadPDF } from '@/lib/download-pdf'
 
 interface PreviewProps {
   customer: CustomerProps | null
@@ -26,52 +27,6 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     if (!compagny || !customer || !subTotal) return null
 
     const pdfRef = useRef<HTMLDivElement>(null)
-
-    const downloadPDF = async (isDownloading = false) => {
-      let pdfBlob
-
-      console.log('Downloading PDF')
-
-      try {
-        const input = pdfRef.current
-        if (!input) return
-        const pdf = new jsPDF('p', 'mm', 'a4')
-        const pageWidth = pdf.internal.pageSize.getWidth()
-        const pageHeight = pdf.internal.pageSize.getHeight()
-
-        const canvas = await html2canvas(input, {
-          scale: 2,
-          useCORS: true,
-          width: input.scrollWidth,
-          height: input.scrollHeight,
-        })
-
-        const imgData = canvas.toDataURL('image/png')
-        const imgProps = pdf.getImageProperties(imgData)
-        const imgWidth = pageWidth
-        const imgHeight = (imgProps.height * imgWidth) / imgProps.width
-
-        let heightLeft = imgHeight
-        let position = 0
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight
-          pdf.addPage()
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-          heightLeft -= pageHeight
-        }
-        if (isDownloading) {
-          pdf.save('download.pdf')
-        }
-        pdfBlob = pdf.output('blob')
-      } catch (error) {
-        console.error('Error generating PDF: ', error)
-      }
-      return pdfBlob
-    }
 
     return (
       <div className="px-2 rounded-xl">

@@ -6,7 +6,7 @@ import {
   ChevronDown,
   Plus,
   Check,
-  ArrowDownToLine,
+  ArrowUpToLine,
 } from 'lucide-react'
 import { Tab } from '@headlessui/react'
 import Invoice from '@/components/molecules/modal/invoice/invoice'
@@ -80,7 +80,7 @@ const Page = () => {
                         type="button"
                         className="bg-white px-2.5 rounded-md py-1.5 h-[36px] items-center justify-center relative"
                       >
-                        <ArrowDownToLine />
+                        <ArrowUpToLine />
                       </button>
                     </div>
                     <div>

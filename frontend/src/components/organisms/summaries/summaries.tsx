@@ -13,11 +13,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { MoreHorizontal, Trash, Edit, FileImage } from 'lucide-react'
+import {
+  MoreHorizontal,
+  Trash,
+  Edit,
+  FileImage,
+  ArrowDownToLine,
+} from 'lucide-react'
 import DeleteCustomer from '@/components/molecules/modal/customer/DeleteCustomer'
 import { InvoiceType, InvoiceStatus } from '@/types/InvoiceProps'
 import Invoice from '@/components/molecules/modal/invoice/invoice'
 import EditInvoice from '@/components/molecules/forms/invoice/edit-invoice'
+import { downloadPDF } from '@/lib/download-pdf'
 
 interface InvoiceProps {
   invoices: InvoiceType[]
@@ -175,11 +182,9 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
                     <DropdownMenuContent align="end" className="w-[200px]">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => openDeleteModal(invoice.id)}
-                        >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Supprimer
+                        <DropdownMenuItem onClick={() => downloadPDF(true)}>
+                          <ArrowDownToLine className="mr-2 h-4 w-4" />
+                          Télecharger la facture
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <p
@@ -189,6 +194,12 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
                             <Edit className="mr-2 h-4 w-4" />
                             <span>Modifier</span>{' '}
                           </p>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openDeleteModal(invoice.id)}
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          Supprimer
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                       <DropdownMenuLabel>Statut</DropdownMenuLabel>

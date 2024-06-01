@@ -89,7 +89,11 @@ const Sidebar: FunctionComponent = () => {
         <Link href="#">Relances automatiques</Link>*/}
       </div>
 
-      <button onClick={toggleInvoiceMenu} disabled>
+      <button
+        onClick={toggleInvoiceMenu}
+        disabled
+        className="cursor-none pointer-events-none"
+      >
         <LayoutDashboard />
         Productivité
       </button>
@@ -113,7 +117,11 @@ const Sidebar: FunctionComponent = () => {
         Contacts
       </Link>
 
-      <button onClick={toggleInvoiceMenu} disabled>
+      <button
+        onClick={toggleInvoiceMenu}
+        className="cursor-none pointer-events-none"
+        disabled
+      >
         <Calculator />
         Comptabilité
       </button>
