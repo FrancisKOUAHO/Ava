@@ -1,7 +1,7 @@
 import { HttpContext } from '@adonisjs/core/http'
 import InvoiceItem from '#models/invoice_item'
 import { createInvoiceItemValidator, updateInvoiceItemValidator } from '#validators/invoice_item'
-import Invoice from "#models/invoice";
+import Invoice from '#models/invoice'
 
 export default class InvoiceItemsController {
   /**
@@ -33,45 +33,40 @@ export default class InvoiceItemsController {
     return response.created(invoiceItem)
   }
 
+  async storeAll({ request, response }: HttpContext) {
+    // Convert the object with numeric keys into an array
+    const itemsObject = request.all()
+    const itemsArray = Object.values(itemsObject) // This converts the object into an array of values
 
-    async storeAll({ request, response }: HttpContext) {
-        // Convert the object with numeric keys into an array
-        const itemsObject = request.all();
-        const itemsArray = Object.values(itemsObject);  // This converts the object into an array of values
+    let results = []
+    let errors = []
 
-        let results = [];
-        let errors = [];
+    for (const data of itemsArray) {
+      const validation = await createInvoiceItemValidator.validate(data)
+      if (!validation) {
+        // errors.push(validation));
+        continue // Skip this iteration if validation fails
+      }
 
-        for (const data of itemsArray) {
-            const validation = await createInvoiceItemValidator.validate(data);
-            if (!validation) {
-                // errors.push(validation));
-                continue;  // Skip this iteration if validation fails
-            }
-
-            try {
-                // If validation passes, create the invoice item
-                const invoiceItem = await InvoiceItem.create(data);
-                results.push(invoiceItem);
-            } catch (error) {
-                errors.push({ message: "Failed to create invoice item", details: error.message });
-            }
-        }
-
-        // Check if there were any errors
-        if (errors.length > 0) {
-            return response.status(400).json({ errors });
-        }
-
-        // If all items were created without errors
-        return response.status(201).json(results);
+      try {
+        // If validation passes, create the invoice item
+        const invoiceItem = await InvoiceItem.create(data)
+        results.push(invoiceItem)
+      } catch (error) {
+        errors.push({ message: 'Failed to create invoice item', details: error.message })
+      }
     }
 
+    // Check if there were any errors
+    if (errors.length > 0) {
+      return response.status(400).json({ errors })
+    }
 
+    // If all items were created without errors
+    return response.status(201).json(results)
+  }
 
-
-
-    /**
+  /**
    * Show individual record
    */
   async show({ params, response }: HttpContext) {
@@ -137,11 +132,10 @@ export default class InvoiceItemsController {
     return response.noContent()
   }
 
-
   public async getInvoiceItems({ params, response }: HttpContext) {
     try {
       const invoiceId = params.invoice_id
-    console.log('invoiceId', invoiceId)
+      console.log('invoiceId', invoiceId)
       // Ensure the invoice exists
       await Invoice.findOrFail(invoiceId)
 
@@ -150,34 +144,33 @@ export default class InvoiceItemsController {
       console.log('invoiceId', invoiceItems)
 
       return response.status(200).json({
-        message: 'Invoice items retrieved successfully',
-        data: invoiceItems
+        message: 'CreateInvoice items retrieved successfully',
+        data: invoiceItems,
       })
     } catch (error) {
       return response.status(500).json({
         message: 'Error retrieving invoice items',
-        error: error.message
+        error: error.message,
       })
     }
   }
 
   public async upsert({ request, response }: HttpContext) {
-    const payload = request.all();
-    console.log('Received invoice items:', payload);
-    let isInserting:boolean = true;
-    let invoiceItem:InvoiceItem| null;
+    const payload = request.all()
+    console.log('Received invoice items:', payload)
+    let isInserting: boolean = true
+    let invoiceItem: InvoiceItem | null
     try {
-      const results:InvoiceItem[] = [];
+      const results: InvoiceItem[] = []
 
       // Convert object to array and iterate
       Object.values(payload).forEach(async (item) => {
-        const {
-          id, invoice_id, quantity, price, unity, name, line_total, line_total_tva, tva
-        } = item;
-        if(id){
-           invoiceItem = await InvoiceItem.find(id);
-          if (invoiceItem ) {
-            isInserting = false;
+        const { id, invoice_id, quantity, price, unity, name, line_total, line_total_tva, tva } =
+          item
+        if (id) {
+          invoiceItem = await InvoiceItem.find(id)
+          if (invoiceItem) {
+            isInserting = false
             // Update existing invoice item
             invoiceItem.merge({
               invoice_id,
@@ -187,12 +180,12 @@ export default class InvoiceItemsController {
               name,
               line_total,
               line_total_tva,
-              tva
-            });
-            await invoiceItem.save();
+              tva,
+            })
+            await invoiceItem.save()
           }
         }
-         if(isInserting) {
+        if (isInserting) {
           // Insert new invoice item
           invoiceItem = await InvoiceItem.create({
             invoice_id,
@@ -202,25 +195,24 @@ export default class InvoiceItemsController {
             name,
             line_total,
             line_total_tva,
-            tva
-          });
+            tva,
+          })
         }
 
-         if(invoiceItem){
-           results.push(invoiceItem);
-         }
-      });
+        if (invoiceItem) {
+          results.push(invoiceItem)
+        }
+      })
 
       return response.status(200).json({
-        message: 'Invoice items upserted successfully',
+        message: 'CreateInvoice items upserted successfully',
         data: results,
-      });
+      })
     } catch (error) {
       return response.status(500).json({
         message: 'Error upserting invoice items',
         error: error.message,
-      });
+      })
     }
   }
-
 }

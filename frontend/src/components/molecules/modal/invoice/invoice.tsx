@@ -2,16 +2,17 @@
 
 import { Fragment, FunctionComponent } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import CreateInvoice from '@/components/molecules/forms/invoice/create-invoice'
 
 interface InvoiceProps {
   isModalOpen: boolean
   setIsModalOpen: (value: boolean) => void
+  children?: React.ReactNode
 }
 
 const Invoice: FunctionComponent<InvoiceProps> = ({
   isModalOpen,
   setIsModalOpen,
+  children,
 }) => {
   return (
     <Transition.Root show={isModalOpen} as={Fragment}>
@@ -42,11 +43,6 @@ const Invoice: FunctionComponent<InvoiceProps> = ({
               <Dialog.Panel className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
                 <div className="relative w-full h-full max-w-none bg-[#f8fafe] shadow-xl">
                   <div className="flex items-center justify-between p-4 border-b">
-                    {/* <h2 className="text-xl font-semibold">Archive :
-                      <span
-                        className="inline-flex items-center rounded-xl bg-[#DFFFA5] px-2 py-1 text-base font-bold text-[#0b2b23] ring-1 ring-inset ring-gray-600/20 ml-2">
-                                          {query}</span>
-                    </h2>*/}
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(false)}
@@ -70,7 +66,7 @@ const Invoice: FunctionComponent<InvoiceProps> = ({
                     className="overflow-y-auto"
                     style={{ maxHeight: 'calc(100vh - 64px)' }}
                   >
-                    <CreateInvoice />
+                    {children}
                   </div>
                 </div>
               </Dialog.Panel>

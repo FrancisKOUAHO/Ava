@@ -1,6 +1,12 @@
 'use client'
 
-import { FormEvent, useState, useEffect, useRef } from 'react'
+import {
+  FormEvent,
+  useState,
+  useEffect,
+  useRef,
+  FunctionComponent,
+} from 'react'
 
 import {
   CircleCheck,
@@ -12,6 +18,7 @@ import {
   Image,
   Trash2,
   Plus,
+  Save,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -41,7 +48,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useFetchData } from '@/app/hooks/useFetch'
-import jsPDF from 'jspdf'
 
 interface LineItem {
   name?: string
@@ -101,11 +107,15 @@ interface SubTotal {
   total?: number
 }
 
-interface PreviewRef {
-  downloadPDF: () => Promise<Blob>
+interface EditInvoiceProps {
+  setIsModalOpen: (value: boolean) => void
+  invoiceId: string | null
 }
 
-const Page = ({ params }: { params: { id: string } }) => {
+const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
+  setIsModalOpen,
+  invoiceId,
+}) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
@@ -155,11 +165,11 @@ const Page = ({ params }: { params: { id: string } }) => {
   const [formValid, setFormValid] = useState(true)
   const { data: customersData } = useFetchData('billing/customer', 'customer')
   const { data: invoiceDetails } = useFetchData(
-    `billing/invoice/${params.id}`,
+    `billing/invoice/${invoiceId}`,
     'invoice',
   )
   const { data: invoiceItemDetails } = useFetchData(
-    `billing/invoice-items/${params.id}`,
+    `billing/invoice-items/${invoiceId}`,
     'invoice-item',
   )
 
@@ -432,22 +442,19 @@ const Page = ({ params }: { params: { id: string } }) => {
         terms: data.terms,
         is_invoice: 1,
       }
-      return api.put(`billing/invoice/${params.id}`, fullData)
+      return api.put(`billing/invoice/${invoiceId}`, fullData)
     },
     onError: (error: any) => {
       console.error('Error:', error.message)
       alert('Failed to send invoice.')
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
-      if (response.data && response.data.id) {
-        //callChildFunction(response.data) // Assuming 'user' is available in the scope
-      }
       queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
           ...item,
-          invoice_id: params.id,
+          invoice_id: invoiceId,
         }))
         const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
@@ -589,34 +596,6 @@ const Page = ({ params }: { params: { id: string } }) => {
     }))
   }
 
-  const callChildFunction = async (responseInvoice: InvoiceData) => {
-    console.log('callChildFunction')
-
-    if (previewRef.current as unknown as PreviewRef) {
-      console.log('callChildFunction 2')
-
-      try {
-        const pdfBlob = await (
-          previewRef.current as unknown as PreviewRef
-        ).downloadPDF()
-        console.log('pdfBlob:', pdfBlob)
-        const formData = new FormData()
-        formData.append('file', pdfBlob, 'invoice.pdf')
-        formData.append('responseInvoice', JSON.stringify(responseInvoice))
-
-        const response = await api.post('billing/sendPdf', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-
-        console.log('Server response:', response)
-      } catch (error) {
-        console.error('Error sending PDF and data:', error)
-      }
-    }
-  }
-
   const changeCustomer = () => {
     if (customer) {
       SendCustomerMutation.mutate(customer)
@@ -628,11 +607,9 @@ const Page = ({ params }: { params: { id: string } }) => {
   }
 
   const getTotalInvoices = (withTva = true) => {
-    console.log('lineItems :', lineItems)
     if (!Array.isArray(lineItems) || lineItems.length === 0) {
       return 0
     }
-    console.log('ic :')
 
     return lineItems.reduce((acc, lineItem) => {
       const total = withTva ? lineItem.lineTotalTva : lineItem.lineTotal
@@ -696,19 +673,22 @@ const Page = ({ params }: { params: { id: string } }) => {
   }, [customer])
 
   return (
-    <section className="px-6 py-6">
-      <div className="flex text-black">
-        <form onSubmit={handleSendInvoice} className="flex gap-12 text-black">
-          <div className="w-3/4">
-            <header className="flex justify-between items-center gap-12">
+    <section className="px-24">
+      <div className="flex justify-between text-black">
+        <form
+          onSubmit={handleSendInvoice}
+          className="flex w-2/4 gap-12 text-black"
+        >
+          <div>
+            <header className="flex justify-between items-center gap-12 mb-6">
               <div className="flex justify-center items-center">
                 <h3 className="text-black text-lg font-semibold">
-                  Créer une Facture
+                  Modifier la facture
                 </h3>
               </div>
             </header>
 
-            <div className="bg-[#f2f5fd] p-6 mt-6 rounded-xl overflow-auto h-[82vh]">
+            <div>
               <div className="flex flex-col items-center">
                 <div className="flex justify-between items-center w-full mb-1">
                   {imagePreviewUrl ? (
@@ -744,7 +724,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                   <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
                     <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
                     <h4>
-                      Glissez une image directement{' '}
+                      Glissez une image directement
                       <span className="text-blue-700">brower</span>
                     </h4>
                   </div>
@@ -898,21 +878,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                           placeholder="EUR"
                         />
                       </div>
-                      {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                      {/*  <Label htmlFor="vatNumber" className="mb-2">*/}
-                      {/*    Numéro de TVA*/}
-                      {/*  </Label>*/}
-                      {/*  <Input*/}
-                      {/*      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                      {/*      type="text"*/}
-                      {/*      id="vatNumber"*/}
-                      {/*      name="vatNumber"*/}
-                      {/*      value={customer ? customer.vatNumber  : ''}*/}
-                      {/*      onChange={(e) => handleCustomerChange({...customer, vatNumber: e.target.value})}*/}
-
-                      {/*      placeholder="987"*/}
-                      {/*  />*/}
-                      {/*</div>*/}
 
                       <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label htmlFor="address" className="mb-2">
@@ -930,20 +895,6 @@ const Page = ({ params }: { params: { id: string } }) => {
                           placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"
                         />
                       </div>
-
-                      {/*<div className="grid w-full max-w-sm items-center gap-1.5">*/}
-                      {/*  <Label htmlFor="address2" className="mb-2">*/}
-                      {/*    Addresse 2*/}
-                      {/*  </Label>*/}
-                      {/*  <Input*/}
-                      {/*    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                      {/*    type="text"*/}
-                      {/*    id="address2"*/}
-                      {/*    name="address2"*/}
-
-                      {/*    placeholder="626 W Pender St #500, Vancouver, BC V6B 1V9, Canada"*/}
-                      {/*  />*/}
-                      {/*</div>*/}
 
                       <div className="grid w-full max-w-sm items-center gap-1.5">
                         <Label htmlFor="city" className="mb-2">
@@ -1523,17 +1474,19 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                 <div className="flex justify-end items-center gap-2 w-full my-8">
                   <ButtonUi
-                    label="Enregistrer en tant que brouillon"
+                    label="Finaliser"
                     type="button"
+                    icon={<Check />}
                     onClick={() => {
-                      handleSubmit(true)
+                      handleSubmit(false)
                     }}
                   />
                   <ButtonUi
-                    label="Télécharger la facture"
+                    label="Brouillon"
                     type="button"
+                    icon={<Save />}
                     onClick={() => {
-                      handleSubmit(false)
+                      handleSubmit(true)
                     }}
                   />
                 </div>
@@ -1541,6 +1494,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             </div>
           </div>
         </form>
+
         <Preview
           ref={previewRef}
           customer={customer}
@@ -1553,4 +1507,4 @@ const Page = ({ params }: { params: { id: string } }) => {
   )
 }
 
-export default Page
+export default EditInvoice

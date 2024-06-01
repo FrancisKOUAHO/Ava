@@ -1,6 +1,12 @@
 'use client'
 
-import { FormEvent, useState, useEffect, useRef } from 'react'
+import {
+  FormEvent,
+  useState,
+  useEffect,
+  useRef,
+  FunctionComponent,
+} from 'react'
 
 import {
   CircleCheck,
@@ -12,6 +18,7 @@ import {
   ImagePlus,
   Image,
   Info,
+  Save,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -104,7 +111,13 @@ interface PreviewRef {
   downloadPDF: () => Promise<Blob>
 }
 
-export const CreateInvoice = () => {
+interface CreateInvoiceProps {
+  setIsModalOpen: (value: boolean) => void
+}
+
+export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
+  setIsModalOpen,
+}) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
@@ -382,10 +395,7 @@ export const CreateInvoice = () => {
       console.error('Error:', error.message)
       alert('Failed to send invoice.')
     },
-    onSuccess: (response: ApiResponse<InvoiceData>) => {
-      if (response.data && response.data.id) {
-        //callChildFunction(response.data) // Assuming 'user' is available in the scope
-      }
+    onSuccess: async (response: ApiResponse<InvoiceData>) => {
       queryClient.invalidateQueries({ queryKey: ['invoice'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
@@ -396,9 +406,12 @@ export const CreateInvoice = () => {
         const transformedData = itemsWithInvoiceId.map(toSnakeCase)
 
         SendItemsDataMutation.mutate(transformedData as LineItem[])
+
         toast.success('Facture bien envoyée', {
           position: 'top-right',
         })
+
+        await setIsModalOpen(false)
       } else {
         toast.error("No lineItems to process or 'lineItems' is not an array")
       }
@@ -639,39 +652,13 @@ export const CreateInvoice = () => {
     }
   }
 
-  const callChildFunction = async (responseInvoice: InvoiceData) => {
-    console.log('callChildFunction')
-
-    if (previewRef.current as unknown as PreviewRef) {
-      console.log('callChildFunction 2')
-
-      try {
-        const pdfBlob = await (
-          previewRef.current as unknown as PreviewRef
-        ).downloadPDF()
-        console.log('pdfBlob:', pdfBlob)
-        const formData = new FormData()
-        formData.append('file', pdfBlob, 'invoice.pdf')
-        formData.append('responseInvoice', JSON.stringify(responseInvoice))
-
-        const response = await api.post('billing/sendPdf', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-
-        console.log('Server response:', response)
-      } catch (error) {
-        console.error('Error sending PDF and data:', error)
-      }
-    }
-  }
-
   useEffect(() => {
     if (customer) {
       checkIfCustomerIsFull()
     }
   }, [customer])
+
+  console.log('user :', user)
 
   return (
     <section className="px-24">
@@ -725,7 +712,7 @@ export const CreateInvoice = () => {
                   <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
                     <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
                     <h4>
-                      Glissez une image directement{' '}
+                      Glissez une image directement
                       <span className="text-blue-700">brower</span>
                     </h4>
                   </div>
@@ -1490,17 +1477,19 @@ export const CreateInvoice = () => {
 
                 <div className="flex justify-end items-center gap-2 w-full my-8">
                   <ButtonUi
-                    label="Enregistrer en tant que brouillon"
+                    label="Finaliser"
                     type="button"
+                    icon={<Check />}
                     onClick={() => {
-                      handleSubmit(true)
+                      handleSubmit(false)
                     }}
                   />
                   <ButtonUi
-                    label="Télécharger la facture"
+                    label="Brouillon"
                     type="button"
+                    icon={<Save />}
                     onClick={() => {
-                      handleSubmit(false)
+                      handleSubmit(true)
                     }}
                   />
                 </div>
