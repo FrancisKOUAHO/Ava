@@ -82,15 +82,18 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
           </div>
         </div>
 
-        <div className="my-2" ref={pdfRef}>
-          <div className="bg-white px-5 py-2 rounded-xl">
+        <div className="my-2">
+          <div
+            className="bg-white px-5 my-2 py-2 rounded-xl h-[70vh]"
+            ref={pdfRef}
+          >
             <div className="flex justify-between">
               <div className="flex flex-col">
                 <div>
                   <h1 className="text-xl font-bold text-[#493fff]">Facture</h1>
                   <p className="text-xs text-black/70">
                     N° F-2024-001
-                    <span className="bg-[#493fff] text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded ml-10">
+                    <span className="bg-[#493fff] text-white text-xs font-medium me-2 py-1 px-3  rounded ml-10">
                       Brouillon
                     </span>
                   </p>
@@ -158,7 +161,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
                 <thead className="border-b-2 border-gray-300 mb-4 text-black">
                   <tr className="bg-[#493fff] rounded-xl text-white">
-                    <th className="text-center text-xs">#</th>
+                    <th className="text-center text-xs p-2">#</th>
                     <th className="text-center text-xs">
                       Désgination et description
                     </th>
