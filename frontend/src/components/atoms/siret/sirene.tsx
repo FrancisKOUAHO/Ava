@@ -4,22 +4,27 @@ import { Ellipsis, SendHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, FormEvent, FunctionComponent } from 'react'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/config/api'
 import { useSirene } from '@/app/hooks/useSirene'
 
-const Sirene = () => {
+interface SireneProps {
+  isOpen: boolean
+  setIsOpen: (value: boolean) => void
+  closeModal: () => void
+}
+
+const Sirene: FunctionComponent<SireneProps> = ({
+  isOpen,
+  closeModal,
+  setIsOpen,
+}) => {
   const queryClient = useQueryClient()
 
-  const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const { data } = useSirene()
-
-  const closeModal = () => {
-    setIsOpen(false)
-  }
 
   const scrappSirenemutation = useMutation<
     { siren_number: FormDataEntryValue },
@@ -54,16 +59,6 @@ const Sirene = () => {
       closeModal()
     }, 2000)
   }
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (data && data.length === 0) {
-        setIsOpen(true)
-      }
-    }, 1000)
-
-    return () => clearTimeout(timeout)
-  }, [data])
 
   return (
     <div

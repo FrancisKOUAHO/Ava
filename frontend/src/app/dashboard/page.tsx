@@ -337,7 +337,6 @@ const Page = () => {
             </Card>
           </div>
         </div>
-        <Sirene />
       </div>
     </>
   )

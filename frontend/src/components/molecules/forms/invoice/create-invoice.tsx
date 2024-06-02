@@ -121,8 +121,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  const [fileName, setFileName] = useState<string>('')
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
   const [isEditableSubtotal, setIsEditableSubtotal] = useState<boolean>(false)
@@ -620,49 +618,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
     checkIfCustomerIsFull()
   }
 
-  const mutation = useMutation({
-    mutationFn: async (upload: any) =>
-      api.post(
-        `upload-logo`,
-        {
-          logo: upload,
-        },
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      ),
-    onError: (e: any) => {
-      throw new Error(e)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.success('Logo téléchargé avec succès')
-    },
-  })
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files ? event.target.files[0] : null
-    if (file) {
-      setFileName(file.name)
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImagePreviewUrl(reader.result)
-        }
-      }
-      reader.readAsDataURL(file)
-      await mutation.mutateAsync(file)
-    } else {
-      setImagePreviewUrl(null)
-      setFileName('')
-    }
-  }
-
   useEffect(() => {
     if (customer) {
       checkIfCustomerIsFull()
@@ -689,46 +644,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
 
             <div>
               <div className="flex flex-col items-center">
-                <div className="flex justify-between items-center w-full mb-1">
-                  {imagePreviewUrl ? (
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Preview"
-                      className="max-w-full max-h-full w-16 h-16"
-                    />
-                  ) : (
-                    <p className="flex justify-center items-center gap-2">
-                      <Image className="text-blue-700" />
-                      Add Logo
-                    </p>
-                  )}
-                  <Info />
-                </div>
-
-                <div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">
-                  {imagePreviewUrl && (
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Preview"
-                      className="max-w-full max-h-full w-16 h-16"
-                    />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    name="image"
-                    onChange={handleFileChange}
-                    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"
-                  />
-                  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
-                    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
-                    <h4>
-                      Glissez une image directement
-                      <span className="text-blue-700">brower</span>
-                    </h4>
-                  </div>
-                </div>
-
                 {customersData && customersData.length >= 1 && (
                   <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                     <Popover open={open} onOpenChange={setOpen}>
@@ -1507,7 +1422,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
-          imagePreviewUrl={imagePreviewUrl}
           getTotalInvoices={getTotalInvoices}
           terms={terms}
           notes={notes}

@@ -14,22 +14,13 @@ interface PreviewProps {
   customer: CustomerProps | null
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
-  imagePreviewUrl: string | null
   terms: string | null
   notes: string | null
   getTotalInvoices: () => number
 }
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(
-  ({
-    customer,
-    lineItems,
-    subTotal,
-    imagePreviewUrl,
-    terms,
-    notes,
-    getTotalInvoices,
-  }) => {
+  ({ customer, lineItems, subTotal, terms, notes, getTotalInvoices }) => {
     const { data: compagny } = useSirene()
 
     console.log('compagny', compagny)
@@ -108,7 +99,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              {/*<div className="flex justify-end">
                 {imagePreviewUrl ? (
                   <img
                     src={imagePreviewUrl}
@@ -118,7 +109,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                 ) : (
                   <ImagePlus className="text-blue-700 w-10 h-10" />
                 )}
-              </div>
+              </div>*/}
             </div>
 
             <div className="rounded-xl my-2 w-full">

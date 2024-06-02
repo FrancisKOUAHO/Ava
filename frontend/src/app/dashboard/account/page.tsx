@@ -5,18 +5,28 @@ import { useState } from 'react'
 import { generateRandomColor } from '@/components/ui/generatorRandomColors'
 import ModalProfil from '@/components/atoms/modal/modalProfil'
 import { useAuth } from '@/context/AuthContext'
+import * as React from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import api from '@/config/api'
+import { toast } from 'sonner'
+import Sirene from '@/components/atoms/siret/sirene'
 
 const ensureHttps = (url: string) => {
   return /^https?:\/\//i.test(url) ? url : `https://${url}`
 }
 
 const Page = () => {
+  const queryClient = useQueryClient()
+
   const { user } = useAuth()
 
+  const [fileName, setFileName] = useState<string>('')
   const [imageLink, setImageLink] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState('')
   const [imageError, setImageError] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+
   const [modalConfig, setModalConfig] = useState({
     title: '',
     description: '',
@@ -26,6 +36,14 @@ const Page = () => {
   const handleImageError = () => {
     console.error('Failed to load image')
     setImageError(true)
+  }
+
+  const closeModal = () => {
+    setIsOpen(false)
+  }
+
+  const openModal = () => {
+    setIsOpen(true)
   }
 
   const handleProfil = (
@@ -48,9 +66,53 @@ const Page = () => {
 
   console.log('user', user)
 
+  const mutation = useMutation({
+    mutationFn: async (upload: any) =>
+      api.post(
+        `upload-logo`,
+        {
+          logo: upload,
+        },
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      ),
+    onError: (e: any) => {
+      throw new Error(e)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('Logo téléchargé avec succès')
+    },
+  })
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files ? event.target.files[0] : null
+    if (file) {
+      setFileName(file.name)
+
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImagePreviewUrl(reader.result)
+        }
+      }
+      reader.readAsDataURL(file)
+      await mutation.mutateAsync(file)
+    } else {
+      setImagePreviewUrl('')
+      setFileName('')
+    }
+  }
+
   const name = user && user.email.split('@')[0]
 
-  const imageDe = 'Voldi ZOLA'
+  const imageDe = user && user.email.split('@')[0]
+
   return (
     <section className="flex-1 max-w-full relative bg-[#f6f7fd]">
       <div className="container py-8 px-10 max-w-full mx-auto w-full">
@@ -66,7 +128,16 @@ const Page = () => {
                 </div>
                 <div>
                   <div className="flex gap-2 flex-wrap">
-                    <div>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => openModal()}
+                        type="button"
+                        className="bg-[#493fff] px-2.5 rounded-md py-1.5 h-[36px] items-center justify-center relative"
+                      >
+                        <span className="font-semibold flex items-center gap-1 text-white">
+                          Recuperer vos données via novre numero sirene
+                        </span>
+                      </button>
                       <button
                         type="button"
                         className="bg-white px-2.5 rounded-md py-1.5 items-center justify-center h-[36px]"
@@ -250,6 +321,8 @@ const Page = () => {
         description={modalConfig.description}
         inputs={modalConfig.inputs}
       />
+
+      <Sirene isOpen={isOpen} setIsOpen={setIsOpen} closeModal={closeModal} />
     </section>
   )
 }
