@@ -44,7 +44,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
           className="my-2"
           style={{
             position: 'sticky',
-            top: 'calc(5rem)',
+            top: 'calc(0rem)',
             maxWidth: ' 550px',
           }}
         >
