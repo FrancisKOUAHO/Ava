@@ -8,20 +8,25 @@ import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
+import {InvoiceProps} from "@/types/InvoiceProps";
 
 interface PreviewProps {
   customer: CustomerProps | null
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
+  invoice: InvoiceProps | null
+  notes: string | null
+  terms: string | null
+  invoice: InvoiceProps | null
   imagePreviewUrl: string | null
   ref: React.RefObject<HTMLDivElement>
 }
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(
-  ({ customer, lineItems, subTotal, imagePreviewUrl, ref }) => {
+  ({ customer, lineItems, subTotal, imagePreviewUrl,notes,terms, ref }) => {
     const { data: compagny } = useSirene()
 
-    if (!compagny || !customer || !subTotal) return null
+    if (!compagny || !customer || !subTotal ) return null
 
     const pdfRef = useRef<HTMLDivElement>(null)
 
@@ -61,10 +66,8 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
           pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
           heightLeft -= pageHeight
         }
-        if (isDownloading) {
-          pdf.save('download.pdf')
-        }
-        pdfBlob = pdf.output('blob')
+        pdf.save('download.pdf')
+        //pdfBlob = pdf.output('blob')
       } catch (error) {
         console.error('Error generating PDF: ', error)
       }
@@ -104,7 +107,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                         <tr>
                           <td className="flex items-center gap-2 p-1 text-center">
                             <div className="w-full">
-                              <p className="text-black text-sm">Company</p>
+                              <p className="text-black text-sm">Entreprise</p>
                               <p className="text-sm text-black/70">
                                 {compagny[0]?.companyName}
                               </p>
@@ -112,7 +115,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                           </td>
                           <td className="p-1 text-center">
                             <div className="w-full">
-                              <p className="text-black text-sm">Address</p>
+                              <p className="text-black text-sm">Adresse</p>
                               <p className="text-sm text-black/70">
                                 1234 Main Street
                               </p>
@@ -120,7 +123,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                           </td>
                           <td className="flex items-center gap-2 p-1 text-center">
                             <div className="w-full">
-                              <p className="text-black text-sm">City</p>
+                              <p className="text-black text-sm">Ville</p>
                               <p className="text-sm text-black/70">New York</p>
                             </div>
                           </td>
@@ -128,7 +131,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                         <tr>
                           <td className="flex items-center gap-2 p-1 text-center">
                             <div className="w-full">
-                              <p className="text-black text-sm">Country</p>
+                              <p className="text-black text-sm">Pays</p>
                               <p className="text-sm text-black/70">
                                 United States
                               </p>
@@ -136,13 +139,13 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                           </td>
                           <td className="p-1 text-center">
                             <div className="w-full">
-                              <p className="text-black text-sm">ZIP Code</p>
+                              <p className="text-black text-sm">Code Zip</p>
                               <p className="text-sm text-black/70">12345</p>
                             </div>
                           </td>
                           <td className="p-1 text-center">
                             <div className="w-full">
-                              <p className="text-black text-sm">Phone</p>
+                              <p className="text-black text-sm">Numéro</p>
                               <p className="text-sm text-black/70">
                                 +1 123 456 7890
                               </p>
@@ -158,7 +161,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
 
             <div className="bg-blue-700 rounded-sm p-2 text-white mb-2">
               <div className="flex justify-between">
-                <p>Billed To</p>
+                <p>Facturé à</p>
                 <div className="flex justify-center items-center gap-2">
                   <p>Total à régler</p>
                   <p>{subTotal && subTotal.total} €</p>
@@ -182,7 +185,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                         </td>
                         <td className="p-1 text-center">
                           <div className="w-full">
-                            <p className="text-black text-sm">Address</p>
+                            <p className="text-black text-sm">Adresse</p>
                             <p className="text-sm text-black/70">
                               {customer.address}
                             </p>
@@ -190,7 +193,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                         </td>
                         <td className="flex items-center gap-2 p-1 text-center">
                           <div className="w-full">
-                            <p className="text-black text-sm">City</p>
+                            <p className="text-black text-sm">Ville</p>
                             <p className="text-sm text-black/70">
                               {customer.city}
                             </p>
@@ -200,7 +203,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <tr>
                         <td className="flex items-center gap-2 p-1 text-center">
                           <div className="w-full">
-                            <p className="text-black text-sm">Country</p>
+                            <p className="text-black text-sm">Pays</p>
                             <p className="text-sm text-black/70">
                               {customer.country}
                             </p>
@@ -208,7 +211,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                         </td>
                         <td className="p-1 text-center">
                           <div className="w-full">
-                            <p className="text-black text-sm">ZIP Code</p>
+                            <p className="text-black text-sm">Code ZIP</p>
                             <p className="text-sm text-black/70">
                               {customer.zip}
                             </p>
@@ -234,10 +237,12 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                 <thead className="border-b-2 border-gray-300 mb-4">
                   <tr>
                     <th className="flex items-center gap-2 p-3 text-center">
-                      Item
+                      Produit
                     </th>
-                    <th className="p-3 text-center">Qty</th>
-                    <th className="p-3 text-center">Rate</th>
+                    <th className="p-3 text-center">Prix</th>
+                    <th className="p-3 text-center">Quantité</th>
+                    <th className="p-3 text-center">Unité</th>
+                    <th className="p-3 text-center">TVA</th>
                     <th className="p-3 text-center">Total</th>
                   </tr>
                 </thead>
@@ -248,7 +253,9 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                         <td className="flex items-center gap-2 p-3 text-center">
                           {lineItem.name}
                         </td>
+                        <td className="p-3 text-center">{lineItem.price}</td>
                         <td className="p-3 text-center">{lineItem.quantity}</td>
+                        <td className="p-3 text-center">{lineItem.unity}</td>
                         <td className="p-3 text-center">{lineItem.tva}</td>
                         <td className="p-3 text-center">
                           {lineItem.lineTotal}
@@ -269,10 +276,10 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                   <tbody>
                     <tr className="bg-[#e7effc] rounded-xl">
                       <td className="flex items-center gap-2 p-3 text-center">
-                        Discount
+                        Réduction
                       </td>
-                      <td className="p-3 text-center">€100</td>
-                      <td className="p-3 text-center">€100</td>
+                      <td className="p-3 text-center">100€</td>
+                      <td className="p-3 text-center">100€</td>
                     </tr>
                   </tbody>
                 </table>
@@ -289,7 +296,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                   <tbody>
                     <tr className="bg-[#e7effc] rounded-xl">
                       <td className="flex items-center gap-2 p-3 text-center">
-                        Discount
+                        Réduction
                       </td>
                       <td className="p-3 text-center">€100</td>
                       <td className="p-3 text-center">€100</td>
@@ -322,10 +329,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </div>
               <div className="grid w-full items-center gap-1.5 my-2">
                 <p className="font-normal text-sm">
-                  Les factures devront être réglées en Euros (€) dès réception,
-                  et au plus tard dans un délai de X jours (délai inférieur ou
-                  égal à 45 jours fin de mois ou 60 jours) à partir de la date
-                  de leur émission
+                  {notes}
                 </p>
               </div>
             </div>
@@ -336,10 +340,8 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </div>
               <div className="grid w-full items-center gap-1.5 my-2">
                 <p className="font-normal text-sm">
-                  Les factures devront être réglées en Euros (€) dès réception,
-                  et au plus tard dans un délai de X jours (délai inférieur ou
-                  égal à 45 jours fin de mois ou 60 jours) à partir de la date
-                  de leur émission
+                  {terms}
+
                 </p>
               </div>
             </div>

@@ -142,8 +142,8 @@ const Page = ({ params }: { params: { id: string } }) => {
   })
   const previewRef = useRef(null)
 
-  const [notes, setnotes] = useState<string>('')
-  const [terms, setTerms] = useState<string>('')
+  const [notes] = useState<string>('')
+  const [terms] = useState<string>('')
   const [totalInvoices, setTotalInvoices] = useState<number>(0)
   const [totalInvoicesWithoutTva, setTotalInvoicesWithoutTva] =
     useState<number>(0)
@@ -163,9 +163,24 @@ const Page = ({ params }: { params: { id: string } }) => {
     'invoice-item',
   )
 
+  const setTerms = (value) => {
+    console.log("Updating terms to:", value);
+    // Supposons que `setInvoiceData` est votre fonction pour mettre à jour l'état
+    setInvoiceData(prev => ({ ...prev, terms: value }));
+  }
+
+  const setNotes = (value) => {
+    console.log("Updating terms to:", value);
+    // Supposons que `setInvoiceData` est votre fonction pour mettre à jour l'état
+    setInvoiceData(prev => ({ ...prev, notes: value }));
+  }
+
+
   useEffect(() => {
     if (invoiceDetails) {
       setInvoiceData(invoiceDetails)
+      setTerms(invoiceDetails.terms)
+      setNotes(invoiceDetails.notes)
       const foundCustomer = customersData.find(
         (cust: InvoiceData) => cust.id === invoiceDetails.customerId,
       )
@@ -314,7 +329,10 @@ const Page = ({ params }: { params: { id: string } }) => {
   }
 
   const makeEditableTerms = (): void => {
-    setEditableTerms((prevState: boolean) => !prevState)
+    setEditableTerms((prevState: boolean) => {
+      console.log("Changing editable state from", prevState, "to", !prevState);
+      return !prevState;
+    });
   }
 
   const addLineItem = (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -564,6 +582,8 @@ const Page = ({ params }: { params: { id: string } }) => {
     field: string,
     value: string | number,
   ) => {
+    console.log('handleItemChange')
+
     setLineItems((prevItems: LineItem[]) =>
       prevItems.map((item, idx) => {
         if (idx === index) {
@@ -583,7 +603,7 @@ const Page = ({ params }: { params: { id: string } }) => {
       }),
     )
 
-    setSubTotal((prevState: SubTotal) => ({
+      setSubTotal((prevState: SubTotal) => ({
       ...prevState,
       total: getSubTotal(totalInvoices),
     }))
@@ -703,7 +723,7 @@ const Page = ({ params }: { params: { id: string } }) => {
             <header className="flex justify-between items-center gap-12">
               <div className="flex justify-center items-center">
                 <h3 className="text-black text-lg font-semibold">
-                  Créer une Facture
+                  Modifier une Facture
                 </h3>
               </div>
             </header>
@@ -720,7 +740,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                   ) : (
                     <p className="flex justify-center items-center gap-2">
                       <Image className="text-blue-700" />
-                      Add Logo
+                      Ajouter un Logo
                     </p>
                   )}
                   <Info />
@@ -745,7 +765,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                     <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
                     <h4>
                       Glissez une image directement{' '}
-                      <span className="text-blue-700">brower</span>
+                      <span className="text-blue-700">navigateur</span>
                     </h4>
                   </div>
                 </div>
@@ -1046,7 +1066,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                 className="flex items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                Entrer un produit à facturer
+                                {lineItem.name ?? "Entrer un produit à facturer"}
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="name"
@@ -1184,7 +1204,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                                 className="flex justify-center items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                {lineItem.unity}
+                                {lineItem.tva}
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="item"
@@ -1461,7 +1481,7 @@ const Page = ({ params }: { params: { id: string } }) => {
 
                 <div className="w-full my-">
                   <div className="flex justify-between items-center w-full gap-3 mb-2">
-                    <p className="font-black text-sm">notes</p>
+                    <p className="font-black text-sm">Notes</p>
                   </div>
                   <div className="grid w-full items-center gap-1.5 my-2">
                     {!editablenotes ? (
@@ -1482,9 +1502,9 @@ const Page = ({ params }: { params: { id: string } }) => {
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
                         id="notes"
                         name="notes"
-                        placeholder="notes"
+                        placeholder="Notes"
                         value={invoiceData?.notes}
-                        onChange={(e) => setnotes(e.target.value)}
+                        onChange={(e) => setNotes(e.target.value)}
                       />
                     )}
                   </div>
@@ -1501,7 +1521,7 @@ const Page = ({ params }: { params: { id: string } }) => {
                         onClick={makeEditableTerms}
                       >
                         {invoiceData?.terms ||
-                          'Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
+                          'Le factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission'}
 
                         <PencilLine
                           className="w-4 h-4 hover:text-blue-700"
@@ -1544,6 +1564,9 @@ const Page = ({ params }: { params: { id: string } }) => {
         <Preview
           ref={previewRef}
           customer={customer}
+          terms={invoiceData?.terms??''}
+          invoice={invoiceData}
+          notes={invoiceData?.notes??''}
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}

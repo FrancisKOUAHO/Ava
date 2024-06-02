@@ -107,6 +107,7 @@ interface PreviewRef {
 const Page = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [fileName, setFileName] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
@@ -137,8 +138,9 @@ const Page = () => {
     siren_number: '',
     sirenNumber: '',
   })
-  const [notes, setnotes] = useState<string>('')
-  const [terms, setTerms] = useState<string>('')
+  const [notes, setNotes] = useState<string>(' Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission')
+  const [terms, setTerms] = useState<string>(' Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission')
+
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
     discount: 0,
@@ -376,6 +378,8 @@ const Page = () => {
         terms: data.terms,
         is_invoice: 1,
       }
+      setInvoiceData(fullData)
+
       return api.post('billing/invoice', fullData)
     },
     onError: (error: any) => {
@@ -404,6 +408,20 @@ const Page = () => {
       }
     },
   })
+
+  const dlPdf = async () => {
+    console.log('test')
+    await previewRef.current.downloadPDF();
+
+
+    // if (previewRef.current as unknown as PreviewRef) {
+    //   console.log('dl pdf 2')
+    //   await (
+    //       previewRef.current as unknown as PreviewRef
+    //   ).downloadPDF()
+    //
+    // }
+  }
 
   const handleSubmit = (isDraft: boolean = true) => {
     const newInvoiceData: InvoiceData = {
@@ -698,7 +716,7 @@ const Page = () => {
                   ) : (
                     <p className="flex justify-center items-center gap-2">
                       <Image className="text-blue-700" />
-                      Add Logo
+                      Ajouter un Logo
                     </p>
                   )}
                   <Info />
@@ -723,7 +741,7 @@ const Page = () => {
                     <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
                     <h4>
                       Glissez une image directement{' '}
-                      <span className="text-blue-700">brower</span>
+                      <span className="text-blue-700">navigateur</span>
                     </h4>
                   </div>
                 </div>
@@ -1010,7 +1028,7 @@ const Page = () => {
                                 className="flex items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                Entrer un produit à facturer
+                                {lineItem.name ?? "Entrer un produit à facturer"}
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="name"
@@ -1042,7 +1060,7 @@ const Page = () => {
                                 className="flex justify-center items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                €{lineItem.price}
+                                {lineItem.price}€
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="item"
@@ -1148,7 +1166,7 @@ const Page = () => {
                                 className="flex justify-center items-center gap-2 w-full"
                                 onClick={() => makeEditable(index)}
                               >
-                                {lineItem.unity}
+                                {lineItem.tva}
                                 <PencilLine
                                   className="w-4 h-4 hover:text-blue-700"
                                   id="item"
@@ -1425,7 +1443,7 @@ const Page = () => {
 
                 <div className="w-full my-">
                   <div className="flex justify-between items-center w-full gap-3 mb-2">
-                    <p className="font-black text-sm">notes</p>
+                    <p className="font-black text-sm">Notes</p>
                   </div>
                   <div className="grid w-full items-center gap-1.5 my-2">
                     {!editablenotes ? (
@@ -1448,7 +1466,8 @@ const Page = () => {
                         id="notes"
                         name="notes"
                         placeholder="Notes"
-                        onChange={(e) => setnotes(e.target.value)}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
                       />
                     )}
                   </div>
@@ -1479,6 +1498,7 @@ const Page = () => {
                         id="terms"
                         name="terms"
                         placeholder="Termes"
+                        value={terms}
                         onChange={(e) => setTerms(e.target.value)}
                       />
                     )}
@@ -1497,7 +1517,7 @@ const Page = () => {
                     label="Télécharger la facture"
                     type="button"
                     onClick={() => {
-                      handleSubmit(false)
+                      dlPdf()
                     }}
                   />
                 </div>
@@ -1510,6 +1530,9 @@ const Page = () => {
           ref={previewRef}
           customer={customer}
           lineItems={lineItems}
+          invoice={invoiceData}
+          terms={terms}
+          notes={notes}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
         />
