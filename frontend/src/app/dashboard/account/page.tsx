@@ -6,9 +6,6 @@ import { generateRandomColor } from '@/components/ui/generatorRandomColors'
 import ModalProfil from '@/components/atoms/modal/modalProfil'
 import { useAuth } from '@/context/AuthContext'
 import * as React from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import api from '@/config/api'
-import { toast } from 'sonner'
 import Sirene from '@/components/atoms/siret/sirene'
 
 const ensureHttps = (url: string) => {
@@ -16,11 +13,8 @@ const ensureHttps = (url: string) => {
 }
 
 const Page = () => {
-  const queryClient = useQueryClient()
-
   const { user } = useAuth()
 
-  const [fileName, setFileName] = useState<string>('')
   const [imageLink, setImageLink] = useState<string>('')
   const [imagePreviewUrl, setImagePreviewUrl] = useState('')
   const [imageError, setImageError] = useState(false)
@@ -66,49 +60,6 @@ const Page = () => {
 
   console.log('user', user)
 
-  const mutation = useMutation({
-    mutationFn: async (upload: any) =>
-      api.post(
-        `upload-logo`,
-        {
-          logo: upload,
-        },
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      ),
-    onError: (e: any) => {
-      throw new Error(e)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.success('Logo téléchargé avec succès')
-    },
-  })
-
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files ? event.target.files[0] : null
-    if (file) {
-      setFileName(file.name)
-
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImagePreviewUrl(reader.result)
-        }
-      }
-      reader.readAsDataURL(file)
-      await mutation.mutateAsync(file)
-    } else {
-      setImagePreviewUrl('')
-      setFileName('')
-    }
-  }
-
   const name = user && user.email.split('@')[0]
 
   const imageDe = user && user.email.split('@')[0]
@@ -135,7 +86,7 @@ const Page = () => {
                         className="bg-[#493fff] px-2.5 rounded-md py-1.5 h-[36px] items-center justify-center relative"
                       >
                         <span className="font-semibold flex items-center gap-1 text-white">
-                          Recuperer vos données via novre numero sirene
+                          Recuperer vos données via notre numero sirene
                         </span>
                       </button>
                       <button
@@ -258,7 +209,7 @@ const Page = () => {
                                 Non renseigné
                               </div>
                             </td>
-                            <td className="flex flex items-center justify-end  text-right pr-0 pb-[1rem] pl-[1rem] pt-[1rem]">
+                            <td className="flex items-center justify-end  text-right pr-0 pb-[1rem] pl-[1rem] pt-[1rem]">
                               <button
                                 type="button"
                                 className="h-[36px] min-w-[64px] px-[16px] text-[#0075eb] text-[0.875rem] border border-solid font-[700] rounded-md hover:bg-blue-100"
