@@ -75,14 +75,14 @@ const Sidebar: FunctionComponent = () => {
         >
           Documents
         </Link>
-        <Link
+        {/* <Link
           href="/dashboard/invoices/articles"
           className={
             pathname === '/dashboard/invoices/articles' ? 'active' : ''
           }
         >
           Articles
-        </Link>
+        </Link>*/}
         {/*<Link href="#">Factures récurrentes</Link>
         <Link href="#">Paiements en ligne</Link>
         <Link href="#">Signatures électroniques</Link>
