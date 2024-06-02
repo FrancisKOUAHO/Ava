@@ -240,6 +240,19 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             <div className="grid w-full items-center gap-1.5 my-2">
               <p className="font-normal text-[9px]">{notes}</p>
             </div>
+
+            <div className="flex justify-center items-center">
+              <img
+                src="/logo/icon-logo.png"
+                alt="logo"
+                width={40}
+                height={40}
+              />
+              <p>
+                <span className="text-xs">Plumera</span>
+                <span className="text-xs"> - 2024</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
