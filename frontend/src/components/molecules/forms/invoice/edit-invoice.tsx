@@ -1503,6 +1503,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
           imagePreviewUrl={imagePreviewUrl}
           terms={terms}
           notes={notes}
+          getTotalInvoices={getTotalInvoices}
         />
       </div>
     </section>
