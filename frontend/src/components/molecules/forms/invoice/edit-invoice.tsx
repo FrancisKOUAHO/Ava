@@ -1500,7 +1500,6 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
-          imagePreviewUrl={imagePreviewUrl}
           terms={terms}
           notes={notes}
           getTotalInvoices={getTotalInvoices}
