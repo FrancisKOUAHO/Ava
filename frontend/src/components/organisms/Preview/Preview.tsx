@@ -237,7 +237,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               <p className="font-normal text-[9px]">{terms}</p>
             </div>
 
-            <div className="grid w-full items-center gap-1.5 my-2">
+            <div className="grid w-full items-center gap-1.5 mt-2 mb-6">
               <p className="font-normal text-[9px]">{notes}</p>
             </div>
 
@@ -250,7 +250,6 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               />
               <p>
                 <span className="text-xs">Plumera</span>
-                <span className="text-xs"> - 2024</span>
               </p>
             </div>
           </div>
