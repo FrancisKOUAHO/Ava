@@ -19,29 +19,10 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import Sirene from '@/components/atoms/siret/sirene'
 import { useAuth } from '@/context/AuthContext'
-import api from '@/config/api'
-import { useEffect } from 'react'
 
 const Page = () => {
-  const { setUser, user } = useAuth()
-
-  const whoami = async () => {
-    const response = await api.get('auth/whoami')
-
-    console.log(response)
-
-    if (!response) {
-      throw new Error('unknown error')
-    }
-
-    setUser(response.data)
-  }
-
-  useEffect(() => {
-    whoami()
-  }, [])
+  const { user } = useAuth()
 
   return (
     <>

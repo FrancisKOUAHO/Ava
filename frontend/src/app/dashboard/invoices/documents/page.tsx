@@ -15,31 +15,23 @@ import api from '@/config/api'
 import Summaries from '@/components/organisms/summaries/summaries'
 import { InvoiceType } from '@/types/InvoiceProps'
 import CreateInvoice from '@/components/molecules/forms/invoice/create-invoice'
+import { useFetchData } from '@/app/hooks/useFetch'
 
 const Page = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const [invoices, setInvoices] = useState<InvoiceType[]>([])
+  const { data, isLoading, isError, error } = useFetchData(
+    'billing/invoice-data',
+    'invoices',
+  )
+
+  const [invoices, setInvoices] = useState<InvoiceType[]>(data || [])
 
   const openModalTable = () => {
     setIsModalOpen(true)
   }
 
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const response = await api.get('billing/invoice-data')
-        const data = await response.data
-        setInvoices(data)
-      } catch (error) {
-        console.error('Failed to fetch invoices', error)
-      }
-    }
-
-    fetchInvoices()
-  }, [])
-
-  console.log(invoices)
+  if (!invoices) return
 
   return (
     <section className="flex-1 max-w-full relative bg-[#f6f7fd]">

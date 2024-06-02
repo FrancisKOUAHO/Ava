@@ -1,6 +1,12 @@
 'use client'
 
-import { createContext, ReactNode, useContext, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import api from '@/config/api'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -43,6 +49,22 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       router.push('/login')
     }
   }
+
+  const whoami = async () => {
+    const response = await api.get('auth/whoami')
+
+    console.log(response)
+
+    if (!response) {
+      throw new Error('unknown error')
+    }
+
+    setUser(response.data)
+  }
+
+  useEffect(() => {
+    whoami()
+  }, [])
 
   return (
     <>

@@ -449,7 +449,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
       alert('Failed to send invoice.')
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
-      queryClient.invalidateQueries({ queryKey: ['invoice'] })
+      queryClient.invalidateQueries({ queryKey: ['invoices'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({

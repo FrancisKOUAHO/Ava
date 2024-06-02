@@ -107,10 +107,6 @@ interface SubTotal {
   total?: number
 }
 
-interface PreviewRef {
-  downloadPDF: () => Promise<Blob>
-}
-
 interface CreateInvoiceProps {
   setIsModalOpen: (value: boolean) => void
 }
@@ -405,7 +401,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
       alert('Failed to send invoice.')
     },
     onSuccess: async (response: ApiResponse<InvoiceData>) => {
-      queryClient.invalidateQueries({ queryKey: ['invoice'] })
+      queryClient.invalidateQueries({ queryKey: ['invoices'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
