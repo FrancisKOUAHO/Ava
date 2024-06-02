@@ -15,14 +15,24 @@ interface PreviewProps {
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
   imagePreviewUrl: string | null
-  ref: React.RefObject<HTMLDivElement>
   terms: string | null
   notes: string | null
+  getTotalInvoices: () => number
 }
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(
-  ({ customer, lineItems, subTotal, imagePreviewUrl, ref, terms, notes }) => {
+  ({
+    customer,
+    lineItems,
+    subTotal,
+    imagePreviewUrl,
+    terms,
+    notes,
+    getTotalInvoices,
+  }) => {
     const { data: compagny } = useSirene()
+
+    console.log('compagny', compagny)
 
     if (!compagny || !customer || !subTotal) return null
 
@@ -30,15 +40,6 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
 
     return (
       <div className="px-2 rounded-xl">
-        <div className="flex justify-between">
-          <h3 className="text-black text-lg font-semibold">Preview</h3>
-          <div className="flex justify-center items-center gap-2">
-            <button onClick={() => downloadPDF(true)}>
-              <FileText className="text-black hover:text-blue-700 w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
         <div
           className="my-2"
           style={{
@@ -62,24 +63,24 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
 
                 <div className="my-3">
                   <h6 className="text-sm font-bold text-black uppercase">
-                    Monsieur Francis KOUAHO
+                    Monsieur {compagny[0].lastName} {compagny[0].firstName}
                   </h6>
-                  <p className="text-xs text-black/70 ">Francis KOUAHO</p>
-                  <p className="text-xs text-black/70">
-                    kouahofrancis@gmail.com
+                  <p className="text-xs text-black/70 ">
+                    {compagny[0].company}
                   </p>
-                  <p className="text-xs text-black/70">+33600000000</p>
+                  <p className="text-xs text-black/70">{compagny[0].email}</p>
+                  <p className="text-xs text-black/70">{compagny[0].phone}</p>
                   <p className="text-xs text-black/70 uppercase">
-                    119 rue saint sebastien
-                  </p>
-                  <p className="text-xs text-black/70 uppercase">
-                    78300 Poissy
+                    {compagny[0].address}
                   </p>
                   <p className="text-xs text-black/70 uppercase">
-                    N° siret: 123456789
+                    {compagny[0].zip} {compagny[0].city}
                   </p>
                   <p className="text-xs text-black/70 uppercase">
-                    N° TVA: FR123456789
+                    N° siret: {compagny[0].sirenNumber}
+                  </p>
+                  <p className="text-xs text-black/70 uppercase">
+                    N° TVA: {compagny[0].tvaNumber}
                   </p>
                 </div>
 
@@ -95,12 +96,14 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
 
               <div className="flex flex-col justify-center gap-12">
                 <div className="my-3">
-                  <p className="text-xs text-black/70 ">Francis KOUAHO</p>
-                  <p className="text-xs text-black/70 uppercase">
-                    119 rue saint sebastien
+                  <p className="text-xs text-black/70 ">
+                    {customer.firstName} {customer.lastName}
                   </p>
                   <p className="text-xs text-black/70 uppercase">
-                    78300 Poissy
+                    {customer.address}
+                  </p>
+                  <p className="text-xs text-black/70 uppercase">
+                    {customer.zip} {customer.city}
                   </p>
                 </div>
               </div>
@@ -128,7 +131,6 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                     </th>
                     <th className="text-center text-xs">Unité</th>
                     <th className="text-center text-xs">Quantité</th>
-                    <th className="text-center text-xs">Prix unitaire</th>
                     <th className="text-center text-xs">Montant HT</th>
                   </tr>
                 </thead>
@@ -149,10 +151,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                           {lineItem.quantity}
                         </td>
                         <td className="text-black p-3 text-center text-xs">
-                          {lineItem.tva}
-                        </td>
-                        <td className="text-black p-3 text-center text-xs">
-                          {lineItem.lineTotal}
+                          {lineItem.lineTotal} €
                         </td>
                       </tr>
                     ))}
@@ -195,7 +194,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Remise générale</p>
                     </div>
                     <div className="text-sm">
-                      {subTotal && subTotal.total} €
+                      {subTotal && subTotal.discount} €
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -203,7 +202,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Total HT final</p>
                     </div>
                     <div className="text-sm">
-                      {subTotal && subTotal.total} €
+                      {getTotalInvoices().toFixed(2)} €
                     </div>
                   </div>
                 </div>

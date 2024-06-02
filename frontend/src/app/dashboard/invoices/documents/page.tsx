@@ -202,7 +202,7 @@ const Page = () => {
                             <div className="w-full md:w-auto inline-flex items-center justify-center mt-8 md:mt-0">
                               <img
                                 src="/images/first-invoice.png"
-                                width="100%"
+                                width="633"
                                 style={{ maxWidth: '500px' }}
                                 alt="invoice"
                               />

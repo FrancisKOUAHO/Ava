@@ -1504,11 +1504,11 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
         </form>
 
         <Preview
-          ref={previewRef}
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
           imagePreviewUrl={imagePreviewUrl}
+          getTotalInvoices={getTotalInvoices}
           terms={terms}
           notes={notes}
         />
