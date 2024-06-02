@@ -1,99 +1,181 @@
 'use client'
 
-import React from 'react'
-import { useSirene } from '@/app/hooks/useSirene'
+import {UserRoundCog, ChevronDown, Pencil} from 'lucide-react';
+import {useState} from "react";
+import {generateRandomColor} from "@/components/ui/generatorRandomColors";
+import ModalProfil from "@/components/atoms/modal/modalProfil";
+
+const ensureHttps = (url: string) => {
+    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+};
+
 
 const Page = () => {
-  const { data } = useSirene()
+    const [imageLink, setImageLink] = useState<string>("");
+    const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+    const [imageError, setImageError] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalConfig, setModalConfig] = useState({ title: '', description: '', inputs: [{ label: '', type: '' }] });
 
-  if (!data) {
-    return <div>Loading...</div>
-  }
+    const handleImageError = () => {
+        console.error("Failed to load image");
+        setImageError(true);
+    }
 
-  return (
-    <section className="py-1 text-black">
-      <div className="w-full px-4 mx-auto mt-6">
-        <div className="relative flex flex-col break-words w-full mb-6 rounded-lg bg-blueGray-100 border-0">
-          <div className="rounded-t mb-0 px-6 py-6">
-            <div className="text-center flex justify-between">
-              <h6 className="text-blueGray-700 text-xl font-bold">
-                Mes informations personnelles
-              </h6>
+    const handleProfil = (title: string, description: string, inputs: Array<{ label: string, type: string }>) => {
+        setModalConfig({ title, description, inputs });
+        setIsModalOpen(true);
+    };
+
+    const getInitials = (name: string) => {
+        return name ? name.split(" ").map((n) => n[0]).join("") : '';
+    }
+
+    const name = "Voldi ZOLA";
+    const imageDe = "Voldi ZOLA";
+    return (
+        <section className="flex-1 max-w-full relative bg-[#f6f7fd]">
+            <div className="container py-8 px-10 max-w-full mx-auto w-full">
+                <div data-v-5fc5e367="" className="pb-[4rem]">
+                    <div className="w-full mx-auto">
+                        <div className="mb-6">
+                            <div className="flex justify-between items-center">
+                                <div className="flex gap-2 items-center">
+                                    <UserRoundCog/>
+                                    <div className="font-semibold" style={{fontSize: "24px"}}>
+                                        Profil
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex gap-2 flex-wrap">
+                                        <div>
+                                            <button type="button" className="bg-white px-2.5 rounded-md py-1.5 items-center justify-center h-[36px]">
+                                                <span className="font-semibold flex items-center gap-1">
+                                                    En savoir plus
+                                                    <ChevronDown className="h-5 w-5"/>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white mt-8 rounded-lg  border-solid text-[#25385e] border-1 border-[#e7e7f3]">
+                                <div className="mb-[1.75rem] p-[1.25rem]">
+                                    <div className="text-center w-full mx-auto">
+                                        <div className="cursor-pointer mb-4" onClick={() => handleProfil("Changer de photo", "Éditez votre photo de profil", [{ label: "Sélectionnez une image", type: "file" }])}>
+                                                    <figure className="c-avatar">
+                                                        {(imagePreviewUrl || imageLink || imageDe) && !imageError ? (
+                                                            <img
+                                                                src={ensureHttps(imagePreviewUrl || imageLink || "@/../public/images/moi.jpeg" || "https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80")}
+                                                                alt="Profile"
+                                                                onError={handleImageError}
+                                                            />
+                                                        ) : (
+                                                            <div className=" rounded-md h-28 w-28 flex items-center justify-center mx-auto" style={{ backgroundColor: generateRandomColor() }}>
+                                                                <span className="text-[#0B2B23] font-medium text-2xl">
+                                                                    {getInitials(name)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </figure>
+                                                </div>
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <span className="text-[1rem] font-[700]">{name}</span>
+                                                    <button
+                                                        className="flex items-center justify-center p-1 rounded-full hover:bg-gray-200"
+                                                        onClick={() => handleProfil("Nom complet", "Éditez les informations de votre profil", [{ label: "Prénom", type: "prenom" }, { label: "Nom", type: "nom" }])}
+                                                    >
+                                                        <Pencil className="h-4 w-4"/>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                </div>
+                                <div className="bg-[#f8f9fd] ">
+                                    <div className="p-[1.25rem] text-[1.125rem] font-[700] mt-[-0.25rem] as-highlighted-title">
+                                                À propos de vous
+                                            </div>
+                                </div>
+                                <div>
+                                    <div className=" p-[1.25rem]">
+                                        <div className="">
+                                            <table className="w-full">
+                                                <tbody className="w-full">
+                                                  <tr className="flex justify-between w-full border-solid border-b border-b-[#e7e7f3]">
+                                                    <td className="flex flex-col gap-1 w-full pr-0 pb-[1rem] pt-[1rem]">
+                                                        <div className="text-[1rem] font-semibold">
+                                                            Numéro de téléphone
+                                                        </div>
+                                                        <div className="text-[#5a7294]">
+                                                            +33 6 66 34 03 51
+                                                        </div>
+                                                    </td>
+                                                    <td className="flex items-center justify-end  text-right pr-0 pb-[1rem] pl-[1rem] pt-[1rem]">
+                                                        <button
+                                                            type="button"
+                                                            className="h-[36px] min-w-[64px] px-[16px] text-[#0075eb] text-[0.875rem] border border-solid font-[700] rounded-md hover:bg-blue-100"
+                                                            onClick={() => handleProfil("Numéro de téléphone", "Éditez les informations concernant votre numéro de téléphone", [{ label: "Téléphone (recommandé)", type: "number" }])}
+                                                        >
+                                                            <span>
+                                                            Modifier
+                                                            </span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                  <tr className="flex justify-between w-full border-solid border-b border-b-[#e7e7f3]">
+                                                    <td className="flex flex-col gap-1 w-full pr-0 pb-[1rem] pt-[1rem]">
+                                                        <div className="text-[1rem] font-semibold">
+                                                            Civilité
+                                                        </div>
+                                                        <div className="text-[#5a7294]">
+                                                            Non renseigné
+                                                        </div>
+                                                    </td>
+                                                    <td className="flex flex items-center justify-end  text-right pr-0 pb-[1rem] pl-[1rem] pt-[1rem]">
+                                                        <button
+                                                            type="button"
+                                                            className="h-[36px] min-w-[64px] px-[16px] text-[#0075eb] text-[0.875rem] border border-solid font-[700] rounded-md hover:bg-blue-100"
+                                                            onClick={() => handleProfil("Civilité", "Éditez les informations concernant votre civilité", [{ label: "Civilité", type: "select" }])}
+                                                        >
+                                                            <span>
+                                                            Modifier
+                                                            </span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                  <tr className="flex justify-between w-full">
+                                                    <td className="flex flex-col gap-1 w-full pr-0 pb-[1rem] pt-[1rem]">
+                                                    <div className="text-[1rem] font-semibold">
+                                                        Date de naissance
+                                                    </div>
+                                                    <div className="text-[#5a7294]">
+                                                        Non renseigné
+                                                    </div>
+                                                </td>
+                                                    <td className="flex items-center justify-end pr-0 pb-[1rem] pl-[1rem] pt-[1rem]">
+                                                        <button
+                                                            type="button"
+                                                            className="h-[36px] min-w-[64px] px-[16px] text-[#0075eb] text-[0.875rem] border-solid  border font-[700] rounded-md hover:bg-blue-100 w-full right"
+                                                            onClick={() => handleProfil("Date de naissance", "Éditez votre date de naissance", [{ label: "Date de naissance *", type: "date" }])}
+                                                        >
+                                                        <span>
+                                                        Modifier
+                                                        </span>
+                                                    </button>
+                                                </td>
+                                                  </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
-            <form>
-              <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">
-                Mes informations personnelles
-              </h6>
-              <div className="flex flex-wrap">
-                <div className="w-full lg:w-12/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Nom de famille
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue={data[0]?.companyName}
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                    />
-                  </div>
-                </div>
-                <div className="w-full lg:w-4/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Prénom
-                    </label>
-                    <input
-                      type="text"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue=""
-                    />
-                  </div>
-                </div>
-                <div className="w-full lg:w-4/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Nationalité
-                    </label>
-                    <input
-                      type="text"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue=""
-                    />
-                  </div>
-                </div>
-                <div className="w-full lg:w-4/12 px-4">
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Date de naissance
-                    </label>
-                    <input
-                      type="text"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                      defaultValue=""
-                    />
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
+            <ModalProfil setOpenModalProfil={setIsModalOpen} openModalProfil={isModalOpen} title={modalConfig.title} description={modalConfig.description} inputs={modalConfig.inputs} />
+        </section>
+    )
 }
 
 export default Page

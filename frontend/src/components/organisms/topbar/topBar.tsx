@@ -1,6 +1,6 @@
 'use client'
 
-import { LogOut, User, Building2, Settings } from 'lucide-react'
+import {LogOut, User, Building2,Settings} from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -30,6 +30,9 @@ const TopBar = () => {
             <div className="c-profile-avatar">
               <div className="flex justify-center items-center text-black gap-6">
                 <DropdownMenu>
+                  <Link  className="cursor-pointer hover:bg-blue-50 rounded-md h-[36px] py-1.5 px-2.5" href="/dashboard/account/">
+                    <Settings className="cursor-pointer" />
+                  </Link>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline">
                       <img
