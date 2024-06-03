@@ -114,14 +114,10 @@ interface SubTotal {
 }
 
 interface EditInvoiceProps {
-  setIsModalOpen: (value: boolean) => void
   invoiceId: string | null
 }
 
-const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
-  setIsModalOpen,
-  invoiceId,
-}) => {
+const EditInvoice: FunctionComponent<EditInvoiceProps> = ({ invoiceId }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)

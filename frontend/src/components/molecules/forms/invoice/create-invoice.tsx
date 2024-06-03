@@ -46,7 +46,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useFetchData } from '@/app/hooks/useFetch'
-import invoice from '@/components/molecules/modal/invoice/invoice'
 
 interface LineItem {
   name?: string
