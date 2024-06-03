@@ -28,7 +28,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '@/config/api'
 import { useAuth } from '@/context/AuthContext'
 import { toast } from 'sonner'
-
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 import * as React from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 
@@ -61,6 +62,8 @@ interface LineItem {
   [key: string]: any
 }
 
+
+
 interface ApiResponse<T> {
   data: T
 }
@@ -73,6 +76,10 @@ interface InvoiceData {
   due_date?: string
   notes: string
   terms: string
+  numero: string
+  bank: string
+  iban: string
+  bic: string
   total_amount: number
   status: string
   discount: number
@@ -120,9 +127,11 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
   const [isEditableSubtotal, setIsEditableSubtotal] = useState<boolean>(false)
+  const [editableBankInfo, setEditableBankInfo] = useState<boolean>(false)
   const [editablenotes, setEditablenotes] = useState<boolean>(false)
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
+
   const [open, setOpen] = useState(false)
   const [customer, setCustomer] = useState<CustomerData | null>({
     user_id: '',
@@ -144,18 +153,15 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
     siren_number: '',
     sirenNumber: '',
   })
-  const [notes, setnotes] = useState<string>(
-    ' Les factures devront être réglées en Euros (€) dès réception, et\n' +
-      '                au plus tard dans un délai de X jours (délai inférieur ou égal à\n' +
-      '                45 jours fin de mois ou 60 jours) à partir de la date de leur\n' +
-      '                émission',
+  const [notes, setNotes] = useState<string>(
+    ' Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission',
   )
   const [terms, setTerms] = useState<string>(
-    ' Les factures devront être réglées en Euros (€) dès réception, et\n' +
-      '                au plus tard dans un délai de X jours (délai inférieur ou égal à\n' +
-      '                45 jours fin de mois ou 60 jours) à partir de la date de leur\n' +
-      '                émission',
+      ' Les factures devront être réglées en Euros (€) dès réception, et au plus tard dans un délai de X jours (délai inférieur ou égal à 45 jours fin de mois ou 60 jours) à partir de la date de leur émission',
   )
+  const [bankName, setBankName] = useState<string>('BNP Paribas')
+    const [iban, setIban] = useState<string>('FR7630004000031234567890143')
+    const [bic, setBic] = useState<string>('BNPAFRPPXXX')
 
   const [subTotal, setSubTotal] = useState<SubTotal>({
     name: 'Réduction',
@@ -392,6 +398,9 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
         discount: data.discount,
         notes: data.notes,
         terms: data.terms,
+        bank: bankName,
+        iban: iban,
+        bic: bic,
         is_invoice: 1,
       }
       return api.post('billing/invoice', fullData)
@@ -401,7 +410,13 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
       alert('Failed to send invoice.')
     },
     onSuccess: async (response: ApiResponse<InvoiceData>) => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      console.log('response :', response)
+      console.log('response.data :', response.data)
+      console.log('response.data.id :', response.data.id)
+      if(response.data && response.data.id) {
+        submitToServer(response.data.id)
+      }
+=      queryClient.invalidateQueries({ queryKey: ['invoices'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
@@ -429,6 +444,9 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
       discount: subTotal?.discount ?? 0,
       notes: notes,
       terms: terms,
+        bank: bankName,
+        iban: iban,
+        bic: bic,
       total_amount: Number(
         (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
       ),
@@ -620,6 +638,36 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
     }
   }, [customer])
 
+
+  const submitToServer = async (invoiceId:string) => {
+    const input = document.getElementById('preview'); // Assurez-vous que votre div Preview a cet id
+    console.log('input :', input)
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'px',
+      format: [canvas.width, canvas.height]
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0);
+    const pdfBlob = pdf.output('blob'); // Génère un blob
+    console.log('pdfBlob :', pdfBlob)
+    const formData = new FormData()
+    formData.append('file', pdfBlob, 'invoice.pdf')
+    formData.append('invoice', invoiceId)
+
+    const response = await api.post('billing/sendPdf', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    return pdfBlob;
+  };
+
+
   console.log('user :', user)
 
   return (
@@ -640,6 +688,46 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
 
             <div>
               <div className="flex flex-col items-center">
+                <div className="flex justify-between items-center w-full mb-1">
+                  {imagePreviewUrl ? (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="max-w-full max-h-full w-16 h-16"
+                    />
+                  ) : (
+                    <p className="flex justify-center items-center gap-2">
+                      <Image className="text-blue-700" />
+                      Ajouter un logo
+                    </p>
+                  )}
+                  <Info />
+                </div>
+
+                <div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">
+                  {imagePreviewUrl && (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Preview"
+                      className="max-w-full max-h-full w-16 h-16"
+                    />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    onChange={handleFileChange}
+                    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"
+                  />
+                  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
+                    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
+                    <h4>
+                      Glissez une image directement dans le
+                      <span className="text-blue-700">navigateur</span>
+                    </h4>
+                  </div>
+                </div>
+
                 {customersData && customersData.length >= 1 && (
                   <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
                     <Popover open={open} onOpenChange={setOpen}>
@@ -1054,34 +1142,34 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                             )}
                           </td>
 
-                          <td className="p-3 text-center">
-                            {!isEditable[index] ? (
-                              <button
-                                className="flex justify-center items-center gap-2 w-full"
-                                onClick={() => makeEditable(index)}
-                              >
-                                {lineItem.unity}
-                                <PencilLine
-                                  className="w-4 h-4 hover:text-blue-700"
-                                  id="item"
-                                />
-                              </button>
-                            ) : (
-                              <Input
-                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                                type="text"
-                                id="tva"
-                                name={`tva-${index}`}
-                                placeholder="Tva"
-                                disabled={!isEditable[index]}
-                                onChange={(e) =>
-                                  handleItemChange(index, 'tva', e.target.value)
-                                }
-                                value={lineItem.tva}
-                                readOnly={!isEditable[index]}
-                              />
-                            )}
-                          </td>
+                          {/*<td className="p-3 text-center">*/}
+                          {/*  {!isEditable[index] ? (*/}
+                          {/*    <button*/}
+                          {/*      className="flex justify-center items-center gap-2 w-full"*/}
+                          {/*      onClick={() => makeEditable(index)}*/}
+                          {/*    >*/}
+                          {/*      {lineItem.unity}*/}
+                          {/*      <PencilLine*/}
+                          {/*        className="w-4 h-4 hover:text-blue-700"*/}
+                          {/*        id="item"*/}
+                          {/*      />*/}
+                          {/*    </button>*/}
+                          {/*  ) : (*/}
+                          {/*    <Input*/}
+                          {/*      className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
+                          {/*      type="text"*/}
+                          {/*      id="tva"*/}
+                          {/*      name={`tva-${index}`}*/}
+                          {/*      placeholder="Tva"*/}
+                          {/*      disabled={!isEditable[index]}*/}
+                          {/*      onChange={(e) =>*/}
+                          {/*        handleItemChange(index, 'tva', e.target.value)*/}
+                          {/*      }*/}
+                          {/*      value={lineItem.tva}*/}
+                          {/*      readOnly={!isEditable[index]}*/}
+                          {/*    />*/}
+                          {/*  )}*/}
+                          {/*</td>*/}
                           <td className="p-3 text-center">
                             <div className="flex justify-center items-center">
                               {!isEditable[index] ? (
@@ -1335,9 +1423,81 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                   </div>
                 </div>
 
+                <div className="flex flex-col w-full mb-6">
+                  <div className="flex justify-start items-center w-full gap-3 mb-2">
+                    <p className="text-sm">Réleve d'identité Bancaire</p>
+                    <hr className="w-full text-blue-700" />
+                  </div>
+                  <div>
+                    <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
+                      <thead className="border-b-2 border-gray-300 mb-4">
+                      <tr>
+                        <th className="p-3 text-center">Banque</th>
+                        <th className="p-3 text-center">IBAN</th>
+                        <th className="p-3 text-center">BIC</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr className="bg-[#e7effc] rounded-xl">
+                        <td className="p-3 text-center">
+                          {editableBankInfo ? (
+                              <input
+                                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  type="text"
+                                  value={bankName}
+                                  onChange={(e) => setBankName(e.target.value)}
+                                  placeholder="Nom de banque"
+                              />
+                          ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                {bankName || 'Indiquer le nom de la banque'}
+                                <PencilLine className="w-4 h-4 cursor-pointer hover:text-blue-700" onClick={() => setEditableBankInfo(true)} />
+                              </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          {editableBankInfo ? (
+                              <input
+                                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  type="text"
+                                  value={iban}
+                                  onChange={(e) => setIban(e.target.value)}
+
+                                  placeholder="IBAN"
+                              />
+                          ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                {iban || 'Indiquer l\'IBAN'}
+                                <PencilLine className="w-4 h-4 cursor-pointer hover:text-blue-700" onClick={() => setEditableBankInfo(true)} />
+                              </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          {editableBankInfo ? (
+                              <input
+                                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  type="text"
+                                  value={bic}
+                                  onChange={(e) => setBic(e.target.value)}
+
+                                  placeholder="BIC"
+                              />
+                          ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                {bic || 'Indiquer le BIC'}
+                                <PencilLine className="w-4 h-4 cursor-pointer hover:text-blue-700" onClick={() => setEditableBankInfo(true)} />
+                              </div>
+                          )}
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
                 <div className="w-full my-">
                   <div className="flex justify-between items-center w-full gap-3 mb-2">
-                    <p className="font-black text-sm">notes</p>
+                    <p className="font-black text-sm">Notes</p>
                   </div>
                   <div className="grid w-full items-center gap-1.5 my-2">
                     {!editablenotes ? (
@@ -1357,7 +1517,8 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                         id="notes"
                         name="notes"
                         placeholder="Notes"
-                        onChange={(e) => setnotes(e.target.value)}
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
                       />
                     )}
                   </div>
@@ -1373,7 +1534,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                         className="w-full text-sm font-normal"
                         onClick={makeEditableTerms}
                       >
-                        {notes}
+                        {terms}
                         <PencilLine
                           className="w-4 h-4 hover:text-blue-700"
                           id="terms"
@@ -1385,6 +1546,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
                         id="terms"
                         name="terms"
                         placeholder="Termes"
+                        value={terms}
                         onChange={(e) => setTerms(e.target.value)}
                       />
                     )}
@@ -1414,14 +1576,21 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
           </div>
         </form>
 
+        <div id="preview">
         <Preview
+            isUpdating={false}
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
           getTotalInvoices={getTotalInvoices}
           terms={terms}
           notes={notes}
+            bankName={bankName}
+            iban={iban}
+            bic={bic}
         />
+        </div>
+
       </div>
     </section>
   )

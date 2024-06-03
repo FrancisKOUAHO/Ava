@@ -7,7 +7,8 @@ import {
   useRef,
   FunctionComponent,
 } from 'react'
-
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 import {
   CircleCheck,
   CircleX,
@@ -65,6 +66,8 @@ interface ApiResponse<T> {
   data: T
 }
 
+
+
 interface InvoiceData {
   user_id: string
   id?: string
@@ -73,6 +76,10 @@ interface InvoiceData {
   due_date?: string
   notes: string
   terms: string
+  numero: string
+  bank: string
+  iban: string
+  bic: string
   total_amount: number
   status: string
   discount: number
@@ -125,6 +132,8 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
   const [isEditableSubtotal, setIsEditableSubtotal] = useState<boolean>(false)
+  const [editableBankInfo, setEditableBankInfo] = useState<boolean>(false)
+
   const [editablenotes, setEditablenotes] = useState<boolean>(false)
   const [editableTerms, setEditableTerms] = useState<boolean>(false)
   const [completed, setCompleted] = useState<boolean>(false)
@@ -152,8 +161,11 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
   })
   const previewRef = useRef(null)
 
-  const [notes, setnotes] = useState<string>('')
+  const [notes, setNotes] = useState<string>('')
   const [terms, setTerms] = useState<string>('')
+    const [bankName, setBankName] = useState<string>('')
+    const [iban, setIban] = useState<string>('')
+    const [bic, setBic] = useState<string>('')
   const [totalInvoices, setTotalInvoices] = useState<number>(0)
   const [totalInvoicesWithoutTva, setTotalInvoicesWithoutTva] =
     useState<number>(0)
@@ -176,6 +188,11 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
   useEffect(() => {
     if (invoiceDetails) {
       setInvoiceData(invoiceDetails)
+      setNotes(invoiceDetails.notes)
+      setTerms(invoiceDetails.terms)
+      setBankName(invoiceDetails.bank)
+      setIban(invoiceDetails.iban)
+      setBic(invoiceDetails.bic)
       const foundCustomer = customersData.find(
         (cust: InvoiceData) => cust.id === invoiceDetails.customerId,
       )
@@ -450,6 +467,9 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
     },
     onSuccess: (response: ApiResponse<InvoiceData>) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      if(response.data && response.data.id) {
+        submitToServer(response.data.id)
+      }
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
@@ -666,6 +686,34 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
     }
   }
 
+  const submitToServer = async (invoiceId:string) => {
+    const input = document.getElementById('preview'); // Assurez-vous que votre div Preview a cet id
+    console.log('input :', input)
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'px',
+      format: [canvas.width, canvas.height]
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0);
+    const pdfBlob = pdf.output('blob'); // Génère un blob
+    console.log('pdfBlob :', pdfBlob)
+    const formData = new FormData()
+    formData.append('file', pdfBlob, 'invoice.pdf')
+    formData.append('invoice', invoiceId)
+
+    const response = await api.post('billing/sendPdf', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    return pdfBlob;
+  };
+
   useEffect(() => {
     if (customer) {
       checkIfCustomerIsFull()
@@ -700,7 +748,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                   ) : (
                     <p className="flex justify-center items-center gap-2">
                       <Image className="text-blue-700" />
-                      Add Logo
+                      Ajouter un logo
                     </p>
                   )}
                   <Info />
@@ -724,8 +772,8 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                   <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
                     <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
                     <h4>
-                      Glissez une image directement
-                      <span className="text-blue-700">brower</span>
+                      Glissez une image directement dans le
+                      <span className="text-blue-700">navigateur</span>
                     </h4>
                   </div>
                 </div>
@@ -1129,34 +1177,34 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                             )}
                           </td>
 
-                          <td className="p-3 text-center">
-                            {!isEditable[index] ? (
-                              <button
-                                className="flex justify-center items-center gap-2 w-full"
-                                onClick={() => makeEditable(index)}
-                              >
-                                {lineItem.unity}
-                                <PencilLine
-                                  className="w-4 h-4 hover:text-blue-700"
-                                  id="item"
-                                />
-                              </button>
-                            ) : (
-                              <Input
-                                className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"
-                                type="text"
-                                id="tva"
-                                name={`tva-${index}`}
-                                placeholder="Tva"
-                                disabled={!isEditable[index]}
-                                onChange={(e) =>
-                                  handleItemChange(index, 'tva', e.target.value)
-                                }
-                                value={lineItem.tva}
-                                readOnly={!isEditable[index]}
-                              />
-                            )}
-                          </td>
+                          {/*<td className="p-3 text-center">*/}
+                          {/*  {!isEditable[index] ? (*/}
+                          {/*    <button*/}
+                          {/*      className="flex justify-center items-center gap-2 w-full"*/}
+                          {/*      onClick={() => makeEditable(index)}*/}
+                          {/*    >*/}
+                          {/*      {lineItem.tva}*/}
+                          {/*      <PencilLine*/}
+                          {/*        className="w-4 h-4 hover:text-blue-700"*/}
+                          {/*        id="item"*/}
+                          {/*      />*/}
+                          {/*    </button>*/}
+                          {/*  ) : (*/}
+                          {/*    <Input*/}
+                          {/*      className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
+                          {/*      type="text"*/}
+                          {/*      id="tva"*/}
+                          {/*      name={`tva-${index}`}*/}
+                          {/*      placeholder="Tva"*/}
+                          {/*      disabled={!isEditable[index]}*/}
+                          {/*      onChange={(e) =>*/}
+                          {/*        handleItemChange(index, 'tva', e.target.value)*/}
+                          {/*      }*/}
+                          {/*      value={lineItem.tva}*/}
+                          {/*      readOnly={!isEditable[index]}*/}
+                          {/*    />*/}
+                          {/*  )}*/}
+                          {/*</td>*/}
                           <td className="p-3 text-center">
                             <div className="flex justify-center items-center">
                               {!isEditable[index] ? (
@@ -1378,7 +1426,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                               id="totalTva"
                               name="totalTva"
                               value={(
-                                totalInvoices - (subTotal.discount ?? 0)
+                                totalInvoices - (subTotal.tva ?? 0)
                               ).toFixed(2)}
                               readOnly
                               placeholder="100"
@@ -1410,9 +1458,82 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                   </div>
                 </div>
 
+                <div className="flex flex-col w-full mb-6">
+                  <div className="flex justify-start items-center w-full gap-3 mb-2">
+                    <p className="text-sm">Réleve d'identité Bancaire</p>
+                    <hr className="w-full text-blue-700" />
+                  </div>
+                  <div>
+                    <table className="table w-full text-gray-400 border-separate space-y-6 text-sm">
+                      <thead className="border-b-2 border-gray-300 mb-4">
+                      <tr>
+                        <th className="p-3 text-center">Banque</th>
+                        <th className="p-3 text-center">IBAN</th>
+                        <th className="p-3 text-center">BIC</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr className="bg-[#e7effc] rounded-xl">
+                        <td className="p-3 text-center">
+                          {editableBankInfo ? (
+                              <input
+                                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  type="text"
+                                  value={bankName}
+                                  onChange={(e) => setBankName(e.target.value)}
+                                  placeholder="Nom de banque"
+                              />
+                          ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                {bankName || 'Indiquer le nom de la banque'}
+                                <PencilLine className="w-4 h-4 cursor-pointer hover:text-blue-700" onClick={() => setEditableBankInfo(true)} />
+                              </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          {editableBankInfo ? (
+                              <input
+                                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  type="text"
+                                  value={iban}
+                                  onChange={(e) => setIban(e.target.value)}
+
+                                  placeholder="IBAN"
+                              />
+                          ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                {iban || 'Indiquer l\'IBAN'}
+                                <PencilLine className="w-4 h-4 cursor-pointer hover:text-blue-700" onClick={() => setEditableBankInfo(true)} />
+                              </div>
+                          )}
+                        </td>
+                        <td className="p-3 text-center">
+                          {editableBankInfo ? (
+                              <input
+                                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                  type="text"
+                                  value={bic}
+                                  onChange={(e) => setBic(e.target.value)}
+
+                                  placeholder="BIC"
+                              />
+                          ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                {bic || 'Indiquer le BIC'}
+                                <PencilLine className="w-4 h-4 cursor-pointer hover:text-blue-700" onClick={() => setEditableBankInfo(true)} />
+                              </div>
+                          )}
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+
                 <div className="w-full my-">
                   <div className="flex justify-between items-center w-full gap-3 mb-2">
-                    <p className="font-black text-sm">notes</p>
+                    <p className="font-black text-sm">Notes</p>
                   </div>
                   <div className="grid w-full items-center gap-1.5 my-2">
                     {!editablenotes ? (
@@ -1435,7 +1556,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                         name="notes"
                         placeholder="notes"
                         value={invoiceData?.notes}
-                        onChange={(e) => setnotes(e.target.value)}
+                        onChange={(e) => setNotes(e.target.value)}
                       />
                     )}
                   </div>
@@ -1494,16 +1615,23 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
             </div>
           </div>
         </form>
+        <div id="preview">
 
         <Preview
+            isUpdating={true}
           ref={previewRef}
           customer={customer}
           lineItems={lineItems}
           subTotal={subTotal}
           terms={terms}
+          numero={invoiceData?.numero}
           notes={notes}
+          bankName={bankName}
+          iban={iban}
+          bic={bic}
           getTotalInvoices={getTotalInvoices}
         />
+        </div>
       </div>
     </section>
   )

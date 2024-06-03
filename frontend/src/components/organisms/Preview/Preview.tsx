@@ -6,28 +6,45 @@ import { useSirene } from '@/app/hooks/useSirene'
 import { CustomerProps } from '@/types/CustomerProps'
 import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
+
 import { downloadPDF } from '@/lib/download-pdf'
 
 interface PreviewProps {
+  isUpdating: boolean | null
   customer: CustomerProps | null
   lineItems: LineItem[] | null
   subTotal: SubTotal | null
   terms: string | null
   notes: string | null
+  bankName: string | null
+  iban: string | null
+  bic: string | null
+  numero: string | null
   getTotalInvoices: () => number
 }
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(
-  ({ customer, lineItems, subTotal, terms, notes, getTotalInvoices }) => {
+  ({
+     isUpdating,
+    customer,
+    lineItems,
+    subTotal,
+     numero,
+    terms,
+    notes,
+     bankName,
+     iban,
+     bic,
+    getTotalInvoices,
+  }) => {
     const { data: compagny } = useSirene()
 
     console.log('compagny', compagny)
+    console.log('isUpdatingf', isUpdating)
 
     if (!compagny || !customer || !subTotal) return null
 
-    const pdfRef = useRef<HTMLDivElement>(null)
+
 
     return (
       <div className="px-2 rounded-xl">
@@ -39,13 +56,13 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             maxWidth: ' 550px',
           }}
         >
-          <div className="bg-white px-5 my-2 py-2 rounded-xl" ref={pdfRef}>
+          <div className="bg-white px-5 my-2 py-2 rounded-xl" >
             <div className="flex justify-between">
               <div className="flex flex-col">
                 <div>
                   <h1 className="text-xl font-bold text-[#493fff]">Facture</h1>
                   <p className="text-xs text-black/70">
-                    N° F-2024-001
+                    {isUpdating ? "N°" +numero:""}
                     <span className="bg-[#493fff] text-white text-xs font-medium me-2 py-1 px-3  rounded ml-10">
                       Brouillon
                     </span>
@@ -136,7 +153,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                           {lineItem.name}
                         </td>
                         <td className="text-black p-3 text-center text-xs">
-                          {lineItem.unit}
+                          {lineItem.unity}
                         </td>
                         <td className="text-black p-3 text-center text-xs">
                           {lineItem.quantity}
@@ -177,7 +194,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Total HT</p>
                     </div>
                     <div className="text-sm">
-                      {subTotal && subTotal.total} €
+                      {subTotal &&  getTotalInvoices().toFixed(2)} €
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -185,7 +202,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Remise générale</p>
                     </div>
                     <div className="text-sm">
-                      {subTotal && subTotal.discount} €
+                      {subTotal && subTotal.discount.toFixed(2)} €
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -193,7 +210,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Total HT final</p>
                     </div>
                     <div className="text-sm">
-                      {getTotalInvoices().toFixed(2)} €
+                      {getTotalInvoices().toFixed(2)  - subTotal.discount.toFixed(2)}  €
                     </div>
                   </div>
                 </div>
@@ -210,17 +227,17 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
               </h6>
               <p className="font-normal text-[12px]">
                 Banque:
-                <span className="uppercase"> Societe general</span>
+                <span className="uppercase"> {bankName}</span>
               </p>
 
               <p className="font-normal text-[12px]">
                 IBAN:
-                <span className="uppercase"> Societe general</span>
+                <span className="uppercase">  {iban}</span>
               </p>
 
               <p className="font-normal text-[12px]">
                 BIC:
-                <span className="uppercase"> Societe general</span>
+                <span className="uppercase">  {bic}</span>
               </p>
             </div>
 
