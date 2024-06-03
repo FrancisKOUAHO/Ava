@@ -1,6 +1,6 @@
 'use effect'
 
-import { Fragment, FunctionComponent } from 'react'
+import React, { Fragment, FunctionComponent } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 
 interface InvoiceProps {

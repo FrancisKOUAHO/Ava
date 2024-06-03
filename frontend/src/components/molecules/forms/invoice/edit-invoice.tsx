@@ -114,6 +114,7 @@ interface SubTotal {
 }
 
 interface EditInvoiceProps {
+  setIsModalOpen: (value: boolean) => void
   invoiceId: string | null
 }
 
