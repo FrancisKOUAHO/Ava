@@ -68,15 +68,20 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
 
                 <div className="my-3">
                   <h6 className="text-sm font-bold text-black uppercase">
-                    Monsieur {compagny[0].lastName} {compagny[0].firstName}
+                    Monsieur {compagny[0] && compagny[0].lastName}{' '}
+                    {compagny[0] && compagny[0].firstName}
                   </h6>
                   <p className="text-xs text-black/70 ">
-                    {compagny[0].company}
+                    {compagny[0] && compagny[0].company}
                   </p>
-                  <p className="text-xs text-black/70">{compagny[0].email}</p>
-                  <p className="text-xs text-black/70">{compagny[0].phone}</p>
+                  <p className="text-xs text-black/70">
+                    {compagny[0] && compagny[0].email}
+                  </p>
+                  <p className="text-xs text-black/70">
+                    {compagny[0] && compagny[0].phone}
+                  </p>
                   <p className="text-xs text-black/70 uppercase">
-                    {compagny[0].address}
+                    {compagny[0] && compagny[0].address}
                   </p>
                   <p className="text-xs text-black/70 uppercase">
                     {compagny[0].zip} {compagny[0].city}
