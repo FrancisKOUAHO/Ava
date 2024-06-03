@@ -182,9 +182,14 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
                     <DropdownMenuContent align="end" className="w-[200px]">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => downloadPDF(true)}>
+                        <DropdownMenuItem onClick={() => downloadPDF(true,invoice.id)}>
                           <ArrowDownToLine className="mr-2 h-4 w-4" />
                           Télecharger la facture
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem >
+                          <ArrowDownToLine className="mr-2 h-4 w-4" />
+                          <a href={invoice.path} download>Download CV {invoice.path}</a>
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <p

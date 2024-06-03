@@ -4,6 +4,8 @@ export default class InvoicesSchema extends BaseSchema {
   protected tableName = 'invoices'
 
   async up() {
+    await this.db.rawQuery('CREATE SEQUENCE IF NOT EXISTS numero_seq START WITH 1 INCREMENT BY 1').knexQuery;
+
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary().defaultTo(this.db.rawQuery('uuid_generate_v4()').knexQuery)
       table.uuid('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
@@ -12,8 +14,13 @@ export default class InvoicesSchema extends BaseSchema {
       table.uuid('client_id').unsigned().references('id').inTable('clients').onDelete('CASCADE')
       table.dateTime('invoice_date').nullable()
       table.dateTime('due_date').nullable()
+      table.text('numero').notNullable().defaultTo(this.db.rawQuery("TO_CHAR(NEXTVAL('numero_seq'), 'FM00000')").knexQuery)
       table.text('notes').nullable()
+      table.text('path').nullable()
       table.text('terms').nullable()
+      table.text('bank').nullable()
+      table.text('iban').nullable()
+      table.text('bic').nullable()
       table.decimal('discount', 12, 2).notNullable()
       table.decimal('total_amount', 12, 2).nullable()
       table.string('status').nullable()

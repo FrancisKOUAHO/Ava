@@ -6,6 +6,9 @@ export interface InvoiceProps {
   due_date?: string
   notes: string
   terms: string
+  bank: string
+  iban: string
+  bic: string
   total_amount: number
   status: string
   discount: number
@@ -38,6 +41,7 @@ export interface InvoiceType {
   status: InvoiceStatus
   terms: string
   total: string
+  path:string
   totalAmount: string
   updatedAt: string
   userId: string | undefined
