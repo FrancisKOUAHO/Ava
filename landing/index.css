@@ -2478,6 +2478,21 @@ figcaption {
     transition: background-color .2s, background-position .2s, color .2s, border .2s, box-shadow .2s;
 }
 
+.buttonS {
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background-color: white;
+    color: #0b4fc9;
+    border-radius: 3px;
+    margin-top: 20px;
+    padding-left: 25px;
+    padding-right: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color .2s, background-position .2s, color .2s, border .2s, box-shadow .2s;
+}
+
+
 .button:hover {
     color: #fff;
     background-color: #0b4fc9;
@@ -9142,6 +9157,17 @@ html.w-mod-js [data-ix="hide-lightbox"] {
 
     .button {
         background-color: #493fff;
+        margin-top: 10px;
+        padding-left: 19px;
+        padding-right: 19px;
+        font-size: 11px;
+        line-height: 21px;
+    }
+
+
+    .buttonSpeciale {
+        background-color: white;
+        color: #493fff ;
         margin-top: 10px;
         padding-left: 19px;
         padding-right: 19px;
