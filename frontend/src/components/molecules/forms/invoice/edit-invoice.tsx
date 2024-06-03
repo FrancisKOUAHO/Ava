@@ -240,8 +240,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
 
   const validateInvoiceData = (invoiceData: InvoiceData) => {
     const errors = []
-    console.log('invoiceData')
-    console.log(invoiceData)
+
     if (!invoiceData.client_id) {
       errors.push('Client ID est requis')
     }

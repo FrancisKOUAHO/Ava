@@ -71,14 +71,14 @@ interface InvoiceData {
   due_date?: string
   notes: string
   terms: string
-  numero: string | null
+  numero: string
   bank: string
   iban: string
   bic: string
   total_amount: number
   status: string
   discount: number
-  is_invoice: number
+  is_invoice?: number
 }
 
 interface CustomerData {
@@ -1522,7 +1522,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
             bankName={bankName}
             iban={iban}
             bic={bic}
-            numero={invoiceData?.numero}
           />
         </div>
       </div>

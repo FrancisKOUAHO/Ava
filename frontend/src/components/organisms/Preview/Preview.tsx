@@ -19,7 +19,7 @@ interface PreviewProps {
   bankName: string | null
   iban: string | null
   bic: string | null
-  numero: string | null
+  numero?: string | null
   getTotalInvoices: () => number
 }
 
@@ -38,9 +38,6 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     getTotalInvoices,
   }) => {
     const { data: compagny } = useSirene()
-
-    console.log('compagny', compagny)
-    console.log('isUpdatingf', isUpdating)
 
     if (!compagny || !customer || !subTotal) return null
 
