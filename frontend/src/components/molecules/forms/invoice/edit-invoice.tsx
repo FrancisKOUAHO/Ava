@@ -229,11 +229,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({ invoiceId }) => {
     setTotalInvoicesWithoutTva(getTotalInvoices(false))
   }, [lineItems])
 
-  useEffect(() => {
-    console.log('invoiceDetails 00')
-
-    console.log(invoiceData)
-  }, [invoiceData])
+  useEffect(() => {}, [invoiceData])
 
   const validateInvoiceData = (invoiceData: InvoiceData) => {
     const errors = []

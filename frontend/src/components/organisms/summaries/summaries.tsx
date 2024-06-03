@@ -150,86 +150,91 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
             </tr>
           </thead>
           <tbody>
-            {invoices.map((invoice: InvoiceType) => (
-              <tr key={invoice.id} className="bg-[#e7effc]">
-                <td className="p-3 text-center">
-                  {invoice?.client?.firstName}
-                </td>
-                <td className="p-3 text-center">{invoice?.totalAmount}€</td>
-                <td className="p-3 text-center">
-                  {invoice?.client?.firstName} {invoice?.client?.lastName}
-                </td>
-                <td className="p-3 text-center">
-                  <span
-                    className={`bg-${invoice?.status === 'payé' ? 'green-200' : 'red-200'} text-${invoice?.status === 'payé' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}
-                  >
-                    {invoice?.status}
-                  </span>
-                </td>
-                <td className="p-3 text-center">
-                  {formatDate(invoice?.createdAt ?? '')}
-                </td>
-                <td className="p-3 text-center">
-                  <DropdownMenu
-                    open={openDropdownId === invoice.id}
-                    onOpenChange={() => toggleDropdown(invoice.id)}
-                  >
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[200px]">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => downloadPDF(true,invoice.id)}>
-                          <ArrowDownToLine className="mr-2 h-4 w-4" />
-                          Télecharger la facture
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <p
-                            onClick={() => openMdalEdit(invoice.id)}
-                            className="flex items-center"
+            {invoices &&
+              invoices.map((invoice: InvoiceType) => (
+                <tr key={invoice.id} className="bg-[#e7effc]">
+                  <td className="p-3 text-center">
+                    {invoice?.client?.firstName}
+                  </td>
+                  <td className="p-3 text-center">{invoice?.totalAmount}€</td>
+                  <td className="p-3 text-center">
+                    {invoice?.client?.firstName} {invoice?.client?.lastName}
+                  </td>
+                  <td className="p-3 text-center">
+                    <span
+                      className={`bg-${invoice?.status === 'payé' ? 'green-200' : 'red-200'} text-${invoice?.status === 'payé' ? 'green-600' : 'red-600'} py-1 px-3 rounded-full text-xs`}
+                    >
+                      {invoice?.status}
+                    </span>
+                  </td>
+                  <td className="p-3 text-center">
+                    {formatDate(invoice?.createdAt ?? '')}
+                  </td>
+                  <td className="p-3 text-center">
+                    <DropdownMenu
+                      open={openDropdownId === invoice.id}
+                      onOpenChange={() => toggleDropdown(invoice.id)}
+                    >
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[200px]">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => downloadPDF(true, invoice.id)}
                           >
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Modifier</span>{' '}
-                          </p>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => openDeleteModal(invoice.id)}
-                        >
-                          <Trash className="mr-2 h-4 w-4" />
-                          Supprimer
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuLabel>Statut</DropdownMenuLabel>
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          onClick={() => updateStatus(invoice.id, 'envoyé')}
-                        >
-                          Envoyé
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateStatus(invoice.id, 'brouillon')}
-                        >
-                          <span>Brouillon</span>{' '}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateStatus(invoice.id, 'payé')}
-                        >
-                          <span>Payé</span>{' '}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => updateStatus(invoice.id, 'caduque')}
-                        >
-                          <span>Caduque</span>{' '}
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </td>
-              </tr>
-            ))}
+                            <ArrowDownToLine className="mr-2 h-4 w-4" />
+                            Télecharger la facture
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <p
+                              onClick={() => openMdalEdit(invoice.id)}
+                              className="flex items-center"
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Modifier</span>{' '}
+                            </p>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openDeleteModal(invoice.id)}
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
+                            Supprimer
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        <DropdownMenuLabel>Statut</DropdownMenuLabel>
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem
+                            onClick={() => updateStatus(invoice.id, 'envoyé')}
+                          >
+                            Envoyé
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              updateStatus(invoice.id, 'brouillon')
+                            }
+                          >
+                            <span>Brouillon</span>{' '}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateStatus(invoice.id, 'payé')}
+                          >
+                            <span>Payé</span>{' '}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => updateStatus(invoice.id, 'caduque')}
+                          >
+                            <span>Caduque</span>{' '}
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
