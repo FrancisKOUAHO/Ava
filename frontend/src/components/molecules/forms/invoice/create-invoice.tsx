@@ -416,7 +416,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
       if(response.data && response.data.id) {
         submitToServer(response.data.id)
       }
-=      queryClient.invalidateQueries({ queryKey: ['invoices'] })
+     queryClient.invalidateQueries({ queryKey: ['invoices'] })
 
       if (response.data && response.data.id && Array.isArray(lineItems)) {
         const itemsWithInvoiceId: LineItem[] = lineItems.map((item) => ({
@@ -688,45 +688,45 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
 
             <div>
               <div className="flex flex-col items-center">
-                <div className="flex justify-between items-center w-full mb-1">
-                  {imagePreviewUrl ? (
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Preview"
-                      className="max-w-full max-h-full w-16 h-16"
-                    />
-                  ) : (
-                    <p className="flex justify-center items-center gap-2">
-                      <Image className="text-blue-700" />
-                      Ajouter un logo
-                    </p>
-                  )}
-                  <Info />
-                </div>
+                {/*<div className="flex justify-between items-center w-full mb-1">*/}
+                {/*  {imagePreviewUrl ? (*/}
+                {/*    <img*/}
+                {/*      src={imagePreviewUrl}*/}
+                {/*      alt="Preview"*/}
+                {/*      className="max-w-full max-h-full w-16 h-16"*/}
+                {/*    />*/}
+                {/*  ) : (*/}
+                {/*    <p className="flex justify-center items-center gap-2">*/}
+                {/*      <Image className="text-blue-700" />*/}
+                {/*      Ajouter un logo*/}
+                {/*    </p>*/}
+                {/*  )}*/}
+                {/*  <Info />*/}
+                {/*</div>*/}
 
-                <div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">
-                  {imagePreviewUrl && (
-                    <img
-                      src={imagePreviewUrl}
-                      alt="Preview"
-                      className="max-w-full max-h-full w-16 h-16"
-                    />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    name="image"
-                    onChange={handleFileChange}
-                    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"
-                  />
-                  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">
-                    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />
-                    <h4>
-                      Glissez une image directement dans le
-                      <span className="text-blue-700">navigateur</span>
-                    </h4>
-                  </div>
-                </div>
+                {/*<div className="border border-dashed border-gray-500 relative bg-[#e7effc] rounded-xl my-6 w-full">*/}
+                {/*  {imagePreviewUrl && (*/}
+                {/*    <img*/}
+                {/*      src={imagePreviewUrl}*/}
+                {/*      alt="Preview"*/}
+                {/*      className="max-w-full max-h-full w-16 h-16"*/}
+                {/*    />*/}
+                {/*  )}*/}
+                {/*  <input*/}
+                {/*    type="file"*/}
+                {/*    accept="image/*"*/}
+                {/*    name="image"*/}
+                {/*    onChange={handleFileChange}*/}
+                {/*    className="cursor-pointer relative block opacity-0 w-full h-full p-20 z-50"*/}
+                {/*  />*/}
+                {/*  <div className="text-center p-10 absolute top-0 right-0 left-0 m-auto">*/}
+                {/*    <ImagePlus className="text-blue-700 w-20 h-20 m-auto mb-2" />*/}
+                {/*    <h4>*/}
+                {/*      Glissez une image directement dans le*/}
+                {/*      <span className="text-blue-700">navigateur</span>*/}
+                {/*    </h4>*/}
+                {/*  </div>*/}
+                {/*</div>*/}
 
                 {customersData && customersData.length >= 1 && (
                   <div className="bg-[#e7effc] rounded-xl w-full my-6 p-2">
