@@ -84,7 +84,8 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                     {compagny[0] && compagny[0].address}
                   </p>
                   <p className="text-xs text-black/70 uppercase">
-                    {compagny[0] && compagny[0].zip} {compagny[0].city}
+                    {compagny[0] && compagny[0].zip}{' '}
+                    {compagny[0] && compagny[0].city}
                   </p>
                   <p className="text-xs text-black/70 uppercase">
                     N° siret: {compagny[0] && compagny[0].sirenNumber}
