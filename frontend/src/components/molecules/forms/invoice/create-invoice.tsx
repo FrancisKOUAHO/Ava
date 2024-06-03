@@ -46,6 +46,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useFetchData } from '@/app/hooks/useFetch'
+import invoice from '@/components/molecules/modal/invoice/invoice'
 
 interface LineItem {
   name?: string
@@ -118,6 +119,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
 }) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
+  const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null)
 
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [isEditable, setIsEditable] = useState<boolean[]>([])
@@ -1522,6 +1524,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
             bankName={bankName}
             iban={iban}
             bic={bic}
+            numero={invoiceData?.numero || null}
           />
         </div>
       </div>

@@ -1182,35 +1182,6 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
                               </select>
                             )}
                           </td>
-
-                          {/*<td className="p-3 text-center">*/}
-                          {/*  {!isEditable[index] ? (*/}
-                          {/*    <button*/}
-                          {/*      className="flex justify-center items-center gap-2 w-full"*/}
-                          {/*      onClick={() => makeEditable(index)}*/}
-                          {/*    >*/}
-                          {/*      {lineItem.tva}*/}
-                          {/*      <PencilLine*/}
-                          {/*        className="w-4 h-4 hover:text-blue-700"*/}
-                          {/*        id="item"*/}
-                          {/*      />*/}
-                          {/*    </button>*/}
-                          {/*  ) : (*/}
-                          {/*    <Input*/}
-                          {/*      className="mt-1 w-full px-3 py-2 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:bg-white"*/}
-                          {/*      type="text"*/}
-                          {/*      id="tva"*/}
-                          {/*      name={`tva-${index}`}*/}
-                          {/*      placeholder="Tva"*/}
-                          {/*      disabled={!isEditable[index]}*/}
-                          {/*      onChange={(e) =>*/}
-                          {/*        handleItemChange(index, 'tva', e.target.value)*/}
-                          {/*      }*/}
-                          {/*      value={lineItem.tva}*/}
-                          {/*      readOnly={!isEditable[index]}*/}
-                          {/*    />*/}
-                          {/*  )}*/}
-                          {/*</td>*/}
                           <td className="p-3 text-center">
                             <div className="flex justify-center items-center">
                               {!isEditable[index] ? (

@@ -8,6 +8,7 @@ import { LineItem } from '@/types/LineItemProps'
 import { SubTotal } from '@/types/SubTotalProps'
 
 import { downloadPDF } from '@/lib/download-pdf'
+import { useAuth } from '@/context/AuthContext'
 
 interface PreviewProps {
   isUpdating: boolean | null
@@ -37,6 +38,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     bic,
     getTotalInvoices,
   }) => {
+    const { user } = useAuth()
     const { data: compagny } = useSirene()
 
     if (!compagny || !customer || !subTotal) return null
@@ -111,17 +113,17 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                 </div>
               </div>
 
-              {/*<div className="flex justify-end">
-                {imagePreviewUrl ? (
+              <div className="flex justify-end">
+                {user.avatar ? (
                   <img
-                    src={imagePreviewUrl}
+                    src={`https://api.plumera.fr/api/v1/uploads/${user.avatar}`}
                     alt="Preview"
                     className="w-18 h-18"
                   />
                 ) : (
                   <ImagePlus className="text-blue-700 w-10 h-10" />
                 )}
-              </div>*/}
+              </div>
             </div>
 
             <div className="rounded-xl my-2 w-full">
