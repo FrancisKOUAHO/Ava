@@ -21,14 +21,13 @@ const Sidebar: FunctionComponent = () => {
   const [hide, sethide] = useState<boolean>(false)
   const toggle = () => sethide(!hide)
 
+
   const toggleInvoiceMenu = () => setShowInvoiceMenu(!showInvoiceMenu)
   const toggleDevisMenu = () => setShowDevisMenu(!showDevisMenu)
 
   return (
     <section className="c-sidebar">
-      <div className="logo">
-        <img src="/logo/logo_blanc.png" alt="logo skipperndt" />
-      </div>
+ 
 
       <Link
         href="/dashboard"

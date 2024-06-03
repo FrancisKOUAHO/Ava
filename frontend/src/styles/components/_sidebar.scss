@@ -1,5 +1,19 @@
 @use '../settings' as *;
 
+.c-sidebar.hidden {
+  transform: translateX(-100%);
+}
+
+.c-sidebar.visible {
+  transform: translateX(0);
+}
+
+@media (min-width: 768px) {
+  .c-sidebar {
+    transform: translateX(0);
+  }
+}
+
 .c-sidebar {
   display: flex;
   flex-direction: column;
@@ -131,3 +145,5 @@
     box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
   }
 }
+
+

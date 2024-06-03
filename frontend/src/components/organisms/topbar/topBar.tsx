@@ -1,6 +1,6 @@
 'use client'
 
-import {LogOut, User, Building2,Settings} from 'lucide-react'
+import {LogOut, User, Building2, Settings, Menu} from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -15,13 +15,17 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
 
-const TopBar = () => {
+const TopBar = ({ openSidebar }: { openSidebar: () => void }) => {
   const { logout } = useAuth()
 
   return (
     <nav className="c-topbar">
       <div className="c-topbar__container">
-        <div className="c-topbar__container__left"></div>
+        <div className="c-topbar__container__left">
+          <Button onClick={openSidebar} className="md:hidden">
+            <Menu className="text-black" />
+          </Button>
+        </div>
       </div>
 
       <div className="c-topbar__container">

@@ -5,13 +5,23 @@ import SideBar from '@/components/organisms/sidebar/sideBar'
 import TopBar from '@/components/organisms/topbar/topBar'
 import AuthContextProvider from '@/context/AuthContext'
 import AuthGuard from '@/lib/AuthGuard'
+import SidebarModal from "@/components/atoms/modal/sidebarModal";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   const [isClient, setIsClient] = useState(false)
+  const [sidebarModalVisible, setSidebarModalVisible] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const openSidebarModal = () => {
+    setSidebarModalVisible(true)
+  }
+
+  const closeSidebarModal = () => {
+    setSidebarModalVisible(false)
+  }
 
   return (
     <>
@@ -19,9 +29,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
         <AuthContextProvider>
           <AuthGuard>
             <section className="c-layout-dashboard">
+              <SidebarModal isOpen={sidebarModalVisible} closeModal={closeSidebarModal} />
               <SideBar />
               <div className="c-layout-dashboard__container">
-                <TopBar />
+                <TopBar openSidebar={openSidebarModal} />
                 {children}
               </div>
             </section>
