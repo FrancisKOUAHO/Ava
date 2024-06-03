@@ -110,6 +110,7 @@ interface SubTotal {
   name?: string
   discount?: number
   total?: number
+  tva?: number
 }
 
 interface EditInvoiceProps {
@@ -490,14 +491,18 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
     const newInvoiceData: InvoiceData = {
       client_id: customer?.id ? customer.id.toString() : '',
       discount: subTotal?.discount ?? 0,
-      notes: invoiceData?.notes ?? '',
-      terms: invoiceData?.terms ?? '',
+      notes: notes,
+      terms: terms,
+      bank: bankName,
+      iban: iban,
+      bic: bic,
       total_amount: Number(
-        (totalInvoices - (subTotal.discount ?? 0)).toFixed(2),
+        (getTotalInvoices() - (subTotal.discount ?? 0)).toFixed(2),
       ),
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
       is_invoice: 1,
+      numero: '0001',
     }
 
     if (!formValid) {
@@ -685,8 +690,12 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
   }
 
   const submitToServer = async (invoiceId: string) => {
-    const input = document.getElementById('preview') // Assurez-vous que votre div Preview a cet id
-    console.log('input :', input)
+    const input = document.getElementById('preview')
+
+    if (!input) {
+      return
+    }
+
     const canvas = await html2canvas(input)
     const imgData = canvas.toDataURL('image/png')
 
@@ -696,8 +705,8 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
       format: [canvas.width, canvas.height],
     })
 
-    pdf.addImage(imgData, 'PNG', 0, 0)
-    const pdfBlob = pdf.output('blob') // Génère un blob
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
+    const pdfBlob = pdf.output('blob')
     console.log('pdfBlob :', pdfBlob)
     const formData = new FormData()
     formData.append('file', pdfBlob, 'invoice.pdf')
@@ -1627,7 +1636,7 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({
             lineItems={lineItems}
             subTotal={subTotal}
             terms={terms}
-            numero={invoiceData?.numero}
+            numero={invoiceData?.numero || null}
             notes={notes}
             bankName={bankName}
             iban={iban}

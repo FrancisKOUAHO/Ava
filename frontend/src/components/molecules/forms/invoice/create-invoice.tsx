@@ -71,7 +71,7 @@ interface InvoiceData {
   due_date?: string
   notes: string
   terms: string
-  numero: string
+  numero: string | null
   bank: string
   iban: string
   bic: string
@@ -405,9 +405,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
       alert('Failed to send invoice.')
     },
     onSuccess: async (response: ApiResponse<InvoiceData>) => {
-      console.log('response :', response)
-      console.log('response.data :', response.data)
-      console.log('response.data.id :', response.data.id)
       if (response.data && response.data.id) {
         submitToServer(response.data.id)
       }
@@ -1525,7 +1522,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
             bankName={bankName}
             iban={iban}
             bic={bic}
-            numero={numero.toString()}
+            numero={invoiceData?.numero}
           />
         </div>
       </div>

@@ -55,12 +55,11 @@ router
             router.post('update-or-insert-invoice-item', [InvoiceItemsController, 'upsert'])
             router.get('invoice-data', [InvoicesController, 'getAllInvoiceData'])
             router.get('devis-data', [InvoicesController, 'getAllDevisData'])
-              router.post('sendPdf', [InvoicesController, 'updatePdfPath'])
-              router.post('generate-pdf', [InvoicesController, 'generatePdf'])
+            router.post('sendPdf', [InvoicesController, 'updatePdfPath'])
+            //router.post('generate-pdf', [InvoicesController, 'generatePdf']);
 
             router.get('connect-to-google', [SessionController, 'connectToGoogle'])
-// Add this line in your router.group() section where you configure routes
-              router.get('download-pdf/:id', [InvoicesController, 'downloadPdf'])
+            router.get('download-pdf/:id', [InvoicesController, 'downloadPdf'])
 
             router.resource('invoice', InvoicesController).apiOnly()
           })
