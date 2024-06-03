@@ -186,11 +186,6 @@ const Summaries: FunctionComponent<InvoiceProps> = ({
                           <ArrowDownToLine className="mr-2 h-4 w-4" />
                           Télecharger la facture
                         </DropdownMenuItem>
-
-                        <DropdownMenuItem >
-                          <ArrowDownToLine className="mr-2 h-4 w-4" />
-                          <a href={invoice.path} download>Download CV {invoice.path}</a>
-                        </DropdownMenuItem>
                         <DropdownMenuItem>
                           <p
                             onClick={() => openMdalEdit(invoice.id)}
