@@ -448,7 +448,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
       status: isDraft ? 'brouillon' : 'envoyé',
       user_id: user.id.toString(),
       is_invoice: 1,
-      numero: 'some value', // Add appropriate value
+      numero: '0001',
     }
 
     if (!formValid) {
@@ -1525,7 +1525,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
             bankName={bankName}
             iban={iban}
             bic={bic}
-            numero="some value"
+            numero={numero.toString()}
           />
         </div>
       </div>

@@ -25,16 +25,16 @@ interface PreviewProps {
 
 const Preview = forwardRef<HTMLDivElement, PreviewProps>(
   ({
-     isUpdating,
+    isUpdating,
     customer,
     lineItems,
     subTotal,
-     numero,
+    numero,
     terms,
     notes,
-     bankName,
-     iban,
-     bic,
+    bankName,
+    iban,
+    bic,
     getTotalInvoices,
   }) => {
     const { data: compagny } = useSirene()
@@ -43,8 +43,6 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     console.log('isUpdatingf', isUpdating)
 
     if (!compagny || !customer || !subTotal) return null
-
-
 
     return (
       <div className="px-2 rounded-xl">
@@ -56,13 +54,13 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             maxWidth: ' 550px',
           }}
         >
-          <div className="bg-white px-5 my-2 py-2 rounded-xl" >
+          <div className="bg-white px-5 my-2 py-2 rounded-xl">
             <div className="flex justify-between">
               <div className="flex flex-col">
                 <div>
                   <h1 className="text-xl font-bold text-[#493fff]">Facture</h1>
                   <p className="text-xs text-black/70">
-                    {isUpdating ? "N°" +numero:""}
+                    {isUpdating ? 'N°' + numero : ''}
                     <span className="bg-[#493fff] text-white text-xs font-medium me-2 py-1 px-3  rounded ml-10">
                       Brouillon
                     </span>
@@ -194,7 +192,7 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Total HT</p>
                     </div>
                     <div className="text-sm">
-                      {subTotal &&  getTotalInvoices().toFixed(2)} €
+                      {subTotal && getTotalInvoices().toFixed(2)} €
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -202,7 +200,10 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Remise générale</p>
                     </div>
                     <div className="text-sm">
-                      {subTotal && subTotal.discount.toFixed(2)} €
+                      {subTotal && subTotal.discount
+                        ? subTotal.discount.toFixed(2)
+                        : 0}{' '}
+                      €{' '}
                     </div>
                   </div>
                   <div className="flex justify-between items-center">
@@ -210,7 +211,10 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                       <p className="text-sm">Total HT final</p>
                     </div>
                     <div className="text-sm">
-                      {getTotalInvoices().toFixed(2)  - subTotal.discount.toFixed(2)}  €
+                      {(getTotalInvoices() - (subTotal?.discount ?? 0)).toFixed(
+                        2,
+                      )}{' '}
+                      €{' '}
                     </div>
                   </div>
                 </div>
@@ -232,12 +236,12 @@ const Preview = forwardRef<HTMLDivElement, PreviewProps>(
 
               <p className="font-normal text-[12px]">
                 IBAN:
-                <span className="uppercase">  {iban}</span>
+                <span className="uppercase"> {iban}</span>
               </p>
 
               <p className="font-normal text-[12px]">
                 BIC:
-                <span className="uppercase">  {bic}</span>
+                <span className="uppercase"> {bic}</span>
               </p>
             </div>
 
