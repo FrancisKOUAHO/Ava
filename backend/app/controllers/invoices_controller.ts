@@ -80,14 +80,11 @@ export default class InvoicesController {
       const invoice = await Invoice.findOrFail(params.id)
 
       //const path = app.tmpPath('uploads', invoice.path);
-      console.log('path', invoice.path)
       response.header('Content-Type', 'application/pdf')
 
       response.download(invoice.path)
       // This will handle setting the appropriate headers and stream the file
     } catch (err) {
-      console.log('huuuù')
-      console.error(err)
       return response.status(401).send('File not found')
     }
   }

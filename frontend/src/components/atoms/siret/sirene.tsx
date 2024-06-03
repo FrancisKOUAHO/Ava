@@ -37,7 +37,6 @@ const Sirene: FunctionComponent<SireneProps> = ({
       throw new Error(e)
     },
     onSuccess: (data) => {
-      console.log(data)
       queryClient.invalidateQueries({ queryKey: ['tax_information'] })
       toast.success('user updated', {
         duration: 5000,

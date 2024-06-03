@@ -29,13 +29,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const connectWithGoogle = async () => {
     const response = await api.get('auth/connect-to-googlee')
-    console.log(response)
   }
 
   const logout = async () => {
     const response = await api.delete('auth/sign-out')
-
-    console.log(response)
 
     if (response.status === 200) {
       localStorage.removeItem('access_token')
@@ -52,8 +49,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const whoami = async () => {
     const response = await api.get('auth/whoami')
-
-    console.log(response)
 
     if (!response) {
       throw new Error('unknown error')

@@ -92,8 +92,6 @@ export default class PublicBusinessDataController {
   async sirene({ request, response }: HttpContext) {
     const data = request.only(['siren_number'])
 
-    console.log('data', data)
-
     return response.ok(data)
   }
 
