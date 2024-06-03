@@ -58,8 +58,6 @@ const Page = () => {
       : ''
   }
 
-  console.log('user', user)
-
   const name = user && user.email.split('@')[0]
 
   const imageDe = user && user.email.split('@')[0]

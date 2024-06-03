@@ -135,13 +135,12 @@ export default class InvoiceItemsController {
   public async getInvoiceItems({ params, response }: HttpContext) {
     try {
       const invoiceId = params.invoice_id
-      console.log('invoiceId', invoiceId)
+
       // Ensure the invoice exists
       await Invoice.findOrFail(invoiceId)
 
       // Get invoice items for the given invoice
       const invoiceItems = await InvoiceItem.query().where('invoice_id', invoiceId)
-      console.log('invoiceId', invoiceItems)
 
       return response.status(200).json({
         message: 'CreateInvoice items retrieved successfully',
@@ -157,7 +156,6 @@ export default class InvoiceItemsController {
 
   public async upsert({ request, response }: HttpContext) {
     const payload = request.all()
-    console.log('Received invoice items:', payload)
     let isInserting: boolean = true
     let invoiceItem: InvoiceItem | null
     try {

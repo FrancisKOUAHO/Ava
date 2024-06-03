@@ -51,7 +51,6 @@ const Sirene: FunctionComponent<SireneProps> = ({
     setLoading(true)
     const form = event.currentTarget
     const { siren_number } = Object.fromEntries(new FormData(form))
-    console.log(siren_number)
     await scrappSirenemutation.mutateAsync({ siren_number: siren_number })
     setLoading(false)
 

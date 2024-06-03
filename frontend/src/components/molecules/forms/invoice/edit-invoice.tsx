@@ -628,7 +628,6 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({ invoiceId }) => {
 
     return lineItems.reduce((acc, lineItem) => {
       const total = withTva ? lineItem.lineTotalTva : lineItem.lineTotal
-      console.log('total :', total)
       return acc + (total ?? 0)
     }, 0)
   }
@@ -699,7 +698,6 @@ const EditInvoice: FunctionComponent<EditInvoiceProps> = ({ invoiceId }) => {
 
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
     const pdfBlob = pdf.output('blob')
-    console.log('pdfBlob :', pdfBlob)
     const formData = new FormData()
     formData.append('file', pdfBlob, 'invoice.pdf')
     formData.append('invoice', invoiceId)

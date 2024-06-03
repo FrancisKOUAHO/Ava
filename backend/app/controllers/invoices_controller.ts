@@ -42,8 +42,6 @@ export default class InvoicesController {
       size: '20mb',
       extnames: ['pdf'],
     })
-    console.log('invoiceId', request)
-    console.log('invoiceId', invoiceId)
 
     if (!pdfFile) {
       return response.status(400).json({ message: 'PDF file not provided' })

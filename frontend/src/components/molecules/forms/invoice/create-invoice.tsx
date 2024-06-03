@@ -649,8 +649,7 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
     })
 
     pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height)
-    const pdfBlob = pdf.output('blob') // Génère un blob
-    console.log('pdfBlob :', pdfBlob)
+    const pdfBlob = pdf.output('blob')
     const formData = new FormData()
     formData.append('file', pdfBlob, 'invoice.pdf')
     formData.append('invoice', invoiceId)
@@ -663,8 +662,6 @@ export const CreateInvoice: FunctionComponent<CreateInvoiceProps> = ({
 
     return pdfBlob
   }
-
-  console.log('user :', user)
 
   return (
     <section className="px-24">

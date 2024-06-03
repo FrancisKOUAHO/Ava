@@ -42,8 +42,7 @@ export default class SessionController {
 
   async sendLoginEmail(user: User) {
     await mail.use('resend').sendLater((message) => {
-      message.from('contact@plumera.fr').to(user.email).subject('Invitation à connecter')
-        .html(`
+      message.from('contact@plumera.fr').to(user.email).subject('Invitation à connecter').html(`
         <!DOCTYPE html>
         <html lang="fr">
           <head>
@@ -166,8 +165,6 @@ export default class SessionController {
     }
 
     const randomFileName = `${uuidv4()}.${avatar.extname}`
-
-    console.log('randomFileName', randomFileName)
 
     await avatar.move(app.makePath('public/uploads'), {
       name: randomFileName,

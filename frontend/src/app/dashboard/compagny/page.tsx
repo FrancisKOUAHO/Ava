@@ -6,8 +6,6 @@ import { useSirene } from '@/app/hooks/useSirene'
 const Page = () => {
   const { data } = useSirene()
 
-  console.log(data)
-
   if (!data) {
     return <div>Loading...</div>
   }
