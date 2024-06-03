@@ -3,6 +3,7 @@ import Invoice from '#models/invoice'
 import { createInvoiceValidator, updateInvoiceValidator } from '#validators/invoice'
 import db from '@adonisjs/lucid/services/db'
 import app from '@adonisjs/core/services/app'
+
 export default class InvoicesController {
   /**
    * Display a list of resource
@@ -34,63 +35,62 @@ export default class InvoicesController {
     return response.created(invoice)
   }
 
-  async updatePdfPath({ request, params, response }: HttpContextContract) {
-    const invoiceId = request.input('invoice');
+  async updatePdfPath({ request, response }: HttpContext) {
+    const invoiceId = request.input('invoice')
+
     const pdfFile = request.file('file', {
       size: '20mb',
       extnames: ['pdf'],
-    });
-    console.log('invoiceId', request);
-    console.log('invoiceId', invoiceId);
-
+    })
+    console.log('invoiceId', request)
+    console.log('invoiceId', invoiceId)
 
     if (!pdfFile) {
-      return response.status(400).json({ message: 'PDF file not provided' });
+      return response.status(400).json({ message: 'PDF file not provided' })
     }
 
     try {
       // Trouver la facture existante par ID
-      const invoice = await Invoice.findOrFail(invoiceId);
+      const invoice = await Invoice.findOrFail(invoiceId)
 
       // Chemin pour stocker le fichier
-      const fileName = `invoice-${invoiceId}-${Date.now()}.pdf`;
-      const filePath = `uploads/${fileName}`;
+      const fileName = `invoice-${invoiceId}-${Date.now()}.pdf`
+      const filePath = `uploads/${fileName}`
 
       // Déplacer le fichier PDF au chemin de stockage final
       await pdfFile.move(app.tmpPath('uploads'), {
         name: fileName,
-        overwrite: true // Écraser le fichier existant du même nom si nécessaire
-      });
+        overwrite: true, // Écraser le fichier existant du même nom si nécessaire
+      })
 
       // Mettre à jour le chemin dans la base de données
-      invoice.path = app.tmpPath(filePath);
-      await invoice.save();
+      invoice.path = app.tmpPath(filePath)
+      await invoice.save()
 
       return response.status(200).json({
         message: 'PDF path updated successfully',
-        path: invoice.pdfPath
-      });
+        path: invoice.path,
+      })
     } catch (error) {
-      return response.status(500).json({ message: 'Error updating invoice', error: error.message });
+      return response.status(500).json({ message: 'Error updating invoice', error: error.message })
     }
   }
 
-  public async downloadPdf({ params, response }: HttpContextContract) {
+  public async downloadPdf({ params, response }: HttpContext) {
     try {
       // Assuming 'id' maps to a database record with the file path
-      const invoice = await Invoice.findOrFail(params.id);
+      const invoice = await Invoice.findOrFail(params.id)
 
       //const path = app.tmpPath('uploads', invoice.path);
-      console.log('path', invoice.path);
-      response.header('Content-Type', 'application/pdf');
+      console.log('path', invoice.path)
+      response.header('Content-Type', 'application/pdf')
 
-      response.download(invoice.path);
+      response.download(invoice.path)
       // This will handle setting the appropriate headers and stream the file
-
     } catch (err) {
-      console.log("huuuù")
-      console.error(err);
-      return response.status(401).send('File not found');
+      console.log('huuuù')
+      console.error(err)
+      return response.status(401).send('File not found')
     }
   }
 
@@ -286,7 +286,7 @@ export default class InvoicesController {
   }
 
   // Dans un contrôleur AdonisJS
-  async generatePdf({ request, response }: HttpContext) {
+  /*  async generatePdf({ request, response }: HttpContext) {
 
     // const body = request.body();
     // const html = body.html;
@@ -337,6 +337,5 @@ export default class InvoicesController {
     // Exemple : await Invoice.create({ pdfPath: filePath });
 
     //return response.json({ path: filePath });
-  }
-
+  }*/
 }
